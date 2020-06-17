@@ -26,7 +26,7 @@ help:
 	$(PDS)get_help_from_makefile.py
 
 setup-dev: ## Install all dependencies needed for development
-    $(PDS)bootstrap.py
+	$(PDS)bootstrap.py
 
 clean: ## Clean most of the temp-data from the project
 	$(CLDIR) --file-patterns "*.py[co],*.done,*.log,**/.coverage" \
