@@ -317,7 +317,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'idm-tools-docs.tex', u'IDM-Tools',
+    (master_doc, 'itertool-docs.tex', u'itertool',
      u'Institute for Disease Modeling', 'manual'),
 ]
 
@@ -359,7 +359,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'idm-tools-docs', u'IDM-Tools',
+    (master_doc, 'itertool-docs', u'itertool',
      [author], 1)
 ]
 
@@ -373,8 +373,8 @@ man_show_urls = True
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'idm-tools-docs', u'IDM-Tools',
-     author, 'Institute for Disease Modeling', 'How to use IDM-Tools for disease simulations.',
+    (master_doc, 'itertool-docs', u'itertool',
+     author, 'Institute for Disease Modeling', 'How to use itertool for calibration',
      'Miscellaneous'),
 ]
 

@@ -27,8 +27,7 @@ setup(
     author_email=[author[1] for author in authors],
     classifiers=[
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Framework:: IDM-Tools :: models'
+        'Programming Language :: Python :: 3.7'
     ],
     description="Calibration tool for IDM-Tools",
     install_requires=requirements,
