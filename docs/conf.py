@@ -95,7 +95,8 @@ author = u'Institute for Disease Modeling'
 # built documents.
 #
 # The short X.Y version.
-version = u'Beta'
+import itertool
+version = itertool.__version__
 # The full version, including alpha/beta/rc tags.
 # release = u'1.0'
 
