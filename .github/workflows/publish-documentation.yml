@@ -41,7 +41,7 @@ jobs:
       - name: Install tools in dev mode
         working-directory: 'itertool'
         run: |
-          make setup-dev
+          python bootstrap.py
       - name: Build docs
         working-directory: 'itertool/docs'
         run: |
