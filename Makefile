@@ -4,7 +4,7 @@ IPY=python -c
 # If user did not define python, set our default to python
 PY?=python
 # Shortcut for running scripts from the dev_scripts folder
-PDS=$(PY) ../.dev_scripts/
+PDS=$(PY) ./.dev_scripts/
 # Shortcut for the cleandir command
 CLDIR=$(PDS)clean_dir.py
 # Shortcut for the run command
