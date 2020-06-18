@@ -5,6 +5,7 @@ on:
     branches:
       # only run this on
       - dev
+      - master
     paths:
       - 'itertool/**'
 
