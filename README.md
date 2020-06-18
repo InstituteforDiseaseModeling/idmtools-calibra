@@ -27,7 +27,7 @@ When setting up your environment for the first time, you can use the following i
    > git clone https://github.com/InstituteforDiseaseModeling/itertool.git
    ```
 2) Create a virtualenv. On Windows, please use venv to create the environment
-   `python -m venv idmtools`
+   `python -m venv itertool`
    On Unix(Mac/Linux) you can use venv or virtualenv
 3) Activate the virtualenv
 4) If you are on windows, run `pip install py-make --upgrade --force-reinstall`
