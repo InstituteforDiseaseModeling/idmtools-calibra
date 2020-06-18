@@ -100,5 +100,5 @@ def process_output(line):
 for install_dir in [join(base_directory, 'docs')]:
     for line in execute(["pip", "install", "-r", "requirements.txt"], cwd=install_dir):
         process_output(line)
-for line in execute(["pip", "install", "-e", ".dev"], cwd=base_directory):
+for line in execute(["pip", "install", "-e", ".[dev]"], cwd=base_directory):
     process_output(line)
