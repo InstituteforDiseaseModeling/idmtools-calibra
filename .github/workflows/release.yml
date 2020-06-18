@@ -8,6 +8,9 @@ on:
       - master
     paths:
       - 'itertool/**'
+      - 'requirements.txt'
+      - 'dev_requirements.txt'
+      - 'setup.py'
 
 jobs:
   release:
