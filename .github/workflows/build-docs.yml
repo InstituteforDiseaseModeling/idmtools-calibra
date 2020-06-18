@@ -1,5 +1,11 @@
 name: "Build docs"
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'itertool/**'
+      - 'docs/*'
+      - 'requirements.txt'
+      - 'setup.py'
 
 jobs:
   build-documentation:
