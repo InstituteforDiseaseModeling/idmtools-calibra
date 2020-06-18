@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements.txt
       - name: Install library
         run: |
-          python .dev_scripts/bootstrap.py
+          make setup-dev
       - name: Builds docs
         working-directory: 'docs'
         run: |
