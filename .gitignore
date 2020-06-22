@@ -153,3 +153,4 @@ venv.bak/
 .dropbox
 .dropbox.attr
 .dropbox.cache
+!/docs/scripts/**

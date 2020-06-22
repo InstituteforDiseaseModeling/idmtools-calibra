@@ -61,7 +61,7 @@ generate-api:
 	rm -rf temp
 	-rm itertool_index.rst
 	-rm modules.rst
-	SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,ignore-module-all sphinx-apidoc -f --tocfile dummy -o . ../sphinx-apidoc -f -e -o . ../itertool
+	SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,ignore-module-all sphinx-apidoc -f -e -o . ../itertool
 	-rm dummy.rst
 	mv modules.rst itertool_index.rst
 
