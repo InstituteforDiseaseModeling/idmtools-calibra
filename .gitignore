@@ -154,3 +154,4 @@ venv.bak/
 .dropbox.attr
 .dropbox.cache
 !/docs/scripts/**
+docs/itertool_*
