@@ -1,14 +1,11 @@
 from __future__ import division
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse
-from scipy.linalg import sqrtm
 
 DEFAULT_PERTURBATION_AND_RESOLUTION = 0.01
 
 
-def perturbed_points(center, Xmin, Xmax, M=10, N=5, n=1, resolution_raw=None):
+def perturbed_points(center, xmin, xmax, m=10, n=5, sample_size=1, resolution_raw=None):
     # Atiye Alaeddini, 12/11/2017
     # generate perturbed points around the center
     """
@@ -32,11 +29,11 @@ def perturbed_points(center, Xmin, Xmax, M=10, N=5, n=1, resolution_raw=None):
 
     Args:
         center: center point    1xp nparray
-        Xmin: minimum of parameters    1xp nparray
-        Xmax: maximum of parameters    1xp nparray
-        M: number of Hessian estimates    scalar-positive integer
-        N: number of pseudodata vectors    scalar-positive integer
-        n: sample size    scalar-positive integer
+        xmin: minimum of parameters    1xp nparray
+        xmax: maximum of parameters    1xp nparray
+        m: number of Hessian estimates    scalar-positive integer
+        n: number of pseudodata vectors    scalar-positive integer
+        sample_size: sample size    scalar-positive integer
         resolution_raw: minimum meaningful perturbation for each parameter   1xp nparray
 
     Returns:
@@ -49,96 +46,104 @@ def perturbed_points(center, Xmin, Xmax, M=10, N=5, n=1, resolution_raw=None):
     if resolution_raw is None:
         resolution = DEFAULT_PERTURBATION_AND_RESOLUTION * np.ones(p)
     else:
-        resolution = resolution_raw / (Xmax - Xmin)
+        resolution = resolution_raw / (xmax - xmin)
 
     # 0-1 scaled center point for perturbing, per parameter
-    X_scaled = (center - Xmin) / (Xmax - Xmin)
+    x_scaled = (center - xmin) / (xmax - xmin)
 
     # initial perturbation size selection
-    C = np.maximum(DEFAULT_PERTURBATION_AND_RESOLUTION * np.ones(p), resolution)
+    c = np.maximum(DEFAULT_PERTURBATION_AND_RESOLUTION * np.ones(p), resolution)
 
     # ensure that no perturbation exceeds 0/1 relative to the scaled center point
-    too_big = (X_scaled + C) > 1
-    too_small = (X_scaled - C) < 0
-    C[too_big] = np.minimum(1 - X_scaled[too_big], resolution[too_big])
-    C[too_small] = np.minimum(X_scaled[too_small], resolution[too_small])
+    too_big = (x_scaled + c) > 1
+    too_small = (x_scaled - c) < 0
+    c[too_big] = np.minimum(1 - x_scaled[too_big], resolution[too_big])
+    c[too_small] = np.minimum(x_scaled[too_small], resolution[too_small])
 
-    X_perturbed = np.zeros(shape=(4*M*N*n, 4+p))
-    X_perturbed[:, 0] = np.tile(range(4), N * n * M).astype(int)
-    X_perturbed[:, 1] = np.repeat(range(N),4 * n * M)
-    X_perturbed[:, 2] = np.tile(np.repeat(range(M), 4 * n), N)
+    x_perturbed = np.zeros(shape=(4 * m * n * sample_size, 4 + p))
+    x_perturbed[:, 0] = np.tile(range(4), n * sample_size * m).astype(int)
+    x_perturbed[:, 1] = np.repeat(range(n), 4 * sample_size * m)
+    x_perturbed[:, 2] = np.tile(np.repeat(range(m), 4 * sample_size), n)
 
     counter = 0
-    for j in range(N):
-        run_numbers = np.random.randint(1,101,n)
-        X_perturbed[(j*(4*n*M)):((j+1)*(4*n*M)), 3] = np.tile(np.repeat(run_numbers, 4), M)
+    for j in range(n):
+        run_numbers = np.random.randint(1, 101, sample_size)
+        x_perturbed[
+            (j * (4 * sample_size * m)):
+            ((j + 1) * (4 * sample_size * m)), 3
+        ] = np.tile(np.repeat(run_numbers, 4), m)
 
-        for k in range(M):
+        for k in range(m):
 
             np.random.seed()
 
             # perturbation vectors
-            Delta = np.random.choice([-1, 1], size=(1,p))
-            thetaPlus = X_scaled + (C * Delta)
-            thetaMinus = X_scaled - (C * Delta)
+            delta = np.random.choice([-1, 1], size=(1, p))
+            theta_plus = x_scaled + (c * delta)
+            theta_minus = x_scaled - (c * delta)
 
-            if (0 > thetaPlus).any() or (thetaPlus > 1).any():
-                thetaPlus = X_scaled
+            if (0 > theta_plus).any() or (theta_plus > 1).any():
+                theta_plus = x_scaled
 
-            if (thetaMinus < 0).any() or (thetaMinus > 1).any():
-                thetaMinus = X_scaled
+            if (theta_minus < 0).any() or (theta_minus > 1).any():
+                theta_minus = x_scaled
 
-            Delta_tilde = np.random.choice([-1, 1], size=(1,p))
-            C_tilde = np.random.uniform(low=0.25, high=0.75) * C
+            delta_tilde = np.random.choice([-1, 1], size=(1, p))
+            c_tilde = np.random.uniform(low=0.25, high=0.75) * c
 
-            thetaPlusPlus = thetaPlus + C_tilde * Delta_tilde
-            thetaPlusMinus = thetaPlus - C_tilde * Delta_tilde
-            thetaMinusPlus = thetaMinus + C_tilde * Delta_tilde
-            thetaMinusMinus = thetaMinus - C_tilde * Delta_tilde
+            theta_plus_plus = theta_plus + c_tilde * delta_tilde
+            theta_plus_minus = theta_plus - c_tilde * delta_tilde
+            theta_minus_plus = theta_minus + c_tilde * delta_tilde
+            theta_minus_minus = theta_minus - c_tilde * delta_tilde
 
-            while (((0 > thetaPlusPlus).any() or (thetaPlusPlus > 1).any()) and
-                       ((thetaPlusMinus < 0).any() or (thetaPlusMinus > 1).any())) or \
-                    (((0 > thetaMinusPlus).any() or (thetaMinusPlus > 1).any()) and
-                         ((thetaMinusMinus < 0).any() or (thetaMinusMinus > 1).any())):
-                Delta_tilde = np.random.choice([-1, 1], size=(1,p))
-                C_tilde = np.random.uniform(low=0.25, high=0.5) * C
-                thetaPlusPlus = thetaPlus + C_tilde * Delta_tilde
-                thetaPlusMinus = thetaPlus - C_tilde * Delta_tilde
-                thetaMinusPlus = thetaMinus + C_tilde * Delta_tilde
-                thetaMinusMinus = thetaMinus - C_tilde * Delta_tilde
+            while (((0 > theta_plus_plus).any() or (theta_plus_plus > 1).any()) and
+                   ((theta_plus_minus < 0).any() or (theta_plus_minus > 1).any())) or \
+                    (((0 > theta_minus_plus).any() or (theta_minus_plus > 1).any()) and
+                     ((theta_minus_minus < 0).any() or (theta_minus_minus > 1).any())):
+                delta_tilde = np.random.choice([-1, 1], size=(1, p))
+                c_tilde = np.random.uniform(low=0.25, high=0.5) * c
+                theta_plus_plus = theta_plus + c_tilde * delta_tilde
+                theta_plus_minus = theta_plus - c_tilde * delta_tilde
+                theta_minus_plus = theta_minus + c_tilde * delta_tilde
+                theta_minus_minus = theta_minus - c_tilde * delta_tilde
 
-            if ((0 > thetaPlusPlus).any() or (thetaPlusPlus > 1).any()):
-                thetaPlusPlus = thetaPlus
+            if (0 > theta_plus_plus).any() or (theta_plus_plus > 1).any():
+                theta_plus_plus = theta_plus
 
-            if ((0 > thetaMinusPlus).any() or (thetaMinusPlus > 1).any()):
-                thetaMinusPlus = thetaMinus
+            if (0 > theta_minus_plus).any() or (theta_minus_plus > 1).any():
+                theta_minus_plus = theta_minus
 
-            if ((0 > thetaPlusMinus).any() or (thetaPlusMinus > 1).any()):
-                thetaPlusMinus = thetaPlus
+            if (0 > theta_plus_minus).any() or (theta_plus_minus > 1).any():
+                theta_plus_minus = theta_plus
 
-            if ((0 > thetaMinusMinus).any() or (thetaMinusMinus > 1).any()):
-                thetaMinusMinus = thetaMinus
+            if (0 > theta_minus_minus).any() or (theta_minus_minus > 1).any():
+                theta_minus_minus = theta_minus
 
             # back to original scale
-            thetaPlusPlus_realValue = thetaPlusPlus * (Xmax - Xmin) + Xmin
-            thetaPlusMinus_realValue = thetaPlusMinus * (Xmax - Xmin) + Xmin
-            thetaMinusPlus_realValue = thetaMinusPlus * (Xmax - Xmin) + Xmin
-            thetaMinusMinus_realValue = thetaMinusMinus * (Xmax - Xmin) + Xmin
-            X_perturbed[(counter + 0):(counter + 4*n+0):4, 4:] = np.tile(thetaPlusPlus_realValue, (n,1))
-            X_perturbed[(counter + 1):(counter + 4*n+1):4, 4:] = np.tile(thetaPlusMinus_realValue, (n,1))
-            X_perturbed[(counter + 2):(counter + 4*n+2):4, 4:] = np.tile(thetaMinusPlus_realValue, (n,1))
-            X_perturbed[(counter + 3):(counter + 4*n+3):4, 4:] = np.tile(thetaMinusMinus_realValue, (n,1))
+            theta_plus_plus_real_value = theta_plus_plus * (xmax - xmin) + xmin
+            theta_plus_minus_real_value = theta_plus_minus * (xmax - xmin) + xmin
+            theta_minus_plus_real_value = theta_minus_plus * (xmax - xmin) + xmin
+            theta_minus_minus_real_value = theta_minus_minus * (xmax - xmin) + xmin
+            x_perturbed[(counter + 0):(counter + 4 * sample_size + 0):4, 4:] = np.tile(theta_plus_plus_real_value,
+                                                                                       (sample_size, 1))
+            x_perturbed[(counter + 1):(counter + 4 * sample_size + 1):4, 4:] = np.tile(theta_plus_minus_real_value,
+                                                                                       (sample_size, 1))
+            x_perturbed[(counter + 2):(counter + 4 * sample_size + 2):4, 4:] = np.tile(theta_minus_plus_real_value,
+                                                                                       (sample_size, 1))
+            x_perturbed[(counter + 3):(counter + 4 * sample_size + 3):4, 4:] = np.tile(theta_minus_minus_real_value,
+                                                                                       (sample_size, 1))
 
-            counter += 4*n
+            counter += 4 * sample_size
 
     # X_perturbed[:,0:4] = X_perturbed[:,0:4].astype(int)
     # convert to pandas DataFrame
-    df_perturbed = pd.DataFrame(data=X_perturbed, columns=(['i(1to4)','j(1toN)','k(1toM)','run_number']+['theta']*p))
+    df_perturbed = pd.DataFrame(data=x_perturbed,
+                                columns=(['i(1to4)', 'j(1toN)', 'k(1toM)', 'run_number'] + ['theta'] * p))
 
     return df_perturbed
 
 
-def FisherInfMatrix(center_point, df_LL_points, data_columns):
+def fisher_inf_matrix(center_point, df_ll_points, data_columns):
     """
     Compute the Fisher Information matrix using the LL of perturbed points
 
@@ -148,77 +153,77 @@ def FisherInfMatrix(center_point, df_LL_points, data_columns):
     Atiye Alaeddini, 12/15/2017
 
     Args:
-        center: center point    (1 x p) nparray
-        df_LL_points: Log Likelihood of points    DataFrame
-
+        center_point: center point    (1 x p) nparray
+        df_ll_points: Log Likelihood of points    DataFrame
+        data_columns: List of columns to filter points with
 
 
     Returns:
         Fisher: Fisher Information matrix    (p x p) np array
     """
 
-    rounds = df_LL_points['j(1toN)'].as_matrix() # j
-    samples_per_round = df_LL_points['k(1toM)'].as_matrix() # k, points[:, 2]
+    rounds = df_ll_points['j(1toN)'].as_matrix()  # j
+    samples_per_round = df_ll_points['k(1toM)'].as_matrix()  # k, points[:, 2]
     N = (max(rounds) + 1).astype(int)
     M = (max(samples_per_round) + 1).astype(int)
-    n = int((np.shape(rounds)[0])/(4*M*N))
+    n = int((np.shape(rounds)[0]) / (4 * M * N))
 
-    PlusPlusPoints = df_LL_points.loc[df_LL_points['i(1to4)']==0].filter(data_columns).as_matrix()
-    PlusMinusPoints = df_LL_points.loc[df_LL_points['i(1to4)']==1].filter(data_columns).as_matrix()
-    MinusPlusPoints = df_LL_points.loc[df_LL_points['i(1to4)']==2].filter(data_columns).as_matrix()
-    MinusMinusPoints = df_LL_points.loc[df_LL_points['i(1to4)']==3].filter(data_columns).as_matrix()
+    plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0].filter(data_columns).as_matrix()
+    plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1].filter(data_columns).as_matrix()
+    minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2].filter(data_columns).as_matrix()
+    minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3].filter(data_columns).as_matrix()
 
-    LL_PlusPlusPoints = df_LL_points.loc[df_LL_points['i(1to4)'] == 0, 'LL'].as_matrix()
-    LL_PlusMinusPoints = df_LL_points.loc[df_LL_points['i(1to4)'] == 1, 'LL'].as_matrix()
-    LL_MinusPlusPoints = df_LL_points.loc[df_LL_points['i(1to4)'] == 2, 'LL'].as_matrix()
-    LL_MinusMinusPoints = df_LL_points.loc[df_LL_points['i(1to4)'] == 3, 'LL'].as_matrix()
+    ll_plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0, 'LL'].as_matrix()
+    ll_plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1, 'LL'].as_matrix()
+    ll_minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2, 'LL'].as_matrix()
+    ll_minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3, 'LL'].as_matrix()
 
     # dimension of X
     p = len(center_point)
 
     # Hessian
-    H_bar = np.zeros(shape=(p, p, N))
-    H_bar_avg = np.zeros(shape=(p, p, N))
+    h_bar = np.zeros(shape=(p, p, N))
+    h_bar_avg = np.zeros(shape=(p, p, N))
 
     for i in range(N):
         # reset the data (samples) used for evaluation of the log likelihood
         # initialization
-        H_hat = np.zeros(shape=(p, p, M))
-        H_hat_avg = np.zeros(shape=(p, p, M))
-        G_p = np.zeros(shape=(p, M))
-        G_m = np.zeros(shape=(p, M))
+        h_hat = np.zeros(shape=(p, p, M))
+        h_hat_avg = np.zeros(shape=(p, p, M))
+        g_p = np.zeros(shape=(p, M))
+        g_m = np.zeros(shape=(p, M))
 
-        PlusPlus_round_i = PlusPlusPoints[(i * M):((i + 1) * M), :]
-        PlusMinus_round_i = PlusMinusPoints[(i * M):((i + 1) * M), :]
-        MinusPlus_round_i = MinusPlusPoints[(i * M):((i + 1) * M), :]
-        MinusMinus_round_i = MinusMinusPoints[(i * M):((i + 1) * M), :]
+        plus_plus_round_i = plus_plus_points[(i * M):((i + 1) * M), :]
+        plus_minus_round_i = plus_minus_points[(i * M):((i + 1) * M), :]
+        minus_plus_round_i = minus_plus_points[(i * M):((i + 1) * M), :]
+        minus_minus_round_i = minus_minus_points[(i * M):((i + 1) * M), :]
 
-        loglPP_round_i = LL_PlusPlusPoints[(i * M):((i + 1) * M)]
-        loglPM_round_i = LL_PlusMinusPoints[(i * M):((i + 1) * M)]
-        loglMP_round_i = LL_MinusPlusPoints[(i * M):((i + 1) * M)]
-        loglMM_round_i = LL_MinusMinusPoints[(i * M):((i + 1) * M)]
+        logl_pp_round_i = ll_plus_plus_points[(i * M):((i + 1) * M)]
+        logl_pm_round_i = ll_plus_minus_points[(i * M):((i + 1) * M)]
+        logl_mp_round_i = ll_minus_plus_points[(i * M):((i + 1) * M)]
+        logl_mm_round_i = ll_minus_minus_points[(i * M):((i + 1) * M)]
 
         for k in range(M):
+            theta_plus_plus = plus_plus_round_i[k]
+            theta_plus_minus = plus_minus_round_i[k]
+            theta_minus_plus = minus_plus_round_i[k]
+            theta_minus_minus = minus_minus_round_i[k]
 
-            thetaPlusPlus = PlusPlus_round_i[k]
-            thetaPlusMinus = PlusMinus_round_i[k]
-            thetaMinusPlus = MinusPlus_round_i[k]
-            thetaMinusMinus = MinusMinus_round_i[k]
-
-            loglPP = loglPP_round_i[k]
-            loglPM = loglPM_round_i[k]
-            loglMP = loglMP_round_i[k]
-            loglMM = loglMM_round_i[k]
+            logl_pp = logl_pp_round_i[k]
+            logl_pm = logl_pm_round_i[k]
+            logl_mp = logl_mp_round_i[k]
+            logl_mm = logl_mm_round_i[k]
 
             # if all((thetaPlusPlus - thetaPlusMinus) != 0) and all((thetaMinusPlus - thetaMinusMinus) != 0) and all(
             #         (thetaPlusPlus - thetaMinusPlus) != 0):
-            G_p[:, k] = div0((loglPP - loglPM), (thetaPlusPlus - thetaPlusMinus))
-            G_m[:, k] = div0((loglMP - loglMM), (thetaMinusPlus - thetaMinusMinus))
+            g_p[:, k] = div0((logl_pp - logl_pm), (theta_plus_plus - theta_plus_minus))
+            g_m[:, k] = div0((logl_mp - logl_mm), (theta_minus_plus - theta_minus_minus))
 
-            S = np.dot((div0(1, (thetaPlusPlus - thetaMinusPlus)))[:, None], (G_p[:, k] - G_m[:, k])[None, :])  # H_hat
-            H_hat[:, :, k] = .5 * (S + S.T)
+            s = np.dot((div0(1, (theta_plus_plus - theta_minus_plus)))[:, None],
+                       (g_p[:, k] - g_m[:, k])[None, :])  # H_hat
+            h_hat[:, :, k] = .5 * (s + s.T)
 
-            H_hat_avg[:, :, k] = k / (k + 1) * H_hat_avg[:, :, k - 1] + 1 / (k + 1) * H_hat[:, :, k]
+            h_hat_avg[:, :, k] = k / (k + 1) * h_hat_avg[:, :, k - 1] + 1 / (k + 1) * h_hat[:, :, k]
 
             # else:
             #     H_hat_avg[:, :, k] = H_hat_avg[:, :, k - 1]
@@ -226,11 +231,11 @@ def FisherInfMatrix(center_point, df_LL_points, data_columns):
         # H_bar[:, :, i] = .5 * (
         #     H_hat_avg[:, :, M - 1] - sqrtm(np.linalg.matrix_power(H_hat_avg[:, :, M - 1], 2) + 1e-6 * np.eye(p))
         # )
-        H_bar[:, :, i] = - np.real(_getAplus(-H_hat_avg[:, :, M - 1]))
-        H_bar_avg[:, :, i] = i / (i + 1) * H_bar_avg[:, :, i - 1] + 1 / (i + 1) * H_bar[:, :, i]
+        h_bar[:, :, i] = - np.real(_get_a_plus(-h_hat_avg[:, :, M - 1]))
+        h_bar_avg[:, :, i] = i / (i + 1) * h_bar_avg[:, :, i - 1] + 1 / (i + 1) * h_bar[:, :, i]
 
-    Fisher = -1 * H_bar_avg[:, :, N - 1]
-    return Fisher
+    fisher = -1 * h_bar_avg[:, :, N - 1]
+    return fisher
 
 
 def sample_cov_ellipse(cov, pos, num_of_pts=10):
@@ -260,7 +265,8 @@ def trunc_gauss(mu, sigma, low_bound, high_bound, num_of_pts, batch_size=100):
             out_of_bounds = False
             new_sample = new_samples[sample_index]
             for param_index in range(len(new_sample)):
-                if (new_sample[param_index] < low_bound[param_index]) or (new_sample[param_index] > high_bound[param_index]):
+                if (new_sample[param_index] < low_bound[param_index]) or (
+                        new_sample[param_index] > high_bound[param_index]):
                     out_of_bounds = True
                     break
             if not out_of_bounds:
@@ -274,39 +280,39 @@ def trunc_gauss(mu, sigma, low_bound, high_bound, num_of_pts, batch_size=100):
 def div0(a, b):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
     with np.errstate(divide='ignore', invalid='ignore'):
-        c = np.true_divide( a, b )
-        c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
+        c = np.true_divide(a, b)
+        c[~ np.isfinite(c)] = 0  # -inf inf NaN
     return c
 
 
-def _getAplus(A):
-    eigval, eigvec = np.linalg.eigh(A)
-    Q = np.matrix(eigvec)
-    xdiag = np.matrix(np.diag(np.maximum(eigval, 0)))
-    return Q*xdiag*Q.T
+def _get_a_plus(a):
+    eig_val, eig_vec = np.linalg.eigh(a)
+    q = eig_vec
+    x_diag = np.diag(np.maximum(eig_val, 0))
+    return q * x_diag * q.T
 
 
-def _getPs(A, W=None):
-    W05 = np.matrix(W**.5)
-    return  W05.I * _getAplus(W05 * A * W05) * W05.I
+def _get_ps(a, w):
+    w05 = w ** .5
+    return np.linalg.inv(w05) * _get_a_plus(w05 * a * w05) * np.linalg.inv(w05)
 
 
-def _getPu(A, W=None):
-    Aret = np.array(A.copy())
-    Aret[W > 0] = np.array(W)[W > 0]
-    return np.matrix(Aret)
+def _get_pu(a, w) -> np.ndarray:
+    a_ret = np.array(a.copy())
+    a_ret[w > 0] = np.array(w)[w > 0]
+    return a_ret
 
 
-def nearPD(A, nit=10):
-    n = A.shape[0]
-    W = np.identity(n)
-# W is the matrix used for the norm (assumed to be Identity matrix here)
-# the algorithm should work for any diagonal W
-    deltaS = 0
-    Yk = A.copy()
+def near_pd(a, nit=10):
+    n = a.shape[0]
+    # W is the matrix used for the norm (assumed to be Identity matrix here)
+    # the algorithm should work for any diagonal W
+    w = np.identity(n)
+    delta_s = 0
+    yk = a.copy()
     for k in range(nit):
-        Rk = Yk - deltaS
-        Xk = _getPs(Rk, W=W)
-        deltaS = Xk - Rk
-        Yk = _getPu(Xk, W=W)
-    return Yk
+        rk = yk - delta_s
+        xk = _get_ps(rk, w=w)
+        delta_s = xk - rk
+        yk = _get_pu(xk, w=w)
+    return yk
