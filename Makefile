@@ -31,6 +31,7 @@ setup-dev: ## Install all dependencies needed for development
 clean: ## Clean most of the temp-data from the project
 	$(CLDIR) --file-patterns "*.py[co],*.done,*.log,**/.coverage" \
 		--dir-patterns "**/__pycache__,**/htmlcov,**/.pytest_cache" --directories "dist,build"
+	$(PDR) -wd "docs" -ex "make clean"
 
 # WARNING: You will need to re-install after running this
 clean-all:  ## Deleting package info hides plugins so we only want to do that for packaging
@@ -38,6 +39,8 @@ clean-all:  ## Deleting package info hides plugins so we only want to do that fo
 	$(CLDIR) --dir-patterns "**/*.egg-info/"lint: ## check style with flake8
 	flake8 --ignore=E501,W291 $(PACKAGE_NAME) tests
 
+lint: ## check style with flake8
+	flake8 --ignore=E501,W291 --exclude="emodpy/campaign/**" $(PACKAGE_NAME) tests
 
 test: ## Run our tests
 	$(FULL_TEST_CMD)
