@@ -5,7 +5,7 @@ matplotlib.use('Agg', warn=False, force=True)
 import matplotlib.pyplot as plt
 import seaborn as sns
 from itertool.utils import StatusPoint
-from itertool.plotters.BasePlotter import BasePlotter
+from itertool.plotters.base_plotter import BasePlotter
 
 sns.set_style('white')
 

@@ -7,8 +7,8 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from itertool.IterationState import IterationState
-from itertool.plotters.BasePlotter import BasePlotter
+from itertool.iteration_state import IterationState
+from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
 from simtools.OutputParser import CompsDTKOutputParser
 

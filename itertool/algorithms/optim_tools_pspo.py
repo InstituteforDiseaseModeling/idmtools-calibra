@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from itertool.algorithms.NextPointAlgorithm import NextPointAlgorithm
+from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
 logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)

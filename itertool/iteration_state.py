@@ -3,7 +3,7 @@ import os
 import time
 from datetime import datetime
 import pandas as pd
-from itertool.ParameterSet import ParameterSet
+from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
 from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.DataAccess.DataStore import DataStore

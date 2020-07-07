@@ -3,7 +3,7 @@ from itertools import zip_longest
 import os
 from simtools.Analysis.AnalyzeManager import AnalyzeManager
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
-from itertool.resamplers.CalibrationPoint import CalibrationPoint, CalibrationParameter
+from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 
 
 class BaseResampler(metaclass=ABCMeta):

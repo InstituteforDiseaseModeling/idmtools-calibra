@@ -1,6 +1,5 @@
 import copy
-
-from itertool.algorithms.NextPointAlgorithm import NextPointAlgorithm
+from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
 
 class GenericIterativeNextPoint(NextPointAlgorithm):

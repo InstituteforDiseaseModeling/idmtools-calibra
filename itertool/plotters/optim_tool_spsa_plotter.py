@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import cm
-from itertool.plotters.BasePlotter import BasePlotter
+from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
 
 logger = logging.getLogger(__name__)

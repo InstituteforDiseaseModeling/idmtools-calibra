@@ -8,8 +8,8 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from itertool.algorithms.PBnB.c_SubRegion import c_SubRegion
-from itertool.plotters.BasePlotter import BasePlotter
+from itertool.algorithms.pbnb.c_sub_region import c_SubRegion
+from itertool.plotters.base_plotter import BasePlotter
 
 logger = logging.getLogger(__name__)
 

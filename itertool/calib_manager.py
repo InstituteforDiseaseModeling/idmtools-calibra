@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from itertool.IterationState import IterationState
+from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
 from simtools.DataAccess.DataStore import DataStore
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory

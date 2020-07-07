@@ -7,7 +7,7 @@ import statsmodels.api as sm
 from scipy.stats import norm
 
 from scipy.special import gammaln  # for calculation of mu_r
-from itertool.algorithms.NextPointAlgorithm import NextPointAlgorithm
+from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
 from history_matching.gpc import GPC
 

@@ -3,7 +3,7 @@ import os
 from calibtool import commands_args
 from simtools.SetupParser import SetupParser
 import simtools.Utilities.Initialization as init
-from itertool.ResampleManager import ResampleManager
+from itertool.resample_manager import ResampleManager
 
 
 def get_calib_manager(args, unknownArgs, force_metadata=False):

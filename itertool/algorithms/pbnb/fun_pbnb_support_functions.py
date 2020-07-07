@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.stats
 from scipy.stats import binom
 
-from .c_SubRegion import c_SubRegion
+from .c_sub_region import c_SubRegion
 
 """
 This function uniformly sampling i_n_samp sample points with i_n_rep replication in the subregions c_subregion and generate the df that used to sent to calibtool

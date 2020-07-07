@@ -1,8 +1,8 @@
 import os
 
 from itertool.algorithms.FisherInfMatrix import perturbed_points
-from itertool.resamplers.BaseResampler import BaseResampler
-from itertool.resamplers.CalibrationPoint import CalibrationPoint, CalibrationParameter
+from itertool.resamplers.base_resampler import BaseResampler
+from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 
 
 class RandomPerturbationResampler(BaseResampler):

@@ -7,8 +7,8 @@ import itertools
 from sklearn.decomposition import PCA
 from matplotlib.patches import Ellipse
 
-from itertool.resamplers.BaseResampler import BaseResampler
-from itertool.resamplers.CalibrationPoint import CalibrationPoint
+from itertool.resamplers.base_resampler import BaseResampler
+from itertool.resamplers.calibration_point import CalibrationPoint
 from itertool.algorithms.FisherInfMatrix import FisherInfMatrix, trunc_gauss
 
 
@@ -114,7 +114,7 @@ class CramerRaoResampler(BaseResampler):
                                                                           resampled_points_df)
 
         # ck4, debugging only
-        from itertool.resamplers.CalibrationPoints import CalibrationPoints
+        from itertool.resamplers.calibration_points import CalibrationPoints
         filename = os.path.join(self.output_location, 'cr-resampled-points-transformed.csv')  # K
         points = CalibrationPoints(resampled_points)
         points.write(filename)

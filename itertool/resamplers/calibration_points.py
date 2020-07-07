@@ -1,7 +1,7 @@
 import os
 import json
 
-from itertool.resamplers.CalibrationPoint import CalibrationPoint
+from itertool.resamplers.calibration_point import CalibrationPoint
 
 
 class CalibrationPoints(object):

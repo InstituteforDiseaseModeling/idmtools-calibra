@@ -2,9 +2,9 @@ import logging
 import operator
 import sys
 import pickle
-from itertool.algorithms.NextPointAlgorithm import NextPointAlgorithm
-from .fun_PBnB_support_functions import *
-import itertool.algorithms.PBnB.m_intial_paramters_setting as par
+from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
+from .fun_pbnb_support_functions import *
+import itertool.algorithms.pbnb.m_intial_paramters_setting as par
 
 logger = logging.getLogger('PBnB_application')
 fh = logging.FileHandler('PBnB_running'+'-debug.log')

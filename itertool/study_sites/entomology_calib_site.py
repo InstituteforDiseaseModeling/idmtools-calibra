@@ -1,7 +1,7 @@
 import logging
 from abc import ABCMeta
 
-from itertool.CalibSite import CalibSite
+from itertool.calib_site import CalibSite
 from itertool.study_sites.site_setup_functions import \
     config_setup_fn, vector_stats_report_fn
 
