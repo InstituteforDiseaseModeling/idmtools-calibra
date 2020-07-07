@@ -30,11 +30,13 @@ class GenericIterativeNextPoint(NextPointAlgorithm):
     Note that the results needs to be contained in a Dictionary. 
     If you want to leverage pandas.DataFrame instead, you should use OptimTool. 
     """
+
     def __init__(self, initial_state):
+        super().__init__()
         self.data = [
             {
-                'iteration':0,
-                'samples':initial_state
+                'iteration': 0,
+                'samples': initial_state
             }
         ]
 
@@ -61,7 +63,7 @@ class GenericIterativeNextPoint(NextPointAlgorithm):
 
     def set_results_for_iteration(self, iteration, results):
         resultsdict = results.to_dict(orient='list').values()[0]
-        for idx,sample in enumerate(self.data[iteration]['samples']): sample.update(resultsdict[idx])
+        for idx, sample in enumerate(self.data[iteration]['samples']): sample.update(resultsdict[idx])
         new_iter = copy.deepcopy(self.data[iteration])
         new_iter['iteration'] = iteration + 1
         self.data.append(new_iter)
@@ -73,7 +75,7 @@ class GenericIterativeNextPoint(NextPointAlgorithm):
         return {'final_samples': {}}
 
     def update_summary_table(self, iteration_state, previous_results):
-        return self.data, self.data #json.dumps(self.data, indent=3)
+        return self.data, self.data  # json.dumps(self.data, indent=3)
 
     def get_results_to_cache(self, results):
         return results.to_dict(orient='list')
