@@ -18,10 +18,7 @@ logger = getLogger(__name__)
 user_logger = getLogger('user')
 
 try:
-    from pycuda import driver, compiler, gpuarray, tools
-    import pycuda.autoinit
-    import pycuda.driver as drv
-    from pycuda.compiler import SourceModule
+    import pycuda
     import skcuda.misc as misc
 except ImportError as e:
     logger.error("Could not import a cuda component. pycuda and skcuda installed")
@@ -64,8 +61,8 @@ class GPC:
                 raise Exception('Missing column')
             xc_new = xc + ' (scaled)'
             self.x_cols_scaled.append(xc_new)
-            self.training_data[xc + ' (scaled)'] = (self.training_data[xc] - self.param_info.loc[xc, 'Min']) / (
-                    self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
+            self.training_data[xc + ' (scaled)'] = (self.training_data[xc] - self.param_info.loc[xc, 'Min']) / \
+                (self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
 
         self.verbose = verbose
         self.debug = debug
@@ -106,8 +103,9 @@ class GPC:
 
         for xc in self.x_cols:
             # xc_new = xc + ' (scaled)'
-            self.training_data[xc + ' (scaled)'] = (self.training_data[xc] - self.param_info.loc[xc, 'Min']) / (
-                    self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
+            self.training_data[xc + ' (scaled)'] = \
+                (self.training_data[xc] - self.param_info.loc[xc, 'Min']) / \
+                (self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
 
     def save(self, save_to=None):
         save_dict = {
@@ -150,7 +148,7 @@ class GPC:
                 B=nx)
 
             # Compile the kernel
-            mod = compiler.SourceModule(kernel_code)
+            mod = pycuda.compiler.SourceModule(kernel_code)
 
             # retrieve the kernel functions
             self.kernel_xx_gpu = mod.get_function("kernel_xx")
@@ -213,14 +211,14 @@ class GPC:
         # Use from before...?
         block_dim, grid_dim = misc.select_block_grid_sizes(pycuda.autoinit.device, (nx, nx))
 
-        x_gpu = gpuarray.to_gpu(x.astype(np.float32))
+        x_gpu = pycuda.gpuarray.to_gpu(x.astype(np.float32))
 
         theta_extended = np.concatenate(
             (np.array(theta[:1]), np.array([0]), np.array(theta[1:])))  # Kernel code needs sigma2_n
-        theta_gpu = gpuarray.to_gpu(theta_extended.astype(np.float32))
+        theta_gpu = pycuda.gpuarray.to_gpu(theta_extended.astype(np.float32))
 
         # create empty gpu array for the result
-        kxx_gpu = gpuarray.empty((nx, nx), np.float32)
+        kxx_gpu = pycuda.gpuarray.empty((nx, nx), np.float32)
 
         # call the kernel on the card
         self.kernel_xx_gpu(
@@ -252,22 +250,22 @@ class GPC:
 
         if x.flags.f_contiguous:  # Fortran column-major
             # Convert to C contiguous (row major)
-            x_gpu = gpuarray.to_gpu(n_p.ascontiguousarray(x).astype(n_p.float32))
+            x_gpu = pycuda.gpuarray.to_gpu(n_p.ascontiguousarray(x).astype(n_p.float32))
         else:
-            x_gpu = gpuarray.to_gpu(x.astype(n_p.float32))
+            x_gpu = pycuda.gpuarray.to_gpu(x.astype(n_p.float32))
 
         if p.flags.f_contiguous:
             # Convert to C contiguous (row major)
-            p_gpu = gpuarray.to_gpu(n_p.ascontiguousarray(p).astype(n_p.float32))
+            p_gpu = pycuda.gpuarray.to_gpu(n_p.ascontiguousarray(p).astype(n_p.float32))
         else:
-            p_gpu = gpuarray.to_gpu(p.astype(n_p.float32))
+            p_gpu = pycuda.gpuarray.to_gpu(p.astype(n_p.float32))
 
         theta_extended = n_p.concatenate(
             (n_p.array(theta[:1]), n_p.array([0]), n_p.array(theta[1:])))  # Kernel code needs sigma2_n
-        theta_gpu = gpuarray.to_gpu(theta_extended.astype(n_p.float32))
+        theta_gpu = pycuda.gpuarray.to_gpu(theta_extended.astype(n_p.float32))
 
         # create empty gpu array for the result
-        kxp_gpu = gpuarray.empty((nx, n_p), n_p.float32)
+        kxp_gpu = pycuda.gpuarray.empty((nx, n_p), n_p.float32)
 
         # call the kernel on the card
         self.kernel_xp_gpu(
@@ -406,11 +404,11 @@ class GPC:
         # TEMP because long-cut in calculating Sigma above
         sqrt_stilde = np.diag(np.sqrt(tau))
         b = np.eye(n) + np.dot(sqrt_stilde, np.dot(k, sqrt_stilde))
-        l = np.linalg.cholesky(b)
-        ##################################################
+        l_cholesky = np.linalg.cholesky(b)
+        # #################################################
 
         log_zep_terms_1_and_4 = 0.5 * sum(
-            np.log(1 + np.multiply(tau, np.reciprocal(tau_minus_i_vec))) - np.log(np.diag(l)))
+            np.log(1 + np.multiply(tau, np.reciprocal(tau_minus_i_vec))) - np.log(np.diag(l_cholesky)))
 
         t = np.diag(tau_minus_i_vec)
         big_matrix = k - np.dot(k, np.dot(sqrt_stilde, np.linalg.solve(b, np.dot(sqrt_stilde, k)))) - np.linalg.inv(
@@ -453,7 +451,7 @@ class GPC:
 
         k = self.kxx_gpu_wrapper(x, theta)  # This is for f, no sigma2_n
 
-        l = w = sqrt_w = pi = d_df_log_p_y_given_f = a = log_p_y_given_f = log_q_y_given_x_theta = i = None
+        l_val = w = sqrt_w = pi = d_df_log_p_y_given_f = a = log_p_y_given_f = log_q_y_given_x_theta = i = None
         for i in range(max_iter):
             user_logger.debug('---[ %d ]------------------------------------' % i)
             user_logger.debug('f_hat:', f_hat)
@@ -480,7 +478,7 @@ class GPC:
             ###
 
             user_logger.debug('Computing L ...')
-            l = np.linalg.cholesky(b)
+            l_val = np.linalg.cholesky(b)
 
             user_logger.debug('Computing b ...')
             d_df_log_p_y_given_f = t - pi
@@ -491,10 +489,10 @@ class GPC:
             w12_k_b = np.dot(sqrt_w, np.dot(k, b))
 
             user_logger.debug('Computing L_slash_W12_K_b ...')
-            l_slash_w12_k_b = np.linalg.solve(l, w12_k_b)
+            l_slash_w12_k_b = np.linalg.solve(l_val, w12_k_b)
 
             user_logger.debug('Computing Lt_slash_L_slash_W12_K_b ...')
-            lt_slash_l_slash_w12_k_b = np.linalg.solve(np.transpose(l), l_slash_w12_k_b)
+            lt_slash_l_slash_w12_k_b = np.linalg.solve(np.transpose(l_val), l_slash_w12_k_b)
 
             user_logger.debug('Computing a ...')
             a = b - np.dot(sqrt_w, lt_slash_l_slash_w12_k_b)
@@ -506,7 +504,7 @@ class GPC:
             #####
             # log_p_y_given_f = -np.log(1 + np.exp(-np.dot(y, f_hat)))
             log_p_y_given_f = np.sum(-np.log(1 + np.exp(-np.multiply(y, f_hat))))
-            log_q_y_given_x_theta = -0.5 * np.dot(np.transpose(a), f_hat) + log_p_y_given_f - sum(np.log(np.diag(l)))
+            log_q_y_given_x_theta = -0.5 * np.dot(np.transpose(a), f_hat) + log_p_y_given_f - sum(np.log(np.diag(l_val)))
 
             d_df_log_q_y_given_x_theta = d_df_log_p_y_given_f - np.linalg.solve(k, f_hat)
             # print '***', log_q_y_given_X_theta, np.linalg.norm(d_df_log_q_y_given_X_theta)
@@ -520,12 +518,12 @@ class GPC:
         user_logger.debug(theta,
                           'Final --> log_q_y_given_X_theta: %f (%d f_hat-iterations)' % (log_q_y_given_x_theta, i))
 
-        if l is None or w is None:
+        if l_val is None or w is None:
             raise Exception("Iter loop did not complete or all expected values were not set")
         return {
             'f_hat': f_hat,
             'log_q_y_given_X_theta': log_q_y_given_x_theta,
-            'L': l,
+            'L': l_val,
             'K': k,
             'W': w,
             'sqrtW': sqrt_w,
@@ -554,9 +552,9 @@ class GPC:
 
         f_hat = mode_results_dict['f_hat']
         log_z = mode_results_dict['log_q_y_given_X_theta']
-        l = mode_results_dict['L']
+        l_val = mode_results_dict['L']
         k = mode_results_dict['K']
-        w = mode_results_dict['W']
+        # w = mode_results_dict['W']
         sqrt_w = mode_results_dict['sqrtW']
         pi = mode_results_dict['pi']
         a = mode_results_dict['a']
@@ -565,10 +563,10 @@ class GPC:
 
         x = self.training_data[self.x_cols_scaled].values
 
-        l_slash_sqrt_w = np.linalg.solve(l, sqrt_w)
-        r = np.dot(sqrt_w, np.linalg.solve(np.transpose(l), l_slash_sqrt_w))  # <-- good
+        l_slash_sqrt_w = np.linalg.solve(l_val, sqrt_w)
+        r = np.dot(sqrt_w, np.linalg.solve(np.transpose(l_val), l_slash_sqrt_w))  # <-- good
 
-        c = np.linalg.solve(l, np.dot(sqrt_w, k))
+        c = np.linalg.solve(l_val, np.dot(sqrt_w, k))
 
         # print(np.diag(K - np.dot(np.transpose(C),C)) - np.diag(K - np.dot(K,np.linalg.solve(np.linalg.inv(W)+K,K))))
         # exit()
@@ -637,7 +635,7 @@ class GPC:
         sqrt_w = np.diag(np.sqrt(-d2_df2_log_p_y_given_f))
 
         user_logger.debug('Computing B ...')
-        ### Dan's method for B:
+        # ## Dan's method for B:
         w = np.sqrt(-d2_df2_log_p_y_given_f)
         w_outer = np.outer(w, w)
         b = np.eye(n) + np.multiply(kxx, w_outer)
@@ -670,8 +668,8 @@ class GPC:
             mu = f_bar_star[0]
             sigma2 = v[0, 0]
 
-            import time
-            tz = time.time()
+            # import time
+            # tz = time.time()
             # Numerical integration ##### (Works, but need variance calculation)
             fstar = np.linspace(mu - 3 * np.sqrt(sigma2), mu + 3 * np.sqrt(sigma2),
                                 100)  # <-- should choose num points (100) wisely
@@ -725,11 +723,11 @@ class GPC:
         user_logger.debug('Computing B ...')
         sqrt_stilde = np.diag(np.sqrt(tau))
         b = np.eye(n) + np.dot(sqrt_stilde, np.dot(kxx, sqrt_stilde))
-        l = np.linalg.cholesky(b)
+        l_cholesky = np.linalg.cholesky(b)
 
         sqrt_stilde_k_nu = np.dot(sqrt_stilde, np.dot(kxx, nu))
-        l_slash_sqrt_stilde_k_nu = np.linalg.solve(l, sqrt_stilde_k_nu)
-        lt_slash_l_slash_sqrt_stilde_k_nu = np.linalg.solve(np.transpose(l), l_slash_sqrt_stilde_k_nu)
+        l_slash_sqrt_stilde_k_nu = np.linalg.solve(l_cholesky, sqrt_stilde_k_nu)
+        lt_slash_l_slash_sqrt_stilde_k_nu = np.linalg.solve(np.transpose(l_cholesky), l_slash_sqrt_stilde_k_nu)
         z = np.dot(sqrt_stilde, lt_slash_l_slash_sqrt_stilde_k_nu)
 
         ret = pd.DataFrame(columns=['Mean-Transformed', 'Var-Transformed', 'Mean', 'Var'])
@@ -739,7 +737,7 @@ class GPC:
             k_xp = self.kxp_gpu_wrapper(x, p, theta)
             f_bar_star = np.dot(np.transpose(k_xp), nu - z)  # MEAN (vector of length 1)
 
-            v = np.linalg.solve(l, np.dot(sqrt_stilde, k_xp))
+            v = np.linalg.solve(l_cholesky, np.dot(sqrt_stilde, k_xp))
             kpp = self.kxx_gpu_wrapper(p, theta)  # For latent distribution, don't add sigma2_n
             v = kpp - np.dot(np.transpose(v), v)  # VARIANCE (matrix of size 1x1)
 
@@ -869,8 +867,9 @@ class GPC:
         # Normalize data
         for xc in self.x_cols:
             # xc_new = xc + ' (scaled)'
-            data[xc + ' (scaled)'] = (data[xc] - self.param_info.loc[xc, 'Min']) / (
-                    self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
+            data[xc + ' (scaled)'] = \
+                (data[xc] - self.param_info.loc[xc, 'Min']) / \
+                (self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
 
         # PREDICT:
         if self.use_laplace_approximation:
@@ -888,8 +887,10 @@ class GPC:
     def plot_data(self, samples_to_circle=None):
         if samples_to_circle is None:
             samples_to_circle = []
-        scaled = 5 + 45 * (self.training_data[self.y_col] - self.training_data[self.y_col].min()) / (
-                self.training_data[self.y_col].max() - self.training_data[self.y_col].min())
+        scaled = \
+            5 + 45 * \
+            (self.training_data[self.y_col] - self.training_data[self.y_col].min()) / \
+            (self.training_data[self.y_col].max() - self.training_data[self.y_col].min())
 
         figs = {}
 

@@ -104,14 +104,11 @@ class OptimToolPBnB(NextPointAlgorithm):
                 logger.info('stage_1')
 
                 self.i_N_k = int(self.i_c_k / sum(1 for j in self.l_subr if j.s_label == 'C' and j.b_activate is True))
-                if self.s_problem_type is 'deterministic':
-                    [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_deterministic(self.l_subr,
-                                                                                                       self.i_N_k,
-                                                                                                       self.i_R_k,
-                                                                                                       self.s_stage,
-                                                                                                       [p['Name'] for p
-                                                                                                        in self.params])
-                elif self.s_problem_type is 'noise':
+                if self.s_problem_type == 'deterministic':
+                    [self.l_subr, self.df_testing_samples] = \
+                        fun_sample_points_generator_deterministic(
+                            self.l_subr, self.i_N_k, self.i_R_k, self.s_stage, [p['Name'] for p in self.params])
+                elif self.s_problem_type == 'noise':
                     [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_noise(self.l_subr, self.i_N_k,
                                                                                                self.i_R_k, self.s_stage,
                                                                                                [p['Name'] for p in
@@ -124,24 +121,22 @@ class OptimToolPBnB(NextPointAlgorithm):
             if self.s_stage == 'stage_2':
                 logger.info('stage_2')
 
-                for c_subr in (c_subr for c_subr in self.l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and len(
-                                       c_subr.pd_sample_record) > 0):
+                for c_subr in \
+                        (c_subr for c_subr in self.l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and  # noqa: W504
+                                                             len(c_subr.pd_sample_record) > 0  # noqa: E127
+                         ):
                     c_subr = copy.copy(fun_order_subregion(c_subr))
 
                 # resampling
                 self.i_R_k = fun_replication_update(self.l_subr, self.i_R_k, self.f_alpha_k)
-                if self.s_problem_type is 'deterministic':
-                    [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_deterministic(self.l_subr,
-                                                                                                       self.i_N_k,
-                                                                                                       self.i_R_k,
-                                                                                                       self.s_stage,
-                                                                                                       [p['Name'] for p
-                                                                                                        in self.params])
-                elif self.s_problem_type is 'noise':
-                    [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_noise(self.l_subr, self.i_N_k,
-                                                                                               self.i_R_k, self.s_stage,
-                                                                                               [p['Name'] for p in
-                                                                                                self.params])
+                if self.s_problem_type == 'deterministic':
+                    [self.l_subr, self.df_testing_samples] = \
+                        fun_sample_points_generator_deterministic(self.l_subr, self.i_N_k, self.i_R_k, self.s_stage,
+                                                                  [p['Name'] for p in self.params])
+                elif self.s_problem_type == 'noise':
+                    [self.l_subr, self.df_testing_samples] = \
+                        fun_sample_points_generator_noise(self.l_subr, self.i_N_k, self.i_R_k, self.s_stage,
+                                                          [p['Name'] for p in self.params])
                 self.s_stage = 'stage_3'
                 if not self.df_testing_samples.empty:  # <-- call calibtool only if there is new sampling demand
                     return self.df_testing_samples
@@ -152,7 +147,7 @@ class OptimToolPBnB(NextPointAlgorithm):
                 # reorder
                 for c_subr in (c_subr for c_subr in self.l_subr if
                                c_subr.s_label == 'C' and c_subr.b_activate is True and len(
-                                       c_subr.pd_sample_record) > 0):
+                                   c_subr.pd_sample_record) > 0):
                     c_subr = copy.copy(fun_order_subregion(c_subr))
 
                 # step 3: Build CI of quantile
@@ -170,14 +165,17 @@ class OptimToolPBnB(NextPointAlgorithm):
                         self.l_subr = fun_elite_indicator(self.l_subr, self.f_CI_l)
                         self.l_subr = fun_worst_indicator(self.l_subr, self.f_CI_u)
 
-                        self.i_N_elite_worst = int(np.ceil(np.log(self.f_alpha_k) /
-                                                           np.log(1. - (self.f_epsilon / self.l_subr[
-                                                               0].f_volume))))  # <-- number of sampling points for elite and worst subregions
-                        if self.s_problem_type is 'deterministic':
+                        self.i_N_elite_worst = \
+                            int(
+                                np.ceil(
+                                    np.log(self.f_alpha_k) / np.log(1. - (self.f_epsilon / self.l_subr[0].f_volume))
+                                )
+                            )  # <-- number of sampling points for elite and worst subregions
+                        if self.s_problem_type == 'deterministic':
                             [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_deterministic(
                                 self.l_subr, self.i_N_elite_worst, self.i_R_k, self.s_stage,
                                 [p['Name'] for p in self.params])
-                        elif self.s_problem_type is 'noise':
+                        elif self.s_problem_type == 'noise':
                             [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_noise(self.l_subr,
                                                                                                        self.i_N_k,
                                                                                                        self.i_R_k,
@@ -196,11 +194,11 @@ class OptimToolPBnB(NextPointAlgorithm):
                         # perform R_k^n-R_k
                         self.i_R_elite_worst = fun_replication_update(self.l_subr, self.i_R_k,
                                                                       self.f_alpha_k)  # <-- number of replication for all sampling points in elite and worst regions
-                        if self.s_problem_type is 'deterministic':
+                        if self.s_problem_type == 'deterministic':
                             [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_deterministic(
                                 self.l_subr, self.i_N_elite_worst, self.i_R_elite_worst, self.s_stage,
                                 [p['Name'] for p in self.params])
-                        elif self.s_problem_type is 'noise':
+                        elif self.s_problem_type == 'noise':
                             [self.l_subr, self.df_testing_samples] = fun_sample_points_generator_noise(self.l_subr,
                                                                                                        self.i_N_k,
                                                                                                        self.i_R_k,
@@ -270,10 +268,11 @@ class OptimToolPBnB(NextPointAlgorithm):
                                 index_number += 1
 
                             # end of branching-------------------------------
-                            if all(i.b_maintaining_indicator is False for i in
-                                   (i for i in self.l_subr if i.b_activate is True)) and all(
-                                i.b_pruning_indicator is False for i in
-                                (i for i in self.l_subr if i.b_activate is True)):
+                            if all(
+                                    i.b_maintaining_indicator is False for i in (i for i in self.l_subr if i.b_activate is True)
+                            ) and all(
+                                i.b_pruning_indicator is False for i in (i for i in self.l_subr if i.b_activate is True)
+                            ):
                                 self.i_k_c += 1
                             else:
                                 self.i_k_c = 0
@@ -370,10 +369,10 @@ class OptimToolPBnB(NextPointAlgorithm):
     def set_results_for_iteration(self, iteration, results):
         logger.info('================begin: set_results_for_iteration================')
         # self.df_testing_samples['result'] = pd.Series(results[results.columns[0]], index=self.df_testing_samples.index)
-        if self.s_problem_type is 'deterministic':
+        if self.s_problem_type == 'deterministic':
             self.df_testing_samples['result'] = pd.Series([[p] for p in results[results.columns[0]]],
                                                           index=self.df_testing_samples.index)  # negative p is because we would like to minimize -negative likelihood()= maximum likelihood
-        elif self.s_problem_type is 'noise':
+        elif self.s_problem_type == 'noise':
             self.df_testing_samples['result'] = pd.Series([p for p in results[results.columns[0]]],
                                                           index=self.df_testing_samples.index)
         logger.info('result')
@@ -384,10 +383,10 @@ class OptimToolPBnB(NextPointAlgorithm):
 
         if iteration == 0:
             os.makedirs(self.s_running_file_name + '/All_region_sampling_record/', exist_ok=True)
-        if self.s_problem_type is 'deterministic':
+        if self.s_problem_type == 'deterministic':
             self.l_subr = fun_results_organizer_deterministic(self.l_subr, self.df_testing_samples,
                                                               self.params)  # <-- Update the self.l_subr based on df_testing_samples
-        elif self.s_problem_type is 'noise':
+        elif self.s_problem_type == 'noise':
             self.l_subr = fun_results_organizer_noise(self.l_subr, self.df_testing_samples, self.i_N_k,
                                                       self.i_N_elite_worst, self.s_stage, self.params)
         for i in range(0, len(self.l_subr)):
