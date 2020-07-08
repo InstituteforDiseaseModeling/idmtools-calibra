@@ -8,7 +8,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from itertool.algorithms.pbnb.c_sub_region import c_SubRegion
+from itertool.algorithms.pbnb.c_sub_region import cSubRegion
 from itertool.plotters.base_plotter import BasePlotter
 
 logger = logging.getLogger(__name__)
@@ -52,8 +52,8 @@ class OptimToolPBnBPlotter(BasePlotter):
         self.str_k = str(self.npt['i_k'])
         self.l_subr = []
         for c_subr in self.npt['l_subr']:
-            c_subr_set = c_SubRegion(self.npt['l_subr'][c_subr]['l_coordinate_lower'],
-                                     self.npt['l_subr'][c_subr]['l_coordinate_upper'], self.params)
+            c_subr_set = cSubRegion(self.npt['l_subr'][c_subr]['l_coordinate_lower'],
+                                    self.npt['l_subr'][c_subr]['l_coordinate_upper'], self.params)
             c_subr_set.i_index = self.npt['l_subr'][c_subr]['i_index']
             c_subr_set.s_label = self.npt['l_subr'][c_subr]['s_label']
             c_subr_set.b_activate = self.npt['l_subr'][c_subr]['b_activate']

@@ -32,15 +32,15 @@ def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_s
         l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]
     elif s_stage == 'stage_2':
         l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                    c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0)]
+                c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0)]
     elif s_stage == 'stage_4-1':
         l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                    c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                        c_subr.b_worst is True or c_subr.b_elite is True))]
+                c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                c_subr.b_worst is True or c_subr.b_elite is True))]
     elif s_stage == 'stage_4-2':
         l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                    c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                        c_subr.b_worst is True or c_subr.b_elite is True))]
+                c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                c_subr.b_worst is True or c_subr.b_elite is True))]
     if not l_sampling_subregions:
         return [l_subr, pd.DataFrame()]
     for c_subr in l_sampling_subregions:
@@ -102,11 +102,11 @@ def fun_sample_points_generator_noise(l_subr, i_n_sampling, i_n_rep, s_stage, l_
     elif s_stage == 'stage_4-1':
         l_sampling_subregions = [c_subr for c_subr in l_subr if
                                  c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                                             c_subr.b_worst is True or c_subr.b_elite is True)]
+                                         c_subr.b_worst is True or c_subr.b_elite is True)]
     else:
         l_sampling_subregions = [c_subr for c_subr in l_subr if
                                  c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                                             c_subr.b_worst is True or c_subr.b_elite is True)]
+                                         c_subr.b_worst is True or c_subr.b_elite is True)]
 
     for c_subr in l_sampling_subregions:
         c_subr.pd_sample_record = c_subr.pd_sample_record.sort_values(by="mean",
@@ -176,7 +176,7 @@ def fun_results_organizer_deterministic(l_subr, df_testing_samples, params):
         df_testing_samples['l_coordinate_upper'] = df_testing_samples['l_coordinate_upper'].astype(str)
         df_testing_samples_s_subr[[p['Name'] for p in params] + ['mean']] = df_testing_samples[
             (df_testing_samples['l_coordinate_lower'] == str(c_subr.l_coordinate_lower)) & (
-                        df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][
+                    df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][
             [p['Name'] for p in params] + ['result']]
         df_testing_samples_s_subr = df_testing_samples_s_subr.reset_index(drop=True)
         if len(df_testing_samples_s_subr) > 0:
@@ -477,14 +477,14 @@ def fun_reg_branching(c_subr, i_n_branching, params, s_branching_dim):
                                           c_subr.l_coordinate_lower[i_max_index]
         l_coordinate_upper[i_max_index] = float(
             (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * (
-                        i + 1)) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
+                    i + 1)) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
         l_new_branching_subr = cSubRegion(l_coordinate_lower, l_coordinate_upper, params)
         l_subr_new.append(l_new_branching_subr)
     # the following reallocate the sampling points
     for i in l_subr_new:
         i.pd_sample_record = c_subr.pd_sample_record[
             (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & (
-                        c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
+                    c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
     for i in l_subr_new:  # reindex the sampling points into 0 1 2...
         i.pd_sample_record = i.pd_sample_record.reset_index(drop=True)
         # update attributed based on data

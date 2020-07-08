@@ -5,14 +5,13 @@ import calendar
 import logging
 from collections import OrderedDict
 import numpy.ma as ma
-import json
-
 import pandas as pd
 import numpy as np
 
 import dtk.utils.parsers.malaria_summary as malaria_summary
 
 logger = logging.getLogger(__name__)
+
 
 # TODO Where should we move some disease specific stuff?
 
@@ -29,24 +28,24 @@ def grouped_df(df, pfprdict, index, column_keep, column_del):
         column_keep: Column (e.g. parasitemia) to keep
         column_del: Column (e.g. gametocytemia) to delete
     """
-    dftemp = df.copy()
-    del dftemp[column_del]
+    df_temp = df.copy()
+    del df_temp[column_del]
 
-    dftemp['PfPR Bin'] = df[column_keep]
-    dftemp = aggregate_on_index(dftemp, index)
+    df_temp['PfPR Bin'] = df[column_keep]
+    df_temp = aggregate_on_index(df_temp, index)
 
-    dfGrouped = dftemp.groupby(['Season', 'Age Bin', 'PfPR Bin'])
+    df_grouped = df_temp.groupby(['Season', 'Age Bin', 'PfPR Bin'])
 
-    dftemp = dfGrouped[column_keep].count()
-    dftemp = dftemp.unstack().fillna(0).stack()
-    dftemp = dftemp.rename(column_keep).reset_index()
-    dftemp['PfPR Bin'] = [pfprdict[p] for p in dftemp['PfPR Bin']]
+    df_temp = df_grouped[column_keep].count()
+    df_temp = df_temp.unstack().fillna(0).stack()
+    df_temp = df_temp.rename(column_keep).reset_index()
+    df_temp['PfPR Bin'] = [pfprdict[p] for p in df_temp['PfPR Bin']]
 
-    dftemp = dftemp.set_index(['Season', 'Age Bin', 'PfPR Bin'])
+    df_temp = df_temp.set_index(['Season', 'Age Bin', 'PfPR Bin'])
 
-    logger.debug('\n%s', dftemp)
+    logger.debug('\n%s', df_temp)
 
-    return dftemp
+    return df_temp
 
 
 def season_channel_age_density_csv_to_pandas(csvfilename, metadata):
@@ -80,16 +79,16 @@ def season_channel_age_density_csv_to_pandas(csvfilename, metadata):
     df = pd.read_csv(csvfilename)
     df = df.loc[df['Village'] == metadata['village']]
 
-    pfprBinsDensity = metadata['parasitemia_bins']
-    uL_per_field = 0.5 / 200.0  # from Garki PDF - page 111 - 0.5 uL per 200 views
-    pfprBins = 1 - np.exp(-np.asarray(pfprBinsDensity) * uL_per_field)
+    pfpr_bins_density = metadata['parasitemia_bins']
+    ul_per_field = 0.5 / 200.0  # from Garki PDF - page 111 - 0.5 uL per 200 views
+    pfpr_bins = 1 - np.exp(-np.asarray(pfpr_bins_density) * ul_per_field)
     seasons = metadata['seasons']
-    pfprdict = dict(zip(pfprBins, pfprBinsDensity))
+    pfprdict = dict(zip(pfpr_bins, pfpr_bins_density))
 
     bins = OrderedDict([
         ('Season', metadata['seasons']),
         ('Age Bin', metadata['age_bins']),
-        ('PfPR Bin', pfprBins)
+        ('PfPR Bin', pfpr_bins)
     ])
     bin_tuples = list(itertools.product(*bins.values()))
     index = pd.MultiIndex.from_tuples(bin_tuples, names=bins.keys())
@@ -99,12 +98,12 @@ def season_channel_age_density_csv_to_pandas(csvfilename, metadata):
 
     df2 = grouped_df(df, pfprdict, index, 'Parasitemia', 'Gametocytemia')
     df3 = grouped_df(df, pfprdict, index, 'Gametocytemia', 'Parasitemia')
-    dfJoined = df2.join(df3).fillna(0)
-    dfJoined = pd.concat([dfJoined['Gametocytemia'], dfJoined['Parasitemia']])
-    dfJoined.name = 'Counts'
-    dftemp = dfJoined.reset_index()
+    df_joined = df2.join(df3).fillna(0)
+    df_joined = pd.concat([df_joined['Gametocytemia'], df_joined['Parasitemia']])
+    df_joined.name = 'Counts'
+    dftemp = df_joined.reset_index()
     dftemp['Channel'] = 'PfPR by Gametocytemia and Age Bin'
-    dftemp.loc[len(dftemp)/2:, 'Channel'] = 'PfPR by Parasitemia and Age Bin'
+    dftemp.loc[len(dftemp) / 2:, 'Channel'] = 'PfPR by Parasitemia and Age Bin'
     dftemp = dftemp.rename(columns={'Seasons': 'Season', 'PfPR Bins': 'PfPR Bin', 'Age Bins': 'Age Bin'})
     dftemp = dftemp.set_index(['Channel', 'Season', 'Age Bin', 'PfPR Bin'])
 
@@ -151,9 +150,9 @@ def season_channel_age_density_json_to_pandas(reference, bins):
     df = pd.concat(season_dict.values(), axis=1, keys=season_dict.keys(), names=['Season', 'Channel'])
 
     # Stack the hierarchical columns into the MultiIndex
-    channel_series = df.stack(['Season', 'Channel'])\
-                       .reorder_levels(['Channel', 'Season', 'Age Bin', 'PfPR Bin'])\
-                       .sort_index()
+    channel_series = df.stack(['Season', 'Channel']) \
+        .reorder_levels(['Channel', 'Season', 'Age Bin', 'PfPR Bin']) \
+        .sort_index()
 
     reference_df = pd.DataFrame(channel_series.rename('Counts'))  # 1-column DataFrame for standardized combine/compare
     logger.debug('\n%s', reference_df)
@@ -236,9 +235,9 @@ def convert_to_counts(rates, pops):
     pop_idx = pops.index.names
 
     # Join rates to population counts on the binning of the latter
-    df = rates.reset_index().set_index(pop_idx)\
-              .join(pops, how='left')\
-              .reset_index().set_index(rate_idx)
+    df = rates.reset_index().set_index(pop_idx) \
+        .join(pops, how='left') \
+        .reset_index().set_index(rate_idx)
 
     counts = (df[rates.name] * df[pops.name]).rename(rates.name)
     return counts
@@ -254,7 +253,7 @@ def age_from_birth_cohort(df):
         a pandas.DataFrame including an additional (or overwritten) 'Age Bin' column
     """
 
-    df['Age Bin'] = df['Time'] / 365.0   # Time in days but Age in years
+    df['Age Bin'] = df['Time'] / 365.0  # Time in days but Age in years
     return df
 
 
@@ -289,7 +288,7 @@ def pairwise(iterable):
     """ s -> (s0,s1), (s1,s2), (s2, s3), ... """
     a, b = itertools.tee(iterable)
     next(b, None)
-    return itertools.izip(a, b)
+    return zip(a, b)
 
 
 def aggregate_on_index(df, index, keep=slice(None)):
@@ -313,7 +312,8 @@ def aggregate_on_index(df, index, keep=slice(None)):
         logger.debug("%s (%s) : %s" % (ix.name, ix.dtype, ix.values))
 
         if ix.name not in df.columns:
-            raise Exception('Cannot perform aggregation as MultiIndex level (%s) not found in DataFrame:\n%s' % (ix.name, df.head()))
+            raise Exception('Cannot perform aggregation as MultiIndex level (%s) not found in DataFrame:\n%s' % (
+                ix.name, df.head()))
 
         # If dtype is object, these are categorical (e.g. season='start_wet', channel='gametocytemia')
         if ix.dtype == 'object':
@@ -338,7 +338,8 @@ def aggregate_on_index(df, index, keep=slice(None)):
             df[ix.name] = pd.cut(df[ix.name], bin_edges, labels=labels)
 
         else:
-            logger.warning('Unexpected dtype=%s for MultiIndex level (%s). No aggregation performed.', ix.dtype, ix.name)
+            logger.warning('Unexpected dtype=%s for MultiIndex level (%s). No aggregation performed.', ix.dtype,
+                           ix.name)
 
     # Aggregate on reference MultiIndex, keeping specified channels and dropping missing data
     if keep != slice(None):
@@ -355,13 +356,11 @@ def aggregate_on_month(sim, ref):
 
 
 def get_spatial_report_data_at_date(sp_data, date):
-
     return pd.DataFrame({'node': sp_data['nodeids'],
                          'data': sp_data['data'][date]})
 
 
 def get_risk_by_distance(df_sim, distances, ddf):
-
     nodelist = df_sim['node'].values.tolist()
     rel_risk = []
 
@@ -376,13 +375,13 @@ def get_risk_by_distance(df_sim, distances, ddf):
             if n_dist == 0 and df_sim.ix[hh_num, 'pop'] > 1:
                 hh_pos = df_sim.ix[hh_num, 'pos']
                 hh_tot = df_sim.ix[hh_num, 'pop']
-                num_pos = (hh_pos - 1)*hh_pos
-                num_ppl = (hh_tot - 1)*hh_pos
+                num_pos = (hh_pos - 1) * hh_pos
+                num_ppl = (hh_tot - 1) * hh_pos
 
             else:
                 # node IDs of nodes within distance
                 neighbors = ddf[(ddf['node1'] == nodelist[hh_num]) & (ddf['node2'] != nodelist[hh_num]) &
-                                (ddf['dist'] <= n_dist) & (ddf['dist'] > distances[k-1])]['node2'].values
+                                (ddf['dist'] <= n_dist) & (ddf['dist'] > distances[k - 1])]['node2'].values
 
                 ndf = df_sim[df_sim['node'].isin(neighbors)]
                 num_pos = sum(ndf['pos'].values)
@@ -392,7 +391,7 @@ def get_risk_by_distance(df_sim, distances, ddf):
             tot_w_pos += num_ppl
 
         if tot_w_pos > 0:
-            rel_risk.append(pos_w_pos/tot_w_pos)
+            rel_risk.append(pos_w_pos / tot_w_pos)
         else:
             rel_risk.append(0)
 
@@ -400,7 +399,6 @@ def get_risk_by_distance(df_sim, distances, ddf):
 
 
 def ento_data(csvfilename, metadata):
-
     df = pd.read_csv(csvfilename)
 
     df = df[['date', 'gambiae_count', 'funestus_count', 'adult_house']]
@@ -415,6 +413,7 @@ def ento_data(csvfilename, metadata):
     df2['funestus'] = list(df.groupby('Month')['funestus'].apply(np.mean))
 
     # Keep only species requested
+    dftemp = None
     for spec in metadata['species']:
         df1 = df2[['Month', spec]]
         df1 = df1.rename(columns={spec: 'Counts'})
@@ -431,10 +430,9 @@ def ento_data(csvfilename, metadata):
 
 
 def multi_year_ento_data(csvfilename, metadata):
-
     df = pd.read_csv(csvfilename)
     if metadata['HFCA']:
-        df = df[df['hf_name']==metadata['HFCA']]
+        df = df[df['hf_name'] == metadata['HFCA']]
 
     df = df[['date', 'gambiae_count', 'funestus_count', 'adult_house']]
     df['gambiae'] = df['gambiae_count'] / df['adult_house']
@@ -453,26 +451,26 @@ def multi_year_ento_data(csvfilename, metadata):
     df2['funestus'] = list(df.groupby(['Month'])['funestus'].apply(np.mean))
 
     # Keep only species requested
+    df_temp = None
     for spec in metadata['species']:
         df1 = df2[['Month', spec]]
         df1 = df1.rename(columns={spec: 'Counts'})
         df1['Channel'] = [spec] * len(df1)
         if 'dftemp' in locals():
-            dftemp = pd.concat([dftemp, df1])
+            df_temp = pd.concat([df_temp, df1])
         else:
-            dftemp = df1.copy()
+            df_temp = df1.copy()
 
-    dftemp = dftemp.sort_values(['Channel', 'Month'])
-    dftemp = dftemp.set_index(['Channel', 'Month'])
+    df_temp = df_temp.sort_values(['Channel', 'Month'])
+    df_temp = df_temp.set_index(['Channel', 'Month'])
 
-    return dftemp
+    return df_temp
 
 
 def multi_year_ento_data_clustered(csvfilename, metadata):
-
     df = pd.read_csv(csvfilename)
     if metadata['HFCA']:
-        df = df[df['cluster_name']==metadata['HFCA']]
+        df = df[df['cluster_name'] == metadata['HFCA']]
 
     df = df[['month', 'gambiae', 'funestus']]
 
@@ -488,23 +486,23 @@ def multi_year_ento_data_clustered(csvfilename, metadata):
     df2['funestus'] = list(df.groupby(['Month'])['funestus'].apply(np.mean))
 
     # Keep only species requested
+    df_temp = None
     for spec in metadata['species']:
         df1 = df2[['Month', spec]]
         df1 = df1.rename(columns={spec: 'Counts'})
         df1['Channel'] = [spec] * len(df1)
         if 'dftemp' in locals():
-            dftemp = pd.concat([dftemp, df1])
+            df_temp = pd.concat([df_temp, df1])
         else:
-            dftemp = df1.copy()
+            df_temp = df1.copy()
 
-    dftemp = dftemp.sort_values(['Channel', 'Month'])
-    dftemp = dftemp.set_index(['Channel', 'Month'])
+    df_temp = df_temp.sort_values(['Channel', 'Month'])
+    df_temp = df_temp.set_index(['Channel', 'Month'])
 
-    return dftemp
+    return df_temp
 
 
 def garki_ento_data(csvfilename, metadata):
-
     df = pd.read_csv(csvfilename)
 
     df = df.loc[df['Village'] == metadata['village']]
@@ -515,14 +513,13 @@ def garki_ento_data(csvfilename, metadata):
     if 'Unnamed: 0' in df.columns:
         del df['Unnamed: 0']
 
-    dftemp = df.sort_values(['Channel', 'Month'])
-    dftemp = dftemp.set_index(['Channel', 'Month'])
+    df_temp = df.sort_values(['Channel', 'Month'])
+    df_temp = df_temp.set_index(['Channel', 'Month'])
 
-    return dftemp
+    return df_temp
 
 
 def garki_multi_year_ento_data(csvfilename, metadata, time_limit):
-
     df = pd.read_csv(csvfilename)
 
     df = df.loc[df['Village'] == metadata['village']]
@@ -533,20 +530,20 @@ def garki_multi_year_ento_data(csvfilename, metadata, time_limit):
     if 'Unnamed: 0' in df.columns:
         del df['Unnamed: 0']
 
-    df['Year'] = df['Year'].apply(lambda x:x%min(df['Year']))
-    df['Month'] += df['Year']*12
+    df['Year'] = df['Year'].apply(lambda x: x % min(df['Year']))
+    df['Month'] += df['Year'] * 12
     del df['Year']
     df = df[df['Month'] < time_limit]
-    dftemp = df.sort_values(['Channel', 'Month'])
-    dftemp = dftemp.set_index(['Channel', 'Month'])
+    df_temp = df.sort_values(['Channel', 'Month'])
+    df_temp = df_temp.set_index(['Channel', 'Month'])
 
-    return dftemp
+    return df_temp
 
 
-def hhs_to_nodes(csvfilename, hhs_file, metadata):
-    from geopy.distance import vincenty
+def hhs_to_nodes(csv_filename, hhs_file, metadata):
+    from geopy.distance import geodesic
 
-    hh_hf_records = pd.read_csv(csvfilename)
+    hh_hf_records = pd.read_csv(csv_filename)
     hh_hf_records = hh_hf_records[hh_hf_records['hf_name'] == metadata['hf']]
     hh_hf_records = hh_hf_records.rename(index=str, columns={"House_ID": "ID", 'lat_r2': 'lat', 'lng_r2': 'lon'})
     hhs_df = pd.read_csv(hhs_file)
@@ -569,33 +566,35 @@ def hhs_to_nodes(csvfilename, hhs_file, metadata):
     # demographic grid cell should contain more households than a threshold
     cell_household_threshold = 1
 
-    # how far people would definitely go by foot in units of neighborhood hops (1 hop is the adjacent 8 cells on the grid; 2 hops is the adjacent 24 cells, etc.
+    # how far people would definitely go by foot in units of neighborhood hops (1 hop is the adjacent 8 cells on the
+    # grid; 2 hops is the adjacent 24 cells, etc.
     # this prepares an approximation of a local topology
     migration_radius = 2
 
     hh_records = all_hh_records[
         (all_hh_records.lon > x_min) & (all_hh_records.lon < x_max) & (all_hh_records.lat > y_min) & (
-        all_hh_records.lat < y_max)]
+                all_hh_records.lat < y_max)]
 
     # get point locations of households
     points = hh_records.as_matrix(["lon", "lat"])
 
-    # get number of grid cells along the x (grid width) and y axis (grid height) based on the bounding box dimensions and pixel/cell size
-    num_cells_x = int(1000 * vincenty((y_min, x_min), (y_min, x_max)).km / cell_size) + 1
-    num_cells_y = int(1000 * vincenty((y_min, x_min), (y_max, x_min)).km / cell_size) + 1
+    # get number of grid cells along the x (grid width) and y axis (grid height) based on the bounding box dimensions
+    # and pixel/cell size
+    num_cells_x = int(1000 * geodesic((y_min, x_min), (y_min, x_max)).km / cell_size) + 1
+    num_cells_y = int(1000 * geodesic((y_min, x_min), (y_max, x_min)).km / cell_size) + 1
 
     # bin households in the grid
-    H, xedges, yedges = np.histogram2d(points[:, 0], points[:, 1], bins=[num_cells_x, num_cells_y])
+    h, xedges, yedges = np.histogram2d(points[:, 0], points[:, 1], bins=[num_cells_x, num_cells_y])
 
     # get centroids of grid cells
     x_mid = (xedges[1:] + xedges[:-1]) / 2
     y_mid = (yedges[1:] + yedges[:-1]) / 2
 
     # build a mesh of centroids
-    X_mid, Y_mid = np.meshgrid(x_mid[:], y_mid[:])
+    x_mid, y_mid = np.meshgrid(x_mid[:], y_mid[:])
 
     # filter pixels/cells by number of households greater than a threshold in each cell
-    cells_masking = ma.masked_less(H, cell_household_threshold)
+    cells_masking = ma.masked_less(h, cell_household_threshold)
     cells_mask = cells_masking.mask
 
     # mask returns False for valid entries;  True would be easier to work with
@@ -612,25 +611,24 @@ def hhs_to_nodes(csvfilename, hhs_file, metadata):
 
         coor_idxs_2_node_label[str(idx_x) + "_" + str(idx_y)] = node_label
 
-    node_label = [0]*len(hh_records)
+    node_label = [0] * len(hh_records)
     for i in range(len(points)):
-        X = X_mid * np.transpose(inverted_filtered_households_mask)
-        Y = Y_mid * np.transpose(inverted_filtered_households_mask)
-        X[X == 0] = 'nan'
-        Y[Y == 0] = 'nan'
-        x = X_mid - points[i][0]
-        y = Y_mid - points[i][1]
-        dist = x**2 + y**2
+        x = x_mid * np.transpose(inverted_filtered_households_mask)
+        y = y_mid * np.transpose(inverted_filtered_households_mask)
+        x[x == 0] = 'nan'
+        y[y == 0] = 'nan'
+        x = x_mid - points[i][0]
+        y = y_mid - points[i][1]
+        dist = x ** 2 + y ** 2
         neigh_cand = np.argwhere(dist == np.min(dist))
         node_label[i] = coor_idxs_2_node_label[str(neigh_cand[0][0]) + "_" + str(neigh_cand[0][1])]
 
-    hh_records['NodeID'] =node_label
+    hh_records['NodeID'] = node_label
 
     return hh_records
 
 
 def ento_spatial_data(datafilename, hhs_hffilename, hhs_file, metadata):
-
     # df2 = hhs_to_nodes(hhs_hffilename, hhs_file, metadata)
 
     df = pd.read_csv(datafilename)
@@ -648,16 +646,17 @@ def ento_spatial_data(datafilename, hhs_hffilename, hhs_file, metadata):
     df2['funestus'] = list(df.groupby(['Month', 'NodeID'])['funestus'].apply(np.mean))
 
     # Keep only species requested
+    df_temp = None
     for spec in metadata['species']:
-        df1 = df2[['Month', 'NodeID',  spec]]
+        df1 = df2[['Month', 'NodeID', spec]]
         df1 = df1.rename(columns={spec: 'Counts'})
         df1['Channel'] = [spec] * len(df1)
         if 'dftemp' in locals():
-            dftemp = pd.concat([dftemp, df1])
+            df_temp = pd.concat([df_temp, df1])
         else:
-            dftemp = df1.copy()
+            df_temp = df1.copy()
 
-    dftemp = dftemp.sort_values(['Channel', 'Month', 'NodeID'])
-    dftemp = dftemp.set_index(['Channel', 'Month', 'NodeID'])
+    df_temp = df_temp.sort_values(['Channel', 'Month', 'NodeID'])
+    df_temp = df_temp.set_index(['Channel', 'Month', 'NodeID'])
 
-    return dftemp
+    return df_temp
