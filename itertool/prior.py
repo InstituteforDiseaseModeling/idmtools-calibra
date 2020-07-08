@@ -193,7 +193,7 @@ class MultiVariatePrior(object):
     def pdf(self, X):
         """
         Returns product of individual component function PDFs at each input point.
-        
+
         Args:
             X: array of points, where each point is an array of correct dimension.
         """
@@ -225,7 +225,7 @@ class MultiVariatePrior(object):
     def rvs(self, size=1):
         """
         Returns an array of random points, where each point is sampled randomly in its component dimensions.
-        
+
         Args:
             size : the number of random points to sample.
         """

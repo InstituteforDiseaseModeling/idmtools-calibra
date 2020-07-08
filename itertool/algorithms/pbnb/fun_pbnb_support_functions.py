@@ -58,19 +58,23 @@ def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_s
             for i in (i for i in range(0, len(c_subr.pd_sample_record)) if
                       c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not, i is index
                 # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
-                                                                                      for p in l_para] + [
-                             i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
+                l_vals = [c_subr.l_coordinate_lower] + \
+                         [c_subr.l_coordinate_upper] + \
+                         [c_subr.pd_sample_record.loc[i, p] for p in l_para] + \
+                         [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
                 df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
 
         else:  # if has not enough sampling points and replication
             if len(c_subr.pd_sample_record) >= 1:  # if already has sample points, first deal with them
-                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[
-                                                                                   i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
+                for i in (
+                        i for i in range(0, len(c_subr.pd_sample_record))
+                        if c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep
+                ):  # check enough # reps or not for existing old sampling points
                     # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [
-                        c_subr.pd_sample_record.loc[i, p] for p in l_para] + [
-                                 i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
+                    l_vals = [c_subr.l_coordinate_lower] + \
+                             [c_subr.l_coordinate_upper] + \
+                             [c_subr.pd_sample_record.loc[i, p] for p in l_para] + \
+                             [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
                     df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
             i_ini_length = len(c_subr.pd_sample_record)  # number of sampling point so far in this subregion
             for i in range(i_ini_length, i_n_sampling):  # create new rows for new sampling points
@@ -101,19 +105,25 @@ def fun_sample_points_generator_noise(l_subr, i_n_sampling, i_n_rep, s_stage, l_
     df_testing_samples = pd.DataFrame([], columns=l_column)
 
     if s_stage == 'stage_1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True:
+                l_sampling_subregions.append(c_subr)
     elif s_stage == 'stage_2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if
-                                 c_subr.s_label == 'C' and c_subr.b_activate is True and len(
-                                     c_subr.pd_sample_record) > 0]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0:
+                l_sampling_subregions.append(c_subr)
     elif s_stage == 'stage_4-1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if
-                                 c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                                         c_subr.b_worst is True or c_subr.b_elite is True)]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True):
+                l_sampling_subregions.append(c_subr)
     else:
-        l_sampling_subregions = [c_subr for c_subr in l_subr if
-                                 c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                                         c_subr.b_worst is True or c_subr.b_elite is True)]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True):
+                l_sampling_subregions.append(c_subr)
 
     for c_subr in l_sampling_subregions:
         c_subr.pd_sample_record = c_subr.pd_sample_record.sort_values(by="mean",
@@ -121,21 +131,25 @@ def fun_sample_points_generator_noise(l_subr, i_n_sampling, i_n_rep, s_stage, l_
         c_subr.pd_sample_record = c_subr.pd_sample_record.reset_index(drop=True)  # reindex before start
 
         if len(c_subr.pd_sample_record) >= i_n_sampling:  # if has enough number of sampling points
-            for i in (i for i in range(0, len(c_subr.pd_sample_record)) if
-                      c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not, i is index
+            for i in (
+                    i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep
+            ):  # check enough # reps or not, i is index
                 # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
-                                                                                      for p in l_para]
+                l_vals = [c_subr.l_coordinate_lower] + \
+                         [c_subr.l_coordinate_upper] + \
+                         [c_subr.pd_sample_record.loc[i, p] for p in l_para]
                 for j in range(0, i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])):
                     df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
 
         else:  # if has not enough sampling points and replication
             if len(c_subr.pd_sample_record) >= 1:  # if already has sample points, first deal with them
-                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[
-                                                                                   i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
+                for i in (
+                        i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep
+                ):  # check enough # reps or not for existing old sampling points
                     # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [
-                        c_subr.pd_sample_record.loc[i, p] for p in l_para]
+                    l_vals = [c_subr.l_coordinate_lower] + \
+                             [c_subr.l_coordinate_upper] + \
+                             [c_subr.pd_sample_record.loc[i, p] for p in l_para]
                     for j in range(0, [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]):
                         df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
             i_ini_length = len(c_subr.pd_sample_record)  # number of sampling point so far in this subregion
@@ -181,10 +195,10 @@ def fun_results_organizer_deterministic(l_subr, df_testing_samples, params):
         c_subr.pd_sample_record.drop(c_subr.pd_sample_record[c_subr.pd_sample_record.rep == 0].index, inplace=True)
         df_testing_samples['l_coordinate_lower'] = df_testing_samples['l_coordinate_lower'].astype(str)
         df_testing_samples['l_coordinate_upper'] = df_testing_samples['l_coordinate_upper'].astype(str)
-        df_testing_samples_s_subr[[p['Name'] for p in params] + ['mean']] = df_testing_samples[
-            (df_testing_samples['l_coordinate_lower'] == str(c_subr.l_coordinate_lower)) & (
-                    df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][
-            [p['Name'] for p in params] + ['result']]
+        df_testing_samples_s_subr[[p['Name'] for p in params] + ['mean']] = \
+            df_testing_samples[
+                (df_testing_samples['l_coordinate_lower'] == str(c_subr.l_coordinate_lower)) &  # noqa: W504
+                (df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][[p['Name'] for p in params] + ['result']]
         df_testing_samples_s_subr = df_testing_samples_s_subr.reset_index(drop=True)
         if len(df_testing_samples_s_subr) > 0:
             for i in range(0, len(df_testing_samples_s_subr)):
@@ -480,18 +494,18 @@ def fun_reg_branching(c_subr, i_n_branching, params, s_branching_dim):
         l_coordinate_lower = copy.deepcopy(c_subr.l_coordinate_lower)
         l_coordinate_upper = copy.deepcopy(c_subr.l_coordinate_upper)
         l_coordinate_lower[i_max_index] = float(
-            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * i) / i_n_branching + \
-                                          c_subr.l_coordinate_lower[i_max_index]
+            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * i
+        ) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
         l_coordinate_upper[i_max_index] = float(
-            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * (
-                    i + 1)) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
+            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * (i + 1)
+        ) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
         l_new_branching_subr = cSubRegion(l_coordinate_lower, l_coordinate_upper, params)
         l_subr_new.append(l_new_branching_subr)
     # the following reallocate the sampling points
     for i in l_subr_new:
         i.pd_sample_record = c_subr.pd_sample_record[
-            (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & (
-                    c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
+            (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & # noqa: W504
+            (c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
     for i in l_subr_new:  # reindex the sampling points into 0 1 2...
         i.pd_sample_record = i.pd_sample_record.reset_index(drop=True)
         # update attributed based on data

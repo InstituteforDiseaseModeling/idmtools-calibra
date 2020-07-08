@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 from datetime import datetime
+from logging import getLogger
 
 import pandas as pd
 
@@ -18,7 +19,7 @@ from simtools.Utilities.Experiments import validate_exp_name, retrieve_experimen
 from simtools.Utilities.General import init_logging
 from simtools.Utilities import verbose_timedelta
 
-logger = init_logging("Calibration")
+logger = getLogger(__name__)
 
 
 class SampleIndexWrapper(object):
@@ -405,7 +406,8 @@ class CalibManager(object):
         Kill the current calibration
         """
         exp = self.load_experiment_from_iteration()
-        if not exp: return
+        if not exp:
+            return
 
         # Cancel simulations for all active managers
         try:
@@ -430,7 +432,8 @@ class CalibManager(object):
         """
         try:
             calib_data = self.read_calib_data()
-        except Exception:
+        except Exception as ex:
+            logger.exception(ex)
             logger.info('Calib data cannot be read -> skip')
             calib_data = None
 
@@ -458,7 +461,8 @@ class CalibManager(object):
                     try:
                         exp_mgr = ExperimentManagerFactory.from_experiment(DataStore.get_experiment(it.experiment_id))
                         exp_mgr.hard_delete()
-                    except:
+                    except Exception as ex:
+                        logger.exception(ex)
                         continue
 
                 # Delete all HPC suites (the local suites are only carried by experiments)

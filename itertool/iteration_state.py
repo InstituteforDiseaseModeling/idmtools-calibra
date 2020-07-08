@@ -282,7 +282,6 @@ class IterationState:
         logger.info(self.summary_table)
 
     def wait_for_finished(self, verbose=True, init_sleep=1.0, sleep_time=30):
-        from simtools.SetupParser import SetupParser
         logger.debug('Waiting for iteration %s simulations to complete' % self.iteration)
         while True:
             time.sleep(init_sleep)
@@ -396,7 +395,8 @@ class IterationState:
         If resuming from an existing iteration, also copy to backup the initial cached state.
         """
         logger.debug('Saving calibration iteration %s' % self.iteration)
-        if not self.calibration_name: return
+        if not self.calibration_name:
+            return
         self.to_file()
 
     def get_parameter_sets_with_likelihoods(self):
@@ -416,7 +416,7 @@ class IterationState:
                                if sim_dict['__sample_index__'] == sample_index}
             if len(replicates_dict) == 0:
                 raise Exception('There should be at least one simulation associated with sample_index: %s. '
-                                'There are none.' % (sample_index, len(replicates_dict)))
+                                'There are none. %s' % (sample_index, len(replicates_dict)))
 
             # Create a distinct ParameterSet object for each replicate
             for sim_id, replicate_dict in replicates_dict.items():
