@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.stats
 from scipy.stats import binom
 
-from .c_sub_region import c_SubRegion
+from .c_sub_region import cSubRegion
 
 """
 This function uniformly sampling i_n_samp sample points with i_n_rep replication in the subregions c_subregion and generate the df that used to sent to calibtool
@@ -18,21 +18,29 @@ outout
     l_subr
     df_testing_samples
 """
+
+
 # TODO: plotter that can choose any two dimension and fix the value of other dimensions
 
 def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_stage, l_para):
     l_column = ['l_coordinate_lower', 'l_coordinate_upper'] + l_para + ['replication']
-    df_testing_samples = pd.DataFrame([], columns=l_column)  # the dataframe contains the sampling point sent to calibtool
+    df_testing_samples = pd.DataFrame([],
+                                      columns=l_column)  # the dataframe contains the sampling point sent to calibtool
     df_testing_samples['replication'].astype(int)
     l_sampling_subregions = []
     if s_stage == 'stage_1':
         l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]
     elif s_stage == 'stage_2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0)]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if (
+                    c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0)]
     elif s_stage == 'stage_4-1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True))]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if (
+                    c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                        c_subr.b_worst is True or c_subr.b_elite is True))]
     elif s_stage == 'stage_4-2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True))]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if (
+                    c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                        c_subr.b_worst is True or c_subr.b_elite is True))]
     if not l_sampling_subregions:
         return [l_subr, pd.DataFrame()]
     for c_subr in l_sampling_subregions:
@@ -42,15 +50,20 @@ def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_s
         if len(c_subr.pd_sample_record) >= i_n_sampling:  # if has enough number of sampling points
             for i in (i for i in range(0, len(c_subr.pd_sample_record)) if
                       c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not, i is index
-                #df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
+                # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
+                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
+                                                                                      for p in l_para] + [
+                             i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
                 df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
 
         else:  # if has not enough sampling points and replication
             if len(c_subr.pd_sample_record) >= 1:  # if already has sample points, first deal with them
-                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
-                    #df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
+                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[
+                                                                                   i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
+                    # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
+                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [
+                        c_subr.pd_sample_record.loc[i, p] for p in l_para] + [
+                                 i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]
                     df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
             i_ini_length = len(c_subr.pd_sample_record)  # number of sampling point so far in this subregion
             for i in range(i_ini_length, i_n_sampling):  # create new rows for new sampling points
@@ -70,23 +83,30 @@ def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_s
             c_subr.pd_sample_record.loc[index, 'var'] = 0
             c_subr.pd_sample_record.loc[index, 'SST'] = 0
             for i in range(i_ini_length, i_n_sampling):  # put the new generate sample points in df_samples
-                l_vals = [c_subr.l_coordinate_lower]+[c_subr.l_coordinate_upper]+[c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep]
+                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
+                                                                                      for p in l_para] + [i_n_rep]
                 df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
     return [l_subr, df_testing_samples]
 
 
-def fun_sample_points_generator_noise (l_subr, i_n_sampling, i_n_rep, s_stage, l_para):
+def fun_sample_points_generator_noise(l_subr, i_n_sampling, i_n_rep, s_stage, l_para):
     l_column = ['l_coordinate_lower', 'l_coordinate_upper'] + l_para
     df_testing_samples = pd.DataFrame([], columns=l_column)
 
     if s_stage == 'stage_1':
         l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]
     elif s_stage == 'stage_2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if
+                                 c_subr.s_label == 'C' and c_subr.b_activate is True and len(
+                                     c_subr.pd_sample_record) > 0]
     elif s_stage == 'stage_4-1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True)]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if
+                                 c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                                             c_subr.b_worst is True or c_subr.b_elite is True)]
     else:
-        l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True)]
+        l_sampling_subregions = [c_subr for c_subr in l_subr if
+                                 c_subr.s_label == 'C' and c_subr.b_activate is True and (
+                                             c_subr.b_worst is True or c_subr.b_elite is True)]
 
     for c_subr in l_sampling_subregions:
         c_subr.pd_sample_record = c_subr.pd_sample_record.sort_values(by="mean",
@@ -96,17 +116,20 @@ def fun_sample_points_generator_noise (l_subr, i_n_sampling, i_n_rep, s_stage, l
         if len(c_subr.pd_sample_record) >= i_n_sampling:  # if has enough number of sampling points
             for i in (i for i in range(0, len(c_subr.pd_sample_record)) if
                       c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not, i is index
-                #df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para]
+                # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
+                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
+                                                                                      for p in l_para]
                 for j in range(0, i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])):
                     df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
 
         else:  # if has not enough sampling points and replication
             if len(c_subr.pd_sample_record) >= 1:  # if already has sample points, first deal with them
-                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
-                    #df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
-                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para]
-                    for j in range(0,[i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]):
+                for i in (i for i in range(0, len(c_subr.pd_sample_record)) if c_subr.pd_sample_record.loc[
+                                                                                   i, 'rep'] < i_n_rep):  # check enough # reps or not for existing old sampling points
+                    # df_testing_samples.append(pd.DataFrame([[c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep - int(c_subr.pd_sample_record.loc[i, '# rep'])]], columns=l_column))
+                    l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [
+                        c_subr.pd_sample_record.loc[i, p] for p in l_para]
+                    for j in range(0, [i_n_rep - int(c_subr.pd_sample_record.loc[i, 'rep'])]):
                         df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
             i_ini_length = len(c_subr.pd_sample_record)  # number of sampling point so far in this subregion
             for i in range(i_ini_length, i_n_sampling):  # create new rows for new sampling points
@@ -126,13 +149,15 @@ def fun_sample_points_generator_noise (l_subr, i_n_sampling, i_n_rep, s_stage, l
             c_subr.pd_sample_record.loc[index, 'SST'] = 0
             c_subr.pd_sample_record.loc[index, 'rep'] = 0
             for i in range(i_ini_length, i_n_sampling):  # put the new generate sample points in df_samples
-                l_vals = [c_subr.l_coordinate_lower]+[c_subr.l_coordinate_upper]+[c_subr.pd_sample_record.loc[i, p] for p in l_para] + [i_n_rep]
+                l_vals = [c_subr.l_coordinate_lower] + [c_subr.l_coordinate_upper] + [c_subr.pd_sample_record.loc[i, p]
+                                                                                      for p in l_para] + [i_n_rep]
                 for j in range(0, i_n_rep):
                     df_testing_samples = df_testing_samples.append(dict(zip(l_column, l_vals)), ignore_index=True)
     return [l_subr, df_testing_samples]
 
+
 def turn_to_power(list, power):
-    return [number**power for number in list]
+    return [number ** power for number in list]
 
 
 def fun_results_organizer_deterministic(l_subr, df_testing_samples, params):
@@ -149,14 +174,18 @@ def fun_results_organizer_deterministic(l_subr, df_testing_samples, params):
         c_subr.pd_sample_record.drop(c_subr.pd_sample_record[c_subr.pd_sample_record.rep == 0].index, inplace=True)
         df_testing_samples['l_coordinate_lower'] = df_testing_samples['l_coordinate_lower'].astype(str)
         df_testing_samples['l_coordinate_upper'] = df_testing_samples['l_coordinate_upper'].astype(str)
-        df_testing_samples_s_subr[[p['Name'] for p in params]+['mean']] = df_testing_samples[(df_testing_samples['l_coordinate_lower'] == str(c_subr.l_coordinate_lower)) & (df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][[p['Name'] for p in params]+['result']]
+        df_testing_samples_s_subr[[p['Name'] for p in params] + ['mean']] = df_testing_samples[
+            (df_testing_samples['l_coordinate_lower'] == str(c_subr.l_coordinate_lower)) & (
+                        df_testing_samples['l_coordinate_upper'] == str(c_subr.l_coordinate_upper))][
+            [p['Name'] for p in params] + ['result']]
         df_testing_samples_s_subr = df_testing_samples_s_subr.reset_index(drop=True)
         if len(df_testing_samples_s_subr) > 0:
             for i in range(0, len(df_testing_samples_s_subr)):
                 df_testing_samples_s_subr.loc[i, 'mean'] = df_testing_samples_s_subr.loc[i, 'mean'][0]
             df_testing_samples_s_subr['rep'] = 1
             df_testing_samples_s_subr['var'] = 0
-            df_testing_samples_s_subr['SST'] = df_testing_samples_s_subr.apply(lambda row: (row['mean'] * row['mean']), axis=1)
+            df_testing_samples_s_subr['SST'] = df_testing_samples_s_subr.apply(lambda row: (row['mean'] * row['mean']),
+                                                                               axis=1)
             c_subr.pd_sample_record = pd.concat([c_subr.pd_sample_record, df_testing_samples_s_subr])
         # the following update i_min_sample, i_max_sample, f_min_diff_sample_mean, and f_max_var
         c_subr.pd_sample_record = c_subr.pd_sample_record.sort_values(by="mean", ascending=True)
@@ -179,10 +208,11 @@ def fun_results_organizer_noise(l_subr, df_testing_samples, i_n_k, i_n_elite_wor
     df_testing_samples = df_testing_samples.reset_index(drop=True)
 
     df_testing_samples['square_result'] = np.power(df_testing_samples['result'], 2)
-    df_testing_samples_grouped = df_testing_samples.groupby(l_params).agg({'result': [np.mean, np.var, np.sum, 'count'], 'square_result': 'sum'}).reset_index()
+    df_testing_samples_grouped = df_testing_samples.groupby(l_params).agg(
+        {'result': [np.mean, np.var, np.sum, 'count'], 'square_result': 'sum'}).reset_index()
     df_testing_samples_grouped.columns = df_testing_samples_grouped.columns.droplevel(level=0)
-    df_testing_samples_grouped.columns = l_params + ['new_data_mean', 'new_data_var', 'new_data_sum', 'new_data_rep', 'new_data_SST']
-
+    df_testing_samples_grouped.columns = l_params + ['new_data_mean', 'new_data_var', 'new_data_sum', 'new_data_rep',
+                                                     'new_data_SST']
 
     for c_subr in [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]:
         c_subr.pd_sample_record = pd.merge(c_subr.pd_sample_record, df_testing_samples_grouped, on=l_params)
@@ -192,11 +222,16 @@ def fun_results_organizer_noise(l_subr, df_testing_samples, i_n_k, i_n_elite_wor
         c_subr.pd_sample_record['new_data_rep'].astype(int)
         c_subr.pd_sample_record['new_data_SST'].astype(float)
 
-        c_subr.pd_sample_record['mean'] = copy.copy(c_subr.pd_sample_record.apply(lambda row: float(row['rep']* row['mean'] + row['new_data_rep'] * row['new_data_mean']) / i_n, axis=1))
-        c_subr.pd_sample_record['SST'] = copy.copy(c_subr.pd_sample_record.apply(lambda row: row['SST']+row['new_data_SST'], axis=1))
-        c_subr.pd_sample_record['var'] = copy.copy(c_subr.pd_sample_record.apply(lambda row: float(row['SST'] - i_n * pow(row['mean'], 2)) / (i_n - 1), axis=1))
+        c_subr.pd_sample_record['mean'] = copy.copy(c_subr.pd_sample_record.apply(
+            lambda row: float(row['rep'] * row['mean'] + row['new_data_rep'] * row['new_data_mean']) / i_n, axis=1))
+        c_subr.pd_sample_record['SST'] = copy.copy(
+            c_subr.pd_sample_record.apply(lambda row: row['SST'] + row['new_data_SST'], axis=1))
+        c_subr.pd_sample_record['var'] = copy.copy(
+            c_subr.pd_sample_record.apply(lambda row: float(row['SST'] - i_n * pow(row['mean'], 2)) / (i_n - 1),
+                                          axis=1))
         c_subr.pd_sample_record['rep'] = copy.copy(i_n)
-        c_subr.pd_sample_record.drop(['new_data_mean', 'new_data_var', 'new_data_sum', 'new_data_rep', 'new_data_SST'], inplace=True, axis=1)
+        c_subr.pd_sample_record.drop(['new_data_mean', 'new_data_var', 'new_data_sum', 'new_data_rep', 'new_data_SST'],
+                                     inplace=True, axis=1)
         '''
         for c_subr_data_index in range(0, len(c_subr.pd_sample_record)):
             if c_subr.pd_sample_record.loc[c_subr_data_index, 'rep'] == 0:
@@ -215,6 +250,7 @@ def fun_results_organizer_noise(l_subr, df_testing_samples, i_n_k, i_n_elite_wor
          '''
     return l_subr
 
+
 """
 This function orders all the sampling points in all the undetermined regions
 input:
@@ -229,10 +265,11 @@ def fun_order_subregion(c_subr):
     c_subr.pd_sample_record = c_subr.pd_sample_record.reset_index(drop=True)  # reindex the sorted df
     if len(c_subr.pd_sample_record) > 0:
         c_subr.i_min_sample = c_subr.pd_sample_record.loc[0, 'mean']
-        c_subr.i_max_sample = c_subr.pd_sample_record.loc[len(c_subr.pd_sample_record)-1, 'mean']
+        c_subr.i_max_sample = c_subr.pd_sample_record.loc[len(c_subr.pd_sample_record) - 1, 'mean']
     c_subr.f_min_diff_sample_mean = min(c_subr.pd_sample_record['mean'].shift(-1) - c_subr.pd_sample_record['mean'])
     c_subr.f_max_var = max(c_subr.pd_sample_record.loc[:, 'var'])
     return c_subr
+
 
 """
 f_update_replication function is aim to calculate the updated replication number
@@ -246,7 +283,8 @@ outout
 
 
 def fun_replication_update(l_subr, i_n_rep, f_alpha):
-    if list(i.f_min_diff_sample_mean for i in l_subr if i.s_label == 'C' and i.b_activate is True) + [] == []: # to prevent empty sequence
+    if list(i.f_min_diff_sample_mean for i in l_subr if
+            i.s_label == 'C' and i.b_activate is True) + [] == []:  # to prevent empty sequence
         f_d_star = 0.005
     elif min(i.f_min_diff_sample_mean for i in l_subr if i.s_label == 'C' and i.b_activate is True) < 0.005:
         f_d_star = 0.005
@@ -260,6 +298,7 @@ def fun_replication_update(l_subr, i_n_rep, f_alpha):
     else:
         i_n_rep = max(i_n_rep, 4 * int(math.ceil(pow(z, 2) * f_var_star / pow(f_d_star, 2))))
     return i_n_rep
+
 
 """
 This function orders all the sampling points in all the undetermined regions
@@ -279,6 +318,7 @@ def fun_order_region(l_subr):
     pd_order_z = pd_order_z.reset_index(drop=True)  # reindex the sorted df
     return pd_order_z
 
+
 """
 input: 
     f_CI_u:upper bound confidence interval
@@ -289,11 +329,13 @@ output:
 
 
 def fun_pruning_indicator(l_subr, f_CI_u):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.b_worst is True):
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.b_worst is True):
         if c_subr.i_min_sample > f_CI_u:
             c_subr.b_maintaining_indicator = False
             c_subr.b_pruning_indicator = True
     return l_subr
+
 
 """
 This function create the list of subregions prepared to maintain from the list of elite subregions 
@@ -306,11 +348,13 @@ output:
 
 
 def fun_maintaining_indicator(l_subr, f_CI_l):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.b_elite is True):
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.b_elite is True):
         if c_subr.i_max_sample < f_CI_l:
             c_subr.b_maintaining_indicator = True
             c_subr.b_pruning_indicator = False
     return l_subr
+
 
 """
 This function create the list of worst function used in the step 4
@@ -323,10 +367,12 @@ output:
 
 
 def fun_elite_indicator(l_subr, f_CI_l):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.i_max_sample < f_CI_l):
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.i_max_sample < f_CI_l):
         c_subr.b_elite = True
         c_subr.b_worst = False
     return l_subr
+
 
 """
 This function create the list of worst function used in the step 4
@@ -339,10 +385,12 @@ output:
 
 
 def fun_worst_indicator(l_subr, f_CI_u):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.i_min_sample > f_CI_u):
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.s_label == 'C' and c_subr.b_activate is True and c_subr.i_min_sample > f_CI_u):
         c_subr.b_elite = False
         c_subr.b_worst = True
     return l_subr
+
 
 """
 This function update the quantile
@@ -358,7 +406,7 @@ def fun_quantile_update(l_subr, f_delta):
     f_vol_C = sum(c.f_volume for c in l_subr if c.s_label == 'C' and c.b_activate is True)
     f_vol_pruning = sum(c.f_volume for c in l_subr if c.b_pruning_indicator is True and c.b_activate is True)
     f_vol_maintaining = sum(c.f_volume for c in l_subr if c.b_maintaining_indicator is True and c.b_activate is True)
-    f_delta = float(f_delta*f_vol_C-f_vol_maintaining)/(f_vol_C-f_vol_pruning-f_vol_maintaining)
+    f_delta = float(f_delta * f_vol_C - f_vol_maintaining) / (f_vol_C - f_vol_pruning - f_vol_maintaining)
     return f_delta
 
 
@@ -394,17 +442,19 @@ def fun_CI_builder(l_subr, pd_order_z, f_delta_k, f_alpha_k, f_epsilon):
     return [CI_u, CI_l]
 
 
-
 def fun_pruning_labeler(l_subr):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.b_pruning_indicator is True and c_subr.b_activate is True):  # <-- whose  worst == 1
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.b_pruning_indicator is True and c_subr.b_activate is True):  # <-- whose  worst == 1
         c_subr.s_label = 'P'
     return l_subr
 
 
 def fun_maintaining_labeler(l_subr):
-    for c_subr in (c_subr for c_subr in l_subr if c_subr.b_maintaining_indicator is True and c_subr.b_activate is True):  # <-- whose elite == 1
+    for c_subr in (c_subr for c_subr in l_subr if
+                   c_subr.b_maintaining_indicator is True and c_subr.b_activate is True):  # <-- whose elite == 1
         c_subr.s_label = 'M'
     return l_subr
+
 
 """
 input:
@@ -422,13 +472,19 @@ def fun_reg_branching(c_subr, i_n_branching, params, s_branching_dim):
     for i in range(0, i_n_branching):
         l_coordinate_lower = copy.deepcopy(c_subr.l_coordinate_lower)
         l_coordinate_upper = copy.deepcopy(c_subr.l_coordinate_upper)
-        l_coordinate_lower[i_max_index] = float((c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index])*i)/i_n_branching+c_subr.l_coordinate_lower[i_max_index]
-        l_coordinate_upper[i_max_index] = float((c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index])*(i+1))/i_n_branching+c_subr.l_coordinate_lower[i_max_index]
-        l_new_branching_subr = c_SubRegion(l_coordinate_lower, l_coordinate_upper, params)
+        l_coordinate_lower[i_max_index] = float(
+            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * i) / i_n_branching + \
+                                          c_subr.l_coordinate_lower[i_max_index]
+        l_coordinate_upper[i_max_index] = float(
+            (c_subr.l_coordinate_upper[i_max_index] - c_subr.l_coordinate_lower[i_max_index]) * (
+                        i + 1)) / i_n_branching + c_subr.l_coordinate_lower[i_max_index]
+        l_new_branching_subr = cSubRegion(l_coordinate_lower, l_coordinate_upper, params)
         l_subr_new.append(l_new_branching_subr)
     # the following reallocate the sampling points
     for i in l_subr_new:
-        i.pd_sample_record = c_subr.pd_sample_record[(c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & (c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
+        i.pd_sample_record = c_subr.pd_sample_record[
+            (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & (
+                        c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
     for i in l_subr_new:  # reindex the sampling points into 0 1 2...
         i.pd_sample_record = i.pd_sample_record.reset_index(drop=True)
         # update attributed based on data
@@ -441,7 +497,8 @@ def fun_reg_branching(c_subr, i_n_branching, params, s_branching_dim):
     return l_subr_new
 
 
-def fun_plot2D(l_subr, l_initial_coordinate_lower, l_initial_coordinate_upper, params, str_k, s_running_file_name, i_iteration):
+def fun_plot2D(l_subr, l_initial_coordinate_lower, l_initial_coordinate_upper, params, str_k, s_running_file_name,
+               i_iteration):
     import matplotlib.patches as patches
     import matplotlib.pyplot as plt
     fig = plt.figure()
@@ -494,12 +551,12 @@ def fun_plot2D(l_subr, l_initial_coordinate_lower, l_initial_coordinate_upper, p
     ax.set_ylabel([p['Name'] for p in params][1])
 
     # make sure file directory exists
-    fig_file = s_running_file_name+'/iter'+str(i_iteration)+'/Region_Status ' + str(str_k) + '.pdf'
+    fig_file = s_running_file_name + '/iter' + str(i_iteration) + '/Region_Status ' + str(str_k) + '.pdf'
     d_file = os.path.dirname(fig_file)
     if not os.path.exists(d_file):
         os.makedirs(d_file)
 
     fig.savefig(fig_file)
-    #with open('l_subr_all_simulations_iteration' + str(str_k) + '.dat', "wb") as f:
+    # with open('l_subr_all_simulations_iteration' + str(str_k) + '.dat', "wb") as f:
     #    pickle.dump(l_subr, f)
     plt.close(fig)

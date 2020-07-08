@@ -1,11 +1,9 @@
 import logging
 import math
-
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from scipy.stats import norm
-
 from scipy.special import gammaln  # for calculation of mu_r
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
@@ -280,7 +278,7 @@ class OptimTool(NextPointAlgorithm):
         else:
             # print('Bad R^2 (%f)'%mod_fit.rsquared)
             max_idx = np.argmax(latest_results)
-            'Stepping to argmax of %f at:' % latest_results[max_idx], latest_dynamic_samples[max_idx]
+            logger.info('Stepping to argmax of %f at:' % latest_results[max_idx], latest_dynamic_samples[max_idx])
             new_dynamic_center = latest_dynamic_samples[max_idx].tolist()
 
         new_center_dict = old_center.to_dict()  # {k:v for k,v in zip(self.get_param_names(), old_center)}
@@ -319,10 +317,10 @@ class OptimTool(NextPointAlgorithm):
         return samples
 
     def choose_and_clamp_hypersphere_samples_for_iteration(self, iteration):
-        N = self.samples_per_iteration
+        n = self.samples_per_iteration
         state_by_iter = self.state.set_index('Iteration')
         # Will vary parameters that are 'Dyanmic' on this iteration
-        samples = self.sample_hypersphere(N, state_by_iter.loc[[iteration]])
+        samples = self.sample_hypersphere(n, state_by_iter.loc[[iteration]])
 
         # Clamp and constrain
         samples = self.clamp(samples)
@@ -345,8 +343,8 @@ class OptimTool(NextPointAlgorithm):
             radius = radius_normal.rvs()
             deviations.append([radius / sn_nrm * sn for sn in sn_rvs])
 
-        X_center = state.reset_index(drop=True).set_index(['Parameter'])[['Center']]
-        xc = X_center.transpose().reset_index(drop=True)
+        x_center = state.reset_index(drop=True).set_index(['Parameter'])[['Center']]
+        xc = x_center.transpose().reset_index(drop=True)
         xc.columns.name = ""
 
         samples = pd.concat([xc] * N).reset_index(drop=True)
@@ -355,9 +353,9 @@ class OptimTool(NextPointAlgorithm):
 
         dynamic_state_by_param = dynamic_state.set_index('Parameter')
         for i, pname in enumerate(dynamic_state['Parameter']):
-            Xcen = dynamic_state_by_param.loc[pname, 'Center']
-            Xrange = dynamic_state_by_param.loc[pname, 'Max'] - dynamic_state_by_param.loc[pname, 'Min']
-            samples.loc[self.center_repeats:N, pname] = Xcen + dt[i] * Xrange
+            x_cen = dynamic_state_by_param.loc[pname, 'Center']
+            x_range = dynamic_state_by_param.loc[pname, 'Max'] - dynamic_state_by_param.loc[pname, 'Min']
+            samples.loc[self.center_repeats:N, pname] = x_cen + dt[i] * x_range
 
         return samples
 
@@ -375,8 +373,8 @@ class OptimTool(NextPointAlgorithm):
         state_by_iteration = self.state.set_index('Iteration')
         last_iter = sorted(state_by_iteration.index.unique())[-1]
 
-        X_Center = self._get_X_center(last_iter)
-        xc = X_Center.to_frame().transpose().reset_index(drop=True)
+        x_center = self._get_X_center(last_iter)
+        xc = x_center.to_frame().transpose().reset_index(drop=True)
         xc.columns.name = ""
 
         dtypes = {name: str(data.dtype) for name, data in xc.iteritems()}

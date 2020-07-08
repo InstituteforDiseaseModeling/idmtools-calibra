@@ -33,8 +33,8 @@ class OptimToolSPSA(NextPointAlgorithm):
         self.params = params  # TODO: Check min <= center <= max
         self.comps_per_iteration = int(comps_per_iteration)
 
-        self.Xmin = {p['Name']: p['Min'] for p in self.params}
-        self.Xmax = {p['Name']: p['Max'] for p in self.params}
+        self.x_min = {p['Name']: p['Min'] for p in self.params}
+        self.x_max = {p['Name']: p['Max'] for p in self.params}
         self.Dynamic = {p['Name']: p['Dynamic'] for p in self.params}
         self.n_dimensions = None
         self.data = pd.DataFrame()
@@ -52,8 +52,8 @@ class OptimToolSPSA(NextPointAlgorithm):
             'comps_per_iteration'] if 'comps_per_iteration' in self.args else self.comps_per_iteration
 
         self.n_dimensions = len(self.params)
-        self.Xmin = {p['Name']: p['Min'] for p in self.params}
-        self.Xmax = {p['Name']: p['Max'] for p in self.params}
+        self.x_min = {p['Name']: p['Min'] for p in self.params}
+        self.x_max = {p['Name']: p['Max'] for p in self.params}
         self.Dynamic = {p['Name']: p['Dynamic'] for p in self.params}
 
         self.need_resolve = False
@@ -111,7 +111,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         else:
             # Regress inputs and results from previous iteration
             # Move X_center, choose samples, save in dataframe
-            samples = self.StochasticNewtonRaphson(iteration)
+            samples = self.stochastic_newton_raphson(iteration)
 
         samples.reset_index(drop=True, inplace=True)
         return self.generate_samples_from_df(samples)
@@ -122,7 +122,7 @@ class OptimToolSPSA(NextPointAlgorithm):
 
         # X should be a data frame
         for pname in X.columns:
-            X[pname] = np.minimum(self.Xmax[pname], np.maximum(self.Xmin[pname], X[pname]))
+            X[pname] = np.minimum(self.x_max[pname], np.maximum(self.x_min[pname], X[pname]))
 
         return X
 
@@ -158,11 +158,11 @@ class OptimToolSPSA(NextPointAlgorithm):
 
         # dummy_counter = -1
         for param in self.params:
-            Hessian_dict = {p['Name']: p['aprioriHessian'] for p in self.params}
+            hessian_dict = {p['Name']: p['aprioriHessian'] for p in self.params}
             # if (param['Dynamic'] is True):
             #     dummy_counter += 1
             print(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
-            self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], Hessian_dict,
+            self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], hessian_dict,
                                                param['Min'], param['Max'], param['Dynamic']]
             # self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], param['aprioriHessian']*np.eye(1,size_of_dynamic_params,dummy_counter),
             #                                    param['Min'], param['Max'], param['Dynamic']]
@@ -174,21 +174,21 @@ class OptimToolSPSA(NextPointAlgorithm):
 
         return initial_samples
 
-    def StochasticNewtonRaphson(self, iteration):
+    def stochastic_newton_raphson(self, iteration):
 
         assert (iteration >= 1)
 
         def proj_spd(A):
             # NOTE: the input matrix is assumed to be symmetric
             d, v = np.linalg.eigh(A)
-            A = v*np.diag(np.maximum(abs(d), 1e-5))*(v.T) #(v * np.maximum(abs(d), 1e-5)).dot(v.T)
+            A = v * np.diag(np.maximum(abs(d), 1e-5)) * (v.T)  # (v * np.maximum(abs(d), 1e-5)).dot(v.T)
             A = (A + A.T) / 2
             return (A)
 
         def proj_nd(A):
             # NOTE: the input matrix is assumed to be symmetric
             d, v = np.linalg.eigh(A)
-            A = v*np.diag(np.minimum(-abs(d), -1e-5))*(v.T) #(v * np.maximum(abs(d), 1e-5)).dot(v.T)
+            A = v * np.diag(np.minimum(-abs(d), -1e-5)) * (v.T)  # (v * np.maximum(abs(d), 1e-5)).dot(v.T)
             A = (A + A.T) / 2
             return (A)
 
@@ -200,115 +200,113 @@ class OptimToolSPSA(NextPointAlgorithm):
         latest_dynamic_samples = self.data.loc[iteration - 1, dynamic_params].values
         latest_results = self.data.loc[iteration - 1, 'Results'].values
 
-        X_min = np.asarray([self.Xmin[pname] for pname in dynamic_params])
-        X_max = np.asarray([self.Xmax[pname] for pname in dynamic_params])
+        x_min = np.asarray([self.x_min[pname] for pname in dynamic_params])
+        x_max = np.asarray([self.x_max[pname] for pname in dynamic_params])
 
-        X_current = latest_dynamic_samples[0]
-        X_current_scaled = (X_current - X_min) / (X_max - X_min)
+        x_current = latest_dynamic_samples[0]
+        x_current_scaled = (x_current - x_min) / (x_max - x_min)
 
         # H_sign = -1 # Hessian should be neg. semi definite (maximization)
-        p = X_current.size
+        p = x_current.size
         M = self.comps_per_iteration
-        Hessian_dynamic = [r['Hessian'] for idx, r in state_prev_iter.iterrows() if r['Dynamic']]
-        H_current_list = [] #np.asmatrix(np.concatenate(Hessian_elements))
+        hessian_dynamic = [r['Hessian'] for idx, r in state_prev_iter.iterrows() if r['Dynamic']]
+        h_current_list = []  # np.asmatrix(np.concatenate(Hessian_elements))
         for i in range(len(dynamic_params)):
-            H_current_list.append([p for idx, p in Hessian_dynamic[i].items() if idx in dynamic_params])
-        H_current_est = np.asmatrix(np.array(H_current_list))
-
+            h_current_list.append([p for idx, p in hessian_dynamic[i].items() if idx in dynamic_params])
+        h_current_est = np.asmatrix(np.array(h_current_list))
 
         largest_step_size = np.abs(np.array([1] * p) - np.array([0] * p)) / 5
 
         # optimization parameters
-        A0, step = 2, .85
-        a0 = step * (1 + A0) ** (0.602)
-        a = a0 * (iteration + 1 + A0) ** (-0.602)
+        a0, step = 2, .85
+        a0 = step * (1 + a0) ** (0.602)
+        a = a0 * (iteration + 1 + a0) ** (-0.602)
         # TODO: assumed here that there is no prior Hessian information 
         w = .8 * (iteration + 1) ** (-.501) if iteration > 1 else 1
 
-        G_avg = np.zeros(shape=(p, M))
-        S_avg = np.zeros(shape=(p, p, M))
+        g_avg = np.zeros(shape=(p, M))
+        s_avg = np.zeros(shape=(p, p, M))
 
         for k in range(M):
             np.random.seed()
 
-            thetaPlus = (np.array(latest_dynamic_samples[4 * k + 1]) - X_min) / (X_max - X_min)
-            thetaMinus = (np.array(latest_dynamic_samples[4 * k + 2]) - X_min) / (X_max - X_min)
+            theta_plus = (np.array(latest_dynamic_samples[4 * k + 1]) - x_min) / (x_max - x_min)
+            theta_minus = (np.array(latest_dynamic_samples[4 * k + 2]) - x_min) / (x_max - x_min)
             f_plus = latest_results[4 * k + 1]
             f_minus = latest_results[4 * k + 2]
 
-            Gk = (f_plus - f_minus) / (thetaPlus - thetaMinus)
-            G_avg[:, k] = k / (k + 1) * G_avg[:, k - 1] + 1 / (k + 1) * Gk.T
+            gk = (f_plus - f_minus) / (theta_plus - theta_minus)
+            g_avg[:, k] = k / (k + 1) * g_avg[:, k - 1] + 1 / (k + 1) * gk.T
 
-            thetaPlusPlus = (np.array(latest_dynamic_samples[4 * k + 3]) - X_min) / (X_max - X_min)
-            thetaMinusPlus = (np.array(latest_dynamic_samples[4 * k + 4]) - X_min) / (X_max - X_min)
-            f_PlusPlus = latest_results[4 * k + 3]
-            f_MinusPlus = latest_results[4 * k + 4]
+            theta_plus_plus = (np.array(latest_dynamic_samples[4 * k + 3]) - x_min) / (x_max - x_min)
+            theta_minus_plus = (np.array(latest_dynamic_samples[4 * k + 4]) - x_min) / (x_max - x_min)
+            f_plus_plus = latest_results[4 * k + 3]
+            f_minus_plus = latest_results[4 * k + 4]
 
-            G_p = (f_PlusPlus - f_plus) / (thetaPlusPlus - thetaPlus)
-            G_m = (f_MinusPlus - f_minus) / (thetaPlusPlus - thetaPlus)
+            g_p = (f_plus_plus - f_plus) / (theta_plus_plus - theta_plus)
+            g_m = (f_minus_plus - f_minus) / (theta_plus_plus - theta_plus)
 
-            Sk = np.dot((1 / (thetaPlus - thetaMinus))[:, None], (G_p - G_m)[None, :])
-            S_avg[:, :, k] = k / (k + 1) * S_avg[:, :, k - 1] + 1 / (k + 1) * Sk
+            sk = np.dot((1 / (theta_plus - theta_minus))[:, None], (g_p - g_m)[None, :])
+            s_avg[:, :, k] = k / (k + 1) * s_avg[:, :, k - 1] + 1 / (k + 1) * sk
 
-        G = G_avg[:, M - 1]
-        H_hat = .5 * (S_avg[:, :, M - 1] + S_avg[:, :, M - 1].T)
-        H_bar = (1 - w) * H_current_est + w * H_hat
-        H_2bar = proj_nd(H_bar)  # H_bar#.5*(H_bar - sqrtm(np.linalg.matrix_power(H_bar,2)+1e-6*np.eye(p)))
-        H_2bar_INV = np.linalg.inv(H_2bar)
+        g = g_avg[:, M - 1]
+        h_hat = .5 * (s_avg[:, :, M - 1] + s_avg[:, :, M - 1].T)
+        h_bar = (1 - w) * h_current_est + w * h_hat
+        h_2bar = proj_nd(h_bar)  # H_bar#.5*(H_bar - sqrtm(np.linalg.matrix_power(H_bar,2)+1e-6*np.eye(p)))
+        h_2bar_inv = np.linalg.inv(h_2bar)
 
         # update x
-        update = np.array(H_2bar_INV.dot(G)).flatten()
+        update = np.array(h_2bar_inv.dot(g)).flatten()
 
         if (np.abs(update) > largest_step_size).any():
             update = np.linalg.norm(largest_step_size) * update / np.linalg.norm(update)
 
-        X_next_scaled = X_current_scaled - a * update  # x_{n+1} = x_n - a_n H_n^{-1} G_n
-        X_next = X_next_scaled * (X_max - X_min) + X_min
-        Hessian_next = H_bar
+        x_next_scaled = x_current_scaled - a * update  # x_{n+1} = x_n - a_n H_n^{-1} G_n
+        x_next = x_next_scaled * (x_max - x_min) + x_min
+        hessian_next = h_bar
 
         self.data.reset_index(inplace=True)
 
         old_center = self._get_X_center(iteration - 1)
         old_center_of_dynamic_params = old_center[dynamic_params].values
-        new_dynamic_center = X_next.tolist()
+        new_dynamic_center = x_next.tolist()
 
         # max_idx = np.argmax(latest_results)
         # if np.max(latest_results) >
         # 'Stepping to argmax of %f at:' % latest_results[max_idx], latest_dynamic_samples[max_idx]
         # new_dynamic_center = latest_dynamic_samples[max_idx].tolist()
 
-
         new_center_dict = old_center.to_dict()  # {k:v for k,v in zip(self.get_param_names(), old_center)}
         new_center_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_center)})
 
-        old_Hessian = self._get_Hessian(iteration - 1)
-        old_dynamic_Hessian = [old_Hessian[p] for p in dynamic_params]
+        old_hessian = self._get_Hessian(iteration - 1)
+        old_dynamic_hessian = [old_hessian[p] for p in dynamic_params]
 
-        old_Hessian_of_dynamic_params = old_Hessian[dynamic_params].values
-        new_list_dynamic_Hessian = Hessian_next.tolist()
-        new_list_dynamic_Hessian.append(dynamic_params)
-        keys = new_list_dynamic_Hessian[-1]
+        old_hessian_of_dynamic_params = old_hessian[dynamic_params].values
+        new_list_dynamic_hessian = hessian_next.tolist()
+        new_list_dynamic_hessian.append(dynamic_params)
+        keys = new_list_dynamic_hessian[-1]
 
-        new_dynamic_Hessian = old_dynamic_Hessian
+        new_dynamic_hessian = old_dynamic_hessian
         for i in range(len(dynamic_params)):
-            new_dynamic_Hessian[i].update({k: v for k, v in zip(dynamic_params, new_list_dynamic_Hessian[i])})
+            new_dynamic_hessian[i].update({k: v for k, v in zip(dynamic_params, new_list_dynamic_hessian[i])})
 
-        new_Hessian_dict = old_Hessian.to_dict()
-        new_Hessian_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_Hessian)})
+        new_hessian_dict = old_hessian.to_dict()
+        new_hessian_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_hessian)})
 
         # User may have added or removed params
         param_names = [p['Name'] for p in self.params]
         # Remove -
         new_center_df = {k: v for k, v in new_center_dict.items() if k in param_names}
-        new_Hessian_df = {k: v for k, v in new_Hessian_dict.items() if k in param_names}
+        new_hessian_df = {k: v for k, v in new_hessian_dict.items() if k in param_names}
         # Add -
         new_params = {p['Name']: p['Guess'] for p in self.params if p['Name'] not in new_center_dict}
         new_center_dict.update(new_params)
-        new_Hessian_dict.update(new_params)
+        new_hessian_dict.update(new_params)
 
         # CLAMP
         new_center_df = pd.Series(new_center_dict, name=0).to_frame().transpose()
-        new_Hessian_df = pd.Series(new_Hessian_dict, name=0).to_frame().transpose()
+        new_hessian_df = pd.Series(new_hessian_dict, name=0).to_frame().transpose()
         new_center_df = self.clamp(new_center_df)
 
         # USER CONSTRAINT FN
@@ -318,9 +316,9 @@ class OptimToolSPSA(NextPointAlgorithm):
             'Iteration': [iteration] * self.n_dimensions,
             'Parameter': new_center_df.columns.values,
             'Center': new_center_df.as_matrix()[0],
-            'Hessian': new_Hessian_df.as_matrix()[0],
-            'Min': [self.Xmin[pname] for pname in new_center_df.columns.values],
-            'Max': [self.Xmax[pname] for pname in new_center_df.columns.values],
+            'Hessian': new_hessian_df.as_matrix()[0],
+            'Min': [self.x_min[pname] for pname in new_center_df.columns.values],
+            'Max': [self.x_max[pname] for pname in new_center_df.columns.values],
             'Dynamic': [self.Dynamic[pname] for pname in new_center_df.columns.values]
         })
 
@@ -333,10 +331,10 @@ class OptimToolSPSA(NextPointAlgorithm):
         return samples
 
     def choose_and_clamp_samples_for_iteration(self, iteration):
-        M = self.comps_per_iteration
+        m = self.comps_per_iteration
         state_by_iter = self.state.set_index('Iteration')
         # Will vary parameters that are 'Dyanmic' on this iteration
-        samples = self.sample_simultaneous_perturbation(M, iteration, state_by_iter.loc[iteration])
+        samples = self.sample_simultaneous_perturbation(m, iteration, state_by_iter.loc[iteration])
 
         # Clamp and constrain
         samples = self.clamp(samples)
@@ -352,54 +350,54 @@ class OptimToolSPSA(NextPointAlgorithm):
         dynamic_state = state.query('Dynamic == True')
         dynamic_state_by_param = dynamic_state.set_index('Parameter')
 
-        X_min = np.array([dynamic_state_by_param.loc[pname, 'Min'] for pname in dynamic_state['Parameter']])
-        X_max = np.array([dynamic_state_by_param.loc[pname, 'Max'] for pname in dynamic_state['Parameter']])
-        X_current = np.array([dynamic_state_by_param.loc[pname, 'Center'] for pname in dynamic_state['Parameter']])
+        x_min = np.array([dynamic_state_by_param.loc[pname, 'Min'] for pname in dynamic_state['Parameter']])
+        x_max = np.array([dynamic_state_by_param.loc[pname, 'Max'] for pname in dynamic_state['Parameter']])
+        x_current = np.array([dynamic_state_by_param.loc[pname, 'Center'] for pname in dynamic_state['Parameter']])
 
-        c0 = .02 * (X_max - X_min) / M ** 0.5
+        c0 = .02 * (x_max - x_min) / M ** 0.5
         c = c0 * (iteration + 1) ** (-0.101)
 
         if resolution is None:
             resolution = 0.5 * c0
 
         # making sure all plus/minus points in range
-        too_big = (X_current + c) > X_max
-        too_small = (X_current - c) < X_min
-        c[too_big] = np.maximum(X_max[too_big] - X_current[too_big], resolution[too_big])
-        c[too_small] = np.maximum(X_current[too_small] - X_min[too_small], resolution[too_small])
+        too_big = (x_current + c) > x_max
+        too_small = (x_current - c) < x_min
+        c[too_big] = np.maximum(x_max[too_big] - x_current[too_big], resolution[too_big])
+        c[too_small] = np.maximum(x_current[too_small] - x_min[too_small], resolution[too_small])
 
         deviations = []
 
         for k in range(M):
             np.random.seed()
 
-            Delta = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
-            thetaPlus = X_current + (c * Delta)
-            thetaMinus = X_current - (c * Delta)
+            delta = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
+            theta_plus = x_current + (c * delta)
+            theta_minus = x_current - (c * delta)
 
-            if (X_min > thetaPlus).any() or (thetaPlus > X_max).any():
-                thetaPlus = X_current
+            if (x_min > theta_plus).any() or (theta_plus > x_max).any():
+                theta_plus = x_current
 
-            if (thetaMinus < X_min).any() or (thetaMinus > X_max).any():
-                thetaMinus = X_current
+            if (theta_minus < x_min).any() or (theta_minus > x_max).any():
+                theta_minus = x_current
 
-            deviations.append((c * Delta).tolist())
-            deviations.append((-c * Delta).tolist())
+            deviations.append((c * delta).tolist())
+            deviations.append((-c * delta).tolist())
 
-            Delta_tilde = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
+            delta_tilde = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
             c_tilde = np.random.uniform(low=1, high=2) * c
-            thetaPlusPlus = thetaPlus + c_tilde * Delta_tilde
-            thetaMinusPlus = thetaMinus + c_tilde * Delta_tilde
+            theta_plus_plus = theta_plus + c_tilde * delta_tilde
+            theta_minus_plus = theta_minus + c_tilde * delta_tilde
 
-            while (thetaPlusPlus < X_min).any() or (thetaPlusPlus > X_max).any() or (thetaMinusPlus < X_min).any() or (
-                thetaMinusPlus > X_max).any():
-                Delta_tilde = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
+            while (theta_plus_plus < x_min).any() or (theta_plus_plus > x_max).any() or (theta_minus_plus < x_min).any() or (
+                    theta_minus_plus > x_max).any():
+                delta_tilde = np.round(np.random.uniform(0, 1, len(c0))) * 2 - 1
                 c_tilde = np.random.uniform(low=1, high=2) * c
-                thetaPlusPlus = thetaPlus + c_tilde * Delta_tilde
-                thetaMinusPlus = thetaMinus + c_tilde * Delta_tilde
+                theta_plus_plus = theta_plus + c_tilde * delta_tilde
+                theta_minus_plus = theta_minus + c_tilde * delta_tilde
 
-            deviations.append((c * Delta + c_tilde * Delta_tilde).tolist())
-            deviations.append((-c * Delta + c_tilde * Delta_tilde).tolist())
+            deviations.append((c * delta + c_tilde * delta_tilde).tolist())
+            deviations.append((-c * delta + c_tilde * delta_tilde).tolist())
 
         X_center = state.reset_index(drop=True).set_index(['Parameter'])[['Center']]
         xc = X_center.transpose().reset_index(drop=True)

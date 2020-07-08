@@ -38,6 +38,9 @@ class IMIS(NextPointAlgorithm):
         self.prior_fn = prior_fn
         self.samples_per_iteration = int(samples_per_iteration)
         self.initial_samples = initial_samples
+        # we set this later in set_initial_samples
+        self.n_initial_samples = 0.0
+        self.prior_covariance: np.ndarray = None
 
         self.priors = []
         self.results = []

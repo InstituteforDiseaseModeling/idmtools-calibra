@@ -5,7 +5,8 @@ Created on Fri Jun 23 14:21:27 2017
 @author: TingYu Ho
 """
 
-class c_SubRegion(object): 
+
+class cSubRegion(object):
     def __init__(self, coordinate_lower, coordinate_upper, params):
         import pandas as pd  # this is how I usually import pandas
         import numpy as np
@@ -20,13 +21,14 @@ class c_SubRegion(object):
         self.l_sample = []  # list of sampling points in this subregion
         self.l_coordinate_lower = coordinate_lower  # lower bound of this region
         self.l_coordinate_upper = coordinate_upper  # upper bound of this region
-        self.array_distance = np.array(self.l_coordinate_upper)-np.array(self.l_coordinate_lower)
+        self.array_distance = np.array(self.l_coordinate_upper) - np.array(self.l_coordinate_lower)
         self.f_volume = np.prod(self.array_distance[self.array_distance != 0])  # volume of the subregion
         self.i_min_sample = 0  # minimum value of sampling points in this subregions
         self.i_max_sample = 0  # maximum value of sampling points in this subregions
         self.f_min_diff_sample_mean = 0.  # minimum value of difference of sorted sampling points in this subregions
-        self.f_max_var = 0.   # maximum value of variance of sampling points in this subregions
-        self.pd_sample_record = pd.DataFrame([], columns=[p['Name'] for p in params]+['rep']+['mean']+['var']+['SST'])
+        self.f_max_var = 0.  # maximum value of variance of sampling points in this subregions
+        self.pd_sample_record = pd.DataFrame([], columns=[p['Name'] for p in params] + ['rep'] + ['mean'] + ['var'] + [
+            'SST'])
         self.pd_sample_record['rep'].astype(int)
         self.pd_sample_record['mean'].astype(float)
         self.pd_sample_record['var'].astype(float)
