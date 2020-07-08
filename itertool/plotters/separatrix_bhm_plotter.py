@@ -1,6 +1,7 @@
 import logging
 import os
 import matplotlib
+
 matplotlib.use('Agg', warn=False, force=True)
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
@@ -206,17 +207,17 @@ class SeparatrixBHMPlotter(BasePlotter):
 
         # ax1.scatter(self.prediction_grid[self.x_var], self.prediction_grid[self.y_var], prediction['Mean'], c='b', marker='o')
         # cntr = ax1.tricontourf(self.prediction_grid[self.x_var], self.prediction_grid[self.y_var], prediction['Mean'], cmap="Blues", alpha=0.5)
-        X = self.prediction_grid[self.x_var].values.reshape(self.prediction_resolution, self.prediction_resolution)
-        Y = self.prediction_grid[self.y_var].values.reshape(self.prediction_resolution, self.prediction_resolution)
-        Z = prediction['Mean'].values.reshape(self.prediction_resolution, self.prediction_resolution)
+        x = self.prediction_grid[self.x_var].values.reshape(self.prediction_resolution, self.prediction_resolution)
+        y = self.prediction_grid[self.y_var].values.reshape(self.prediction_resolution, self.prediction_resolution)
+        z = prediction['Mean'].values.reshape(self.prediction_resolution, self.prediction_resolution)
         s = np.sqrt(prediction['Var'])
-        S = s.values.reshape(self.prediction_resolution, self.prediction_resolution)
-        ax1.plot_surface(X, Y, Z, cmap="Blues", alpha=0.5, edgecolors='none', linewidth=0, antialiased=True)
+        s = s.values.reshape(self.prediction_resolution, self.prediction_resolution)
+        ax1.plot_surface(x, y, z, cmap="Blues", alpha=0.5, edgecolors='none', linewidth=0, antialiased=True)
 
         # ax1.scatter(self.prediction_grid[self.x_var], self.prediction_grid[self.y_var], prediction['Mean'] + 2*np.sqrt(prediction['Var']), c = 'm', marker='o')
-        ax1.plot_surface(X, Y, Z + 2 * S, color='k', alpha=0.1, edgecolors='none', linewidth=0, antialiased=True)
+        ax1.plot_surface(x, y, z + 2 * s, color='k', alpha=0.1, edgecolors='none', linewidth=0, antialiased=True)
         # ax1.scatter(self.prediction_grid[self.x_var], self.prediction_grid[self.y_var], prediction['Mean'] - 2*np.sqrt(prediction['Var']), c = 'c', marker='o')
-        ax1.plot_surface(X, Y, Z - 2 * S, color='k', alpha=0.1, edgecolors='none', linewidth=0, antialiased=True)
+        ax1.plot_surface(x, y, z - 2 * s, color='k', alpha=0.1, edgecolors='none', linewidth=0, antialiased=True)
 
         ax1.set_xlabel(self.x_var)
         ax1.set_xlim([self.param_info.loc[self.x_var, 'Min'], self.param_info.loc[self.x_var, 'Max']])

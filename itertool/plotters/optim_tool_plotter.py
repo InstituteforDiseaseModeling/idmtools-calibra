@@ -63,11 +63,11 @@ class OptimToolPlotter(BasePlotter):
 
         data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
 
-        X_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
-        X_center = X_center_all[self.iteration_state.iteration]
-        X_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
-        X_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
-        Dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
+        x_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
+        x_center = x_center_all[self.iteration_state.iteration]
+        x_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
+        x_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
+        dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
 
         latest_results = data_this_iter['Results'].values  # Sort by sample?
         latest_fitted = data_this_iter['Fitted'].values  # Sort by sample?
@@ -93,10 +93,10 @@ class OptimToolPlotter(BasePlotter):
         data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
         # latest_samples = data_this_iter[self.param_names].values
         # D = latest_samples.shape[1]
-        D = len(self.param_names)
+        d = len(self.param_names)
 
         ### STATE EVOLUTION ###
-        cw = None if D < 3 else int(np.ceil(np.sqrt(D)))
+        cw = None if d < 3 else int(np.ceil(np.sqrt(d)))
         g = sns.FacetGrid(self.state, row=None, col='Parameter', hue=None, col_wrap=cw, sharex=False, sharey=False,
                           size=3, aspect=1, palette=None, row_order=None, col_order=None, hue_order=None, hue_kws=None,
                           dropna=True, legend_out=True, despine=True, margin_titles=True, xlim=None, ylim=None,
@@ -127,10 +127,10 @@ class OptimToolPlotter(BasePlotter):
         ### STATE ###
 
         dynamic_state = self.state.query('Iteration == @prev_iter & Dynamic == True')
-        D_dynamic = len(dynamic_state)
+        d_dynamic = len(dynamic_state)
         dynamic_param_names = list(dynamic_state['Parameter'].values)
 
-        if D_dynamic == 1:
+        if d_dynamic == 1:
             data_sorted = data_prev_iter.sort_values(dynamic_param_names[0])
 
             sorted_samples = data_sorted[dynamic_param_names]
@@ -141,8 +141,8 @@ class OptimToolPlotter(BasePlotter):
             h1 = plt.plot(sorted_samples, sorted_results, 'ko', figure=fig)
             yl = ax.get_ylim()
 
-            X_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
-            h2 = plt.plot(2 * [X_center], yl, 'b-', figure=fig)
+            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
+            h2 = plt.plot(2 * [x_center], yl, 'b-', figure=fig)
 
             h3 = plt.plot(sorted_samples, sorted_fitted, 'r-', figure=fig)
 
@@ -156,7 +156,7 @@ class OptimToolPlotter(BasePlotter):
 
             del h1, h2, h3, ax, fig
 
-        elif D_dynamic == 2:
+        elif d_dynamic == 2:
             x0 = data_prev_iter[dynamic_param_names[0]]
             x1 = data_prev_iter[dynamic_param_names[1]]
             y = prev_results
@@ -169,11 +169,11 @@ class OptimToolPlotter(BasePlotter):
             h1 = ax.scatter(x0, x1, y, c='k', marker='o', figure=fig)
             i = int(prev_iter)
 
-            X_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names].values[prev_iter]
+            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names].values[prev_iter]
 
-            h2 = ax.scatter(X_center[0],
-                            X_center[1],
-                            rp[0] + rp[1] * X_center[0] + rp[2] * X_center[1],
+            h2 = ax.scatter(x_center[0],
+                            x_center[1],
+                            rp[0] + rp[1] * x_center[0] + rp[2] * x_center[1],
                             c='b', marker='.', s=200, figure=fig)
 
             '''

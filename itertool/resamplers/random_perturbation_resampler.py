@@ -1,6 +1,6 @@
 import os
 
-from itertool.algorithms.FisherInfMatrix import perturbed_points
+from itertool.algorithms.fisher_inf_matrix import perturbed_points
 from itertool.resamplers.base_resampler import BaseResampler
 from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 

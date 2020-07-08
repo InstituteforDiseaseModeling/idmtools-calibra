@@ -63,11 +63,11 @@ class OptimToolSPSAPlotter(BasePlotter):
 
         data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
 
-        X_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
-        X_center = X_center_all[self.iteration_state.iteration]
-        X_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
-        X_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
-        Dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
+        x_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
+        x_center = x_center_all[self.iteration_state.iteration]
+        x_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
+        x_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
+        dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
 
         latest_results = data_this_iter['Results'].values  # Sort by sample?
         # latest_fitted = data_this_iter['Fitted'].values  # Sort by sample?
@@ -127,10 +127,10 @@ class OptimToolSPSAPlotter(BasePlotter):
         ### STATE ###
 
         dynamic_state = self.state.query('Iteration == @prev_iter & Dynamic == True')
-        D_dynamic = len(dynamic_state)
+        d_dynamic = len(dynamic_state)
         dynamic_param_names = list(dynamic_state['Parameter'].values)
 
-        if D_dynamic == 1:
+        if d_dynamic == 1:
             data_sorted = data_prev_iter.sort_values(dynamic_param_names[0])
 
             sorted_samples = data_sorted[dynamic_param_names]
@@ -156,7 +156,7 @@ class OptimToolSPSAPlotter(BasePlotter):
 
             del h1, h2, ax, fig
 
-        elif D_dynamic == 2:
+        elif d_dynamic == 2:
             x0 = data_prev_iter[dynamic_param_names[0]]
             x1 = data_prev_iter[dynamic_param_names[1]]
             y = prev_results

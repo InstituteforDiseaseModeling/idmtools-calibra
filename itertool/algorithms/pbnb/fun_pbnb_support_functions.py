@@ -426,20 +426,20 @@ outout
 """
 
 
-def fun_CI_builder(l_subr, pd_order_z, f_delta_k, f_alpha_k, f_epsilon):
-    f_vol_S = l_subr[0].f_volume
-    f_vol_C = sum(c.f_volume for c in l_subr if c.s_label == 'C' and c.b_activate is True)
-    f_vol_P = sum(c.f_volume for c in l_subr if c.s_label == 'P' and c.b_activate is True)
-    f_vol_M = sum(c.f_volume for c in l_subr if c.s_label == 'M' and c.b_activate is True)
-    f_delta_kl = f_delta_k - float(f_vol_P * f_epsilon) / (f_vol_S * f_vol_C)
-    f_delta_ku = f_delta_k + float(f_vol_M * f_epsilon) / (f_vol_S * f_vol_C)
+def fun_ci_builder(l_subr, pd_order_z, f_delta_k, f_alpha_k, f_epsilon):
+    f_vol_s = l_subr[0].f_volume
+    f_vol_c = sum(c.f_volume for c in l_subr if c.s_label == 'C' and c.b_activate is True)
+    f_vol_p = sum(c.f_volume for c in l_subr if c.s_label == 'P' and c.b_activate is True)
+    f_vol_m = sum(c.f_volume for c in l_subr if c.s_label == 'M' and c.b_activate is True)
+    f_delta_kl = f_delta_k - float(f_vol_p * f_epsilon) / (f_vol_s * f_vol_c)
+    f_delta_ku = f_delta_k + float(f_vol_m * f_epsilon) / (f_vol_s * f_vol_c)
     f_max_r = binom.ppf(f_alpha_k / 2, len(pd_order_z), f_delta_kl)
     f_min_s = binom.ppf(1 - f_alpha_k / 2, len(pd_order_z), f_delta_ku)
     if math.isnan(f_max_r) is True:
         f_max_r = 0
-    CI_l = pd_order_z.loc[f_max_r, 'mean']
-    CI_u = pd_order_z.loc[f_min_s, 'mean']
-    return [CI_u, CI_l]
+    ci_l = pd_order_z.loc[f_max_r, 'mean']
+    ci_u = pd_order_z.loc[f_min_s, 'mean']
+    return [ci_u, ci_l]
 
 
 def fun_pruning_labeler(l_subr):

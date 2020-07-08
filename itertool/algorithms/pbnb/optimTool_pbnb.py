@@ -149,7 +149,7 @@ class OptimToolPBnB(NextPointAlgorithm):
 
                 # step 3: Build CI of quantile
                 pd_order_z = fun_order_region(self.l_subr)
-                [self.f_CI_u, self.f_CI_l] = fun_CI_builder(self.l_subr, pd_order_z, self.f_delta_k, self.f_alpha_k,
+                [self.f_CI_u, self.f_CI_l] = fun_ci_builder(self.l_subr, pd_order_z, self.f_delta_k, self.f_alpha_k,
                                                             self.f_epsilon)
                 self.s_stage = 'stage_4-1'
 
