@@ -4,9 +4,7 @@ import re
 import shutil
 from datetime import datetime
 from logging import getLogger
-
 import pandas as pd
-
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
 from simtools.DataAccess.DataStore import DataStore
@@ -16,7 +14,6 @@ from simtools.SetupParser import SetupParser
 from simtools.Utilities.COMPSUtilities import COMPS_login
 from simtools.Utilities.Encoding import NumpyEncoder
 from simtools.Utilities.Experiments import validate_exp_name, retrieve_experiment
-from simtools.Utilities.General import init_logging
 from simtools.Utilities import verbose_timedelta
 
 logger = getLogger(__name__)
@@ -398,7 +395,8 @@ class CalibManager(object):
 
             # Get experiment by id
             return DataStore.get_experiment(it.experiment_id)
-        except:
+        except Exception as ex:
+            logger.exception(ex)
             return None
 
     def kill(self):

@@ -24,8 +24,9 @@ class ResampleManager:
             if restart_at_step < len(self.steps):
                 self.first_step = restart_at_step
             else:
-                raise Exception('Cannot restart resampling at step %d . Can restart at step %d or lower.' % (
-                restart_at_step, len(self.steps) - 1))
+                raise Exception(
+                    'Cannot restart resampling at step %d . Can restart at step %d or lower.' % (restart_at_step, len(self.steps) - 1)
+                )
         else:
             raise Exception(
                 "Cannot restart from step 0. Run with no restart selected if resampling from the beginning is desired.")
@@ -81,7 +82,7 @@ class ResampleManager:
         """
         Retrieve information about the most recent (final completed) iteration's calibrated point,
         merging from the final IterationState.json and CalibManager.json.
-        
+
         Returns:
         """
         n_points = 1  # ck4, hardcoded for now for HIV purposes, need to determine how to get this from the CalibManager

@@ -26,7 +26,7 @@ class NextPointAlgorithm(metaclass=ABCMeta):
 
     @abstractmethod
     def get_samples_for_iteration(self, iteration):
-       pass
+        pass
 
     @abstractmethod
     def get_state(self):

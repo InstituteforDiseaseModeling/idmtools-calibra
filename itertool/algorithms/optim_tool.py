@@ -443,6 +443,6 @@ class OptimTool(NextPointAlgorithm):
 
     @staticmethod
     def get_r(num_params, volume_fraction):
-        r = math.exp(1 / float(num_params) * (
-                math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
+        r = math.exp(
+            1 / float(num_params) * (math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
         return r

@@ -13,7 +13,7 @@ def get_calib_manager(args, unknownArgs, force_metadata=False):
         warning_note = \
             """
             /!\\ WARNING /!\\ Suggest to set calib_manager within run_calib_args like the following:
-            
+
                 run_calib_args = {'calib_manager': calib_manager}
             """
         print(warning_note)

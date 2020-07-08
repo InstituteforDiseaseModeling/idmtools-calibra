@@ -149,7 +149,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         self.data['__sample_index__'] = self.data['__sample_index__'].astype(int)
 
         self.n_dimensions = len(self.params)
-        size_of_dynamic_params = sum(self.Dynamic.values())
+        # size_of_dynamic_params = sum(self.Dynamic.values())
         iteration = 0
 
         # Clear self.state in case of resuming iteration 0 from commission
@@ -239,7 +239,7 @@ class OptimToolSPSA(NextPointAlgorithm):
             g_avg[:, k] = k / (k + 1) * g_avg[:, k - 1] + 1 / (k + 1) * gk.T
 
             theta_plus_plus = (np.array(latest_dynamic_samples[4 * k + 3]) - x_min) / (x_max - x_min)
-            theta_minus_plus = (np.array(latest_dynamic_samples[4 * k + 4]) - x_min) / (x_max - x_min)
+            # theta_minus_plus = (np.array(latest_dynamic_samples[4 * k + 4]) - x_min) / (x_max - x_min)
             f_plus_plus = latest_results[4 * k + 3]
             f_minus_plus = latest_results[4 * k + 4]
 
@@ -268,7 +268,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         self.data.reset_index(inplace=True)
 
         old_center = self._get_X_center(iteration - 1)
-        old_center_of_dynamic_params = old_center[dynamic_params].values
+        # old_center_of_dynamic_params = old_center[dynamic_params].values
         new_dynamic_center = x_next.tolist()
 
         # max_idx = np.argmax(latest_results)
@@ -282,10 +282,10 @@ class OptimToolSPSA(NextPointAlgorithm):
         old_hessian = self._get_Hessian(iteration - 1)
         old_dynamic_hessian = [old_hessian[p] for p in dynamic_params]
 
-        old_hessian_of_dynamic_params = old_hessian[dynamic_params].values
+        # old_hessian_of_dynamic_params = old_hessian[dynamic_params].values
         new_list_dynamic_hessian = hessian_next.tolist()
         new_list_dynamic_hessian.append(dynamic_params)
-        keys = new_list_dynamic_hessian[-1]
+        # keys = new_list_dynamic_hessian[-1]
 
         new_dynamic_hessian = old_dynamic_hessian
         for i in range(len(dynamic_params)):
@@ -295,10 +295,10 @@ class OptimToolSPSA(NextPointAlgorithm):
         new_hessian_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_hessian)})
 
         # User may have added or removed params
-        param_names = [p['Name'] for p in self.params]
+        # param_names = [p['Name'] for p in self.params]
         # Remove -
-        new_center_df = {k: v for k, v in new_center_dict.items() if k in param_names}
-        new_hessian_df = {k: v for k, v in new_hessian_dict.items() if k in param_names}
+        # new_center_df = {k: v for k, v in new_center_dict.items() if k in param_names}
+        # new_hessian_df = {k: v for k, v in new_hessian_dict.items() if k in param_names}
         # Add -
         new_params = {p['Name']: p['Guess'] for p in self.params if p['Name'] not in new_center_dict}
         new_center_dict.update(new_params)

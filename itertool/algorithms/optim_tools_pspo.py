@@ -197,20 +197,20 @@ class OptimToolPSPO(NextPointAlgorithm):
         # H_sign = -1 # Hessian should be neg. semi definite (maximization)
         p = x_current.size
         m = self.comps_per_iteration
-        hessian_elements = [r['Hessian'] for idx, r in state_prev_iter.iterrows() if r['Dynamic']]
-        h_current_est = np.diag(hessian_elements)
+        # hessian_elements = [r['Hessian'] for idx, r in state_prev_iter.iterrows() if r['Dynamic']]
+        # h_current_est = np.diag(hessian_elements)
 
-        largest_step_size = np.abs(np.array([1] * p) - np.array([0] * p)) / 5
+        # largest_step_size = np.abs(np.array([1] * p) - np.array([0] * p)) / 5
 
         # optimization parameters
         a0, step = 3, .001
         a0 = step * (1 + a0) ** 0.602
         a = a0 * (iteration + 1 + a0) ** (-0.602)
         # TODO: assumed here that there is no prior Hessian information 
-        w = .8 * (iteration + 1) ** (-.501) if iteration > 1 else 1
+        # w = .8 * (iteration + 1) ** (-.501) if iteration > 1 else 1
 
         # G_avg = np.zeros(shape=(p, M))
-        s_avg = np.zeros(shape=(p, p, m))
+        # s_avg = np.zeros(shape=(p, p, m))
         delta_f = np.zeros(shape=(m, 1))
         deltas = np.zeros(shape=(p, m))
 
@@ -268,13 +268,13 @@ class OptimToolPSPO(NextPointAlgorithm):
         self.data.reset_index(inplace=True)
 
         old_center = self._get_X_center(iteration - 1)
-        old_center_of_dynamic_params = old_center[dynamic_params].values
+        # old_center_of_dynamic_params = old_center[dynamic_params].values
         new_dynamic_center = x_next.tolist()[0]
         new_center_dict = old_center.to_dict()  # {k:v for k,v in zip(self.get_param_names(), old_center)}
         new_center_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_center)})
 
         old_hessian = self._get_Hessian(iteration - 1)
-        old_hessian_of_dynamic_params = old_hessian[dynamic_params].values
+        # old_hessian_of_dynamic_params = old_hessian[dynamic_params].values
         new_dynamic_hessian = hessian_next.tolist()
         new_hessian_dict = old_hessian.to_dict()
         new_hessian_dict.update({k: v for k, v in zip(dynamic_params, new_dynamic_hessian)})

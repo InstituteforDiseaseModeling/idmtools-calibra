@@ -16,46 +16,34 @@ def dirichlet_multinomial_pandas(df):
     n_obs = df.sum(level=sum_levels)
     n_categories = len(df.index.levels[-1])
 
-    n_obs['LL'] = gammaln(n_obs.ref + 1) \
-                  + gammaln(n_obs.sim) \
-                  - gammaln(n_obs.ref + n_obs.sim + n_categories) \
-                  + gammaln(df.ref + df.sim + 1).sum(level=sum_levels) \
-                  - gammaln(df.sim + 1).sum(level=sum_levels) \
-                  - gammaln(df.ref + 1).sum(level=sum_levels)
+    n_obs['LL'] = gammaln(n_obs.ref + 1) + gammaln(n_obs.sim) - gammaln(n_obs.ref + n_obs.sim + n_categories) + gammaln(
+        df.ref + df.sim + 1).sum(level=sum_levels) - gammaln(df.sim + 1).sum(level=sum_levels) - gammaln(df.ref + 1).sum(level=sum_levels)
 
     return n_obs.LL.mean() / n_categories
 
 
 def gamma_poisson_pandas(df):
-    LL = gammaln(df.ref.Observations + df.sim.Observations + 1) \
-         - gammaln(df.ref.Observations + 1) \
-         - gammaln(df.sim.Observations + 1)
+    ll = gammaln(df.ref.Observations + df.sim.Observations + 1) - gammaln(df.ref.Observations + 1) - gammaln(df.sim.Observations + 1)
 
     ix = df.ref.Trials > 0
-    LL.loc[ix] += (df.loc[ix].ref.Observations + 1) * np.log(df.loc[ix].ref.Trials)
+    ll.loc[ix] += (df.loc[ix].ref.Observations + 1) * np.log(df.loc[ix].ref.Trials)
 
     ix = df.sim.Trials > 0
-    LL.loc[ix] += (df.loc[ix].sim.Observations + 1) * np.log(df.loc[ix].sim.Trials)
+    ll.loc[ix] += (df.loc[ix].sim.Observations + 1) * np.log(df.loc[ix].sim.Trials)
 
     ix = (df.ref.Trials > 0) & (df.sim.Trials > 0)
-    LL.loc[ix] -= (df.loc[ix].ref.Observations + df.loc[ix].sim.Observations + 1) \
-                  * np.log(df.loc[ix].ref.Trials + df.loc[ix].sim.Trials)
+    ll.loc[ix] -= (df.loc[ix].ref.Observations + df.loc[ix].sim.Observations + 1) * np.log(df.loc[ix].ref.Trials + df.loc[ix].sim.Trials)
 
-    return LL.mean()
+    return ll.mean()
 
 
 def beta_binomial_pandas(df):
-    LL = gammaln(df.ref.Trials + 1) \
-         + gammaln(df.sim.Trials + 2) \
-         - gammaln(df.ref.Trials + df.sim.Trials + 2) \
-         + gammaln(df.ref.Observations + df.sim.Observations + 1) \
-         + gammaln(df.ref.Trials - df.ref.Observations + df.sim.Trials - df.sim.Observations + 1) \
-         - gammaln(df.ref.Observations + 1) \
-         - gammaln(df.ref.Trials - df.ref.Observations + 1) \
-         - gammaln(df.sim.Observations + 1) \
-         - gammaln(df.sim.Trials - df.sim.Observations + 1)
+    ll = gammaln(df.ref.Trials + 1) + gammaln(df.sim.Trials + 2) - gammaln(df.ref.Trials + df.sim.Trials + 2) + gammaln(
+        df.ref.Observations + df.sim.Observations + 1) + gammaln(
+        df.ref.Trials - df.ref.Observations + df.sim.Trials - df.sim.Observations + 1) - gammaln(df.ref.Observations + 1) - gammaln(
+        df.ref.Trials - df.ref.Observations + 1) - gammaln(df.sim.Observations + 1) - gammaln(df.sim.Trials - df.sim.Observations + 1)
 
-    return LL.mean()
+    return ll.mean()
 
 
 """
@@ -89,58 +77,58 @@ def dirichlet_single(raw_data, sim_data):
     raw_nobs = sum(raw_data)
     sim_nobs = sum(sim_data)
 
-    LL = 0.
-    LL += gammaln(raw_nobs + 1)
-    LL += gammaln(sim_nobs + num_cat_bins)
-    LL -= gammaln(raw_nobs + sim_nobs + num_cat_bins)
+    ll = 0.
+    ll += gammaln(raw_nobs + 1)
+    ll += gammaln(sim_nobs + num_cat_bins)
+    ll -= gammaln(raw_nobs + sim_nobs + num_cat_bins)
     for catbin in range(num_cat_bins):
-        LL += gammaln(raw_data[catbin] + sim_data[catbin] + 1)
-        LL -= gammaln(sim_data[catbin] + 1)
-        LL -= gammaln(raw_data[catbin] + 1)
+        ll += gammaln(raw_data[catbin] + sim_data[catbin] + 1)
+        ll -= gammaln(sim_data[catbin] + 1)
+        ll -= gammaln(raw_data[catbin] + 1)
 
-    LL /= num_cat_bins
-    return LL
+    ll /= num_cat_bins
+    return ll
 
 
 def beta_binomial(raw_nobs, sim_nobs, raw_data, sim_data, return_mean=True):
     num_bins = len(raw_data)
 
-    LL = 0.
+    ll = 0.
     for this_bin in range(num_bins):
-        LL += gammaln(raw_nobs[this_bin] + 1)
-        LL += gammaln(sim_nobs[this_bin] + 2)
-        LL -= gammaln(raw_nobs[this_bin] + sim_nobs[this_bin] + 2)
-        LL += gammaln(raw_data[this_bin] + sim_data[this_bin] + 1)
-        LL += gammaln(raw_nobs[this_bin] - raw_data[this_bin] + sim_nobs[this_bin] - sim_data[this_bin] + 1)
-        LL -= gammaln(raw_data[this_bin] + 1)
-        LL -= gammaln(raw_nobs[this_bin] - raw_data[this_bin] + 1)
-        LL -= gammaln(sim_data[this_bin] + 1)
-        LL -= gammaln(sim_nobs[this_bin] - sim_data[this_bin] + 1)
+        ll += gammaln(raw_nobs[this_bin] + 1)
+        ll += gammaln(sim_nobs[this_bin] + 2)
+        ll -= gammaln(raw_nobs[this_bin] + sim_nobs[this_bin] + 2)
+        ll += gammaln(raw_data[this_bin] + sim_data[this_bin] + 1)
+        ll += gammaln(raw_nobs[this_bin] - raw_data[this_bin] + sim_nobs[this_bin] - sim_data[this_bin] + 1)
+        ll -= gammaln(raw_data[this_bin] + 1)
+        ll -= gammaln(raw_nobs[this_bin] - raw_data[this_bin] + 1)
+        ll -= gammaln(sim_data[this_bin] + 1)
+        ll -= gammaln(sim_nobs[this_bin] - sim_data[this_bin] + 1)
 
     if num_bins != 0 and return_mean:
-        LL /= num_bins
-    return LL
+        ll /= num_bins
+    return ll
 
 
 def gamma_poisson(raw_nobs, sim_nobs, raw_data, sim_data, return_mean=True):
     num_bins = len(raw_data)
 
-    LL = 0.
+    ll = 0.
     for this_bin in range(num_bins):
         if raw_nobs[this_bin] > 0:
-            LL += (raw_data[this_bin] + 1) * math.log(raw_nobs[this_bin])
+            ll += (raw_data[this_bin] + 1) * math.log(raw_nobs[this_bin])
         if sim_nobs[this_bin] > 0:
-            LL += (sim_data[this_bin] + 1) * math.log(sim_nobs[this_bin])
+            ll += (sim_data[this_bin] + 1) * math.log(sim_nobs[this_bin])
         if raw_nobs[this_bin] + sim_nobs[this_bin] > 0:
-            LL -= (raw_data[this_bin] + sim_data[this_bin] + 1) * math.log(raw_nobs[this_bin] + sim_nobs[this_bin])
-        LL += gammaln(raw_data[this_bin] + sim_data[this_bin] + 1)
-        LL -= gammaln(raw_data[this_bin] + 1)
-        LL -= gammaln(sim_data[this_bin] + 1)
+            ll -= (raw_data[this_bin] + sim_data[this_bin] + 1) * math.log(raw_nobs[this_bin] + sim_nobs[this_bin])
+        ll += gammaln(raw_data[this_bin] + sim_data[this_bin] + 1)
+        ll -= gammaln(raw_data[this_bin] + 1)
+        ll -= gammaln(sim_data[this_bin] + 1)
 
     if num_bins != 0 and return_mean:
-        LL /= num_bins
+        ll /= num_bins
 
-    return LL
+    return ll
 
 
 """

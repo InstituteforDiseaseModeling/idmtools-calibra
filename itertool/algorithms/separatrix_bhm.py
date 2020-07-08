@@ -3,16 +3,13 @@ import numpy as np
 import pandas as pd
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
-logger = getLogger(__name__)
-user_logger = getLogger('user')
+logger = logging.getLogger(__name__)
+user_logger = logging.getLogger('user')
 try:
     from history_matching.gpc import GPC
 except ImportError as ex:
     user_logger.error("Separatrix_BHM requires history matching")
     raise ex
-
-logging.basicConfig(format='%(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class SeparatrixBHM(NextPointAlgorithm):

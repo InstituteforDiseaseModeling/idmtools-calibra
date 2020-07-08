@@ -96,9 +96,9 @@ def perturbed_points(center, xmin, xmax, m=10, n=5, sample_size=1, resolution_ra
             theta_minus_plus = theta_minus + c_tilde * delta_tilde
             theta_minus_minus = theta_minus - c_tilde * delta_tilde
 
-            while (((0 > theta_plus_plus).any() or (theta_plus_plus > 1).any()) and
+            while (((0 > theta_plus_plus).any() or (theta_plus_plus > 1).any()) and  # noqa: W504
                    ((theta_plus_minus < 0).any() or (theta_plus_minus > 1).any())) or \
-                    (((0 > theta_minus_plus).any() or (theta_minus_plus > 1).any()) and
+                    (((0 > theta_minus_plus).any() or (theta_minus_plus > 1).any()) and  # noqa: W504
                      ((theta_minus_minus < 0).any() or (theta_minus_minus > 1).any())):
                 delta_tilde = np.random.choice([-1, 1], size=(1, p))
                 c_tilde = np.random.uniform(low=0.25, high=0.5) * c
@@ -164,9 +164,9 @@ def compute_fisher_inf_matrix(center_point, df_ll_points, data_columns):
 
     rounds = df_ll_points['j(1toN)'].as_matrix()  # j
     samples_per_round = df_ll_points['k(1toM)'].as_matrix()  # k, points[:, 2]
-    N = (max(rounds) + 1).astype(int)
-    M = (max(samples_per_round) + 1).astype(int)
-    n = int((np.shape(rounds)[0]) / (4 * M * N))
+    rounds = (max(rounds) + 1).astype(int)
+    m = (max(samples_per_round) + 1).astype(int)
+    # n = int((np.shape(rounds)[0]) / (4 * m * rounds))
 
     plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0].filter(data_columns).as_matrix()
     plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1].filter(data_columns).as_matrix()
@@ -182,28 +182,28 @@ def compute_fisher_inf_matrix(center_point, df_ll_points, data_columns):
     p = len(center_point)
 
     # Hessian
-    h_bar = np.zeros(shape=(p, p, N))
-    h_bar_avg = np.zeros(shape=(p, p, N))
+    h_bar = np.zeros(shape=(p, p, rounds))
+    h_bar_avg = np.zeros(shape=(p, p, rounds))
 
-    for i in range(N):
+    for i in range(rounds):
         # reset the data (samples) used for evaluation of the log likelihood
         # initialization
-        h_hat = np.zeros(shape=(p, p, M))
-        h_hat_avg = np.zeros(shape=(p, p, M))
-        g_p = np.zeros(shape=(p, M))
-        g_m = np.zeros(shape=(p, M))
+        h_hat = np.zeros(shape=(p, p, m))
+        h_hat_avg = np.zeros(shape=(p, p, m))
+        g_p = np.zeros(shape=(p, m))
+        g_m = np.zeros(shape=(p, m))
 
-        plus_plus_round_i = plus_plus_points[(i * M):((i + 1) * M), :]
-        plus_minus_round_i = plus_minus_points[(i * M):((i + 1) * M), :]
-        minus_plus_round_i = minus_plus_points[(i * M):((i + 1) * M), :]
-        minus_minus_round_i = minus_minus_points[(i * M):((i + 1) * M), :]
+        plus_plus_round_i = plus_plus_points[(i * m):((i + 1) * m), :]
+        plus_minus_round_i = plus_minus_points[(i * m):((i + 1) * m), :]
+        minus_plus_round_i = minus_plus_points[(i * m):((i + 1) * m), :]
+        minus_minus_round_i = minus_minus_points[(i * m):((i + 1) * m), :]
 
-        logl_pp_round_i = ll_plus_plus_points[(i * M):((i + 1) * M)]
-        logl_pm_round_i = ll_plus_minus_points[(i * M):((i + 1) * M)]
-        logl_mp_round_i = ll_minus_plus_points[(i * M):((i + 1) * M)]
-        logl_mm_round_i = ll_minus_minus_points[(i * M):((i + 1) * M)]
+        logl_pp_round_i = ll_plus_plus_points[(i * m):((i + 1) * m)]
+        logl_pm_round_i = ll_plus_minus_points[(i * m):((i + 1) * m)]
+        logl_mp_round_i = ll_minus_plus_points[(i * m):((i + 1) * m)]
+        logl_mm_round_i = ll_minus_minus_points[(i * m):((i + 1) * m)]
 
-        for k in range(M):
+        for k in range(m):
             theta_plus_plus = plus_plus_round_i[k]
             theta_plus_minus = plus_minus_round_i[k]
             theta_minus_plus = minus_plus_round_i[k]
@@ -231,10 +231,10 @@ def compute_fisher_inf_matrix(center_point, df_ll_points, data_columns):
         # H_bar[:, :, i] = .5 * (
         #     H_hat_avg[:, :, M - 1] - sqrtm(np.linalg.matrix_power(H_hat_avg[:, :, M - 1], 2) + 1e-6 * np.eye(p))
         # )
-        h_bar[:, :, i] = - np.real(_get_a_plus(-h_hat_avg[:, :, M - 1]))
+        h_bar[:, :, i] = - np.real(_get_a_plus(-h_hat_avg[:, :, m - 1]))
         h_bar_avg[:, :, i] = i / (i + 1) * h_bar_avg[:, :, i - 1] + 1 / (i + 1) * h_bar[:, :, i]
 
-    fisher = -1 * h_bar_avg[:, :, N - 1]
+    fisher = -1 * h_bar_avg[:, :, rounds - 1]
     return fisher
 
 

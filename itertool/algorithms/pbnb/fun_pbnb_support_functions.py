@@ -504,7 +504,7 @@ def fun_reg_branching(c_subr, i_n_branching, params, s_branching_dim):
     # the following reallocate the sampling points
     for i in l_subr_new:
         i.pd_sample_record = c_subr.pd_sample_record[
-            (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) & # noqa: W504
+            (c_subr.pd_sample_record[s_branching_dim] > i.l_coordinate_lower[i_max_index]) &  # noqa: W504
             (c_subr.pd_sample_record[s_branching_dim] < i.l_coordinate_upper[i_max_index])]
     for i in l_subr_new:  # reindex the sampling points into 0 1 2...
         i.pd_sample_record = i.pd_sample_record.reset_index(drop=True)

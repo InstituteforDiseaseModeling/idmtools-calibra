@@ -55,25 +55,25 @@ class TestStuff(unittest.TestCase):
         # df_perturbed_points = perturbed_points(center_point, low_bound, up_bound)
         # print df_perturbed_points
         # df_perturbed_points.to_csv("data2.csv")
-        df_perturbed_points = pd.DataFrame.from_csv("data.csv")
+        # df_perturbed_points = pd.DataFrame.from_csv("data.csv")
         ll = pd.DataFrame.from_csv("LLdata.csv")
-        Fisher = FisherInfMatrix(center_point, ll)
-        Covariance = np.linalg.inv(Fisher)
+        fisher = FisherInfMatrix(center_point, ll)
+        covariance = np.linalg.inv(fisher)
 
-        print("eigs of fisher: ", np.linalg.eigvals(Fisher))
-        print("eigs of Covariance: ", np.linalg.eigvals(Covariance))
+        print("eigs of fisher: ", np.linalg.eigvals(fisher))
+        print("eigs of Covariance: ", np.linalg.eigvals(covariance))
 
-        fig3 = plt.figure('CramerRao')
-        ax = plt.subplot(111)
+        plt.figure('CramerRao')
+        plt.subplot(111)
         x, y = center_point[0:2]
         plt.plot(x, y, 'g.')
-        plot_cov_ellipse(Covariance[0:2,0:2], center_point[0:2], nstd=3, alpha=0.6, color='green')
-        sample_x, sample_y, sample_z = trunc_gauss(center_point, Covariance, low_bound, up_bound, 10).T
+        plot_cov_ellipse(covariance[0:2, 0:2], center_point[0:2], nstd=3, alpha=0.6, color='green')
+        sample_x, sample_y, sample_z = trunc_gauss(center_point, covariance, low_bound, up_bound, 10).T
         # sample_x, sample_y = np.random.multivariate_normal(center_point[0:2], Covariance[0:2,0:2], 10).T
-        print('covariance:\n%s'%Covariance)
-        print('sample_x:\n%s'%sample_x)
-        print('sample_y:\n%s'%sample_y)
-        print('sample_z:\n%s'%sample_z)
+        print('covariance:\n%s' % covariance)
+        print('sample_x:\n%s' % sample_x)
+        print('sample_y:\n%s' % sample_y)
+        print('sample_z:\n%s' % sample_z)
 
         plt.plot(sample_x, sample_y, 'x')
         plt.xlim(low_bound[0], up_bound[0])
@@ -82,10 +82,3 @@ class TestStuff(unittest.TestCase):
         plt.ylabel('Y', fontsize=14)
 
         plt.show()
-
-
-#
-#
-# # test
-# def test():
-#
