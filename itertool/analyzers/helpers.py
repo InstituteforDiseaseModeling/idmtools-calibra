@@ -1,6 +1,6 @@
 import itertools
 import random
-from datetime import date, datetime
+from datetime import date
 import calendar
 import logging
 from collections import OrderedDict
@@ -127,7 +127,7 @@ def season_channel_age_density_json_to_pandas(reference, bins):
         }
 
     To a pd.DataFrame with Multi Index::
-                                                                     
+
         Channel                            Season     Age Bin   PfPR Bin      Counts
         PfPR by Gametocytemia and Age Bin  start_wet  5         0             0
                                                                 50            0
@@ -294,7 +294,7 @@ def pairwise(iterable):
 def aggregate_on_index(df, index, keep=slice(None)):
     """
     Aggregate and re-index data on specified (multi-)index (levels and) intervals
-    
+
     Args:
         df: a pandas.DataFrame with columns matching the specified (Multi)Index (level) names
         index: pandas.(Multi)Index of categorical values or right-bin-edges, e.g. ['early', 'late'] or [5, 15, 100]
@@ -380,8 +380,12 @@ def get_risk_by_distance(df_sim, distances, ddf):
 
             else:
                 # node IDs of nodes within distance
-                neighbors = ddf[(ddf['node1'] == nodelist[hh_num]) & (ddf['node2'] != nodelist[hh_num]) &
-                                (ddf['dist'] <= n_dist) & (ddf['dist'] > distances[k - 1])]['node2'].values
+                neighbors = ddf[
+                    (ddf['node1'] == nodelist[hh_num])
+                    & (ddf['node2'] != nodelist[hh_num])  # noqa: W503
+                    & (ddf['dist'] <= n_dist)  # noqa: W503
+                    & (ddf['dist'] > distances[k - 1])  # noqa: W503
+                ]['node2'].values
 
                 ndf = df_sim[df_sim['node'].isin(neighbors)]
                 num_pos = sum(ndf['pos'].values)
@@ -398,6 +402,10 @@ def get_risk_by_distance(df_sim, distances, ddf):
     return rel_risk
 
 
+def time_as_int(x):
+    return int(x.strftime('%m'))
+
+
 def ento_data(csvfilename, metadata):
     df = pd.read_csv(csvfilename)
 
@@ -407,8 +415,8 @@ def ento_data(csvfilename, metadata):
     df = df.dropna()
 
     df['date'] = pd.to_datetime(df['date'])
-    dateparser = lambda x: int(x.strftime('%m'))
-    df['Month'] = df['date'].apply(lambda x: int(dateparser(x)))
+
+    df['Month'] = df['date'].apply(lambda x: int(time_as_int(x)))
     df2 = df.groupby('Month')['gambiae'].apply(np.mean).reset_index()
     df2['funestus'] = list(df.groupby('Month')['funestus'].apply(np.mean))
 
@@ -442,8 +450,7 @@ def multi_year_ento_data(csvfilename, metadata):
     df['date'] = pd.to_datetime(df['date'])
     mask = (df['date'] <= '2017-12-31')
     df = df.loc[mask]
-    dateparser = lambda x: int(x.strftime('%m'))
-    df['Month'] = df['date'].apply(lambda x: int(dateparser(x)))
+    df['Month'] = df['date'].apply(lambda x: int(time_as_int(x)))
     df['Year'] = df['date'].apply(lambda x: int(x.strftime('%y')))
     df['Year'] = df['Year'].apply(lambda x: x % min(df['Year']))
     df['Month'] += df['Year'] * 12
@@ -467,8 +474,8 @@ def multi_year_ento_data(csvfilename, metadata):
     return df_temp
 
 
-def multi_year_ento_data_clustered(csvfilename, metadata):
-    df = pd.read_csv(csvfilename)
+def multi_year_ento_data_clustered(csv_filename, metadata):
+    df = pd.read_csv(csv_filename)
     if metadata['HFCA']:
         df = df[df['cluster_name'] == metadata['HFCA']]
 
@@ -477,8 +484,7 @@ def multi_year_ento_data_clustered(csvfilename, metadata):
     df['date'] = pd.to_datetime(df['month'])
     mask = (df['date'] <= '2017-12-31')
     df = df.loc[mask]
-    dateparser = lambda x: int(x.strftime('%m'))
-    df['Month'] = df['date'].apply(lambda x: int(dateparser(x)))
+    df['Month'] = df['date'].apply(lambda x: int(time_as_int(x)))
     df['Year'] = df['date'].apply(lambda x: int(x.strftime('%y')))
     df['Year'] = df['Year'].apply(lambda x: x % min(df['Year']))
     df['Month'] += df['Year'] * 12
@@ -569,11 +575,11 @@ def hhs_to_nodes(csv_filename, hhs_file, metadata):
     # how far people would definitely go by foot in units of neighborhood hops (1 hop is the adjacent 8 cells on the
     # grid; 2 hops is the adjacent 24 cells, etc.
     # this prepares an approximation of a local topology
-    migration_radius = 2
+    # migration_radius = 2
 
     hh_records = all_hh_records[
-        (all_hh_records.lon > x_min) & (all_hh_records.lon < x_max) & (all_hh_records.lat > y_min) & (
-                all_hh_records.lat < y_max)]
+        (all_hh_records.lon > x_min) & (all_hh_records.lon < x_max) & (all_hh_records.lat > y_min) & (all_hh_records.lat < y_max)
+    ]
 
     # get point locations of households
     points = hh_records.as_matrix(["lon", "lat"])
@@ -640,8 +646,7 @@ def ento_spatial_data(datafilename, hhs_hffilename, hhs_file, metadata):
     df['NodeID'] = [random.randint(0, 32) for i in range(len(df))]
 
     df['date'] = pd.to_datetime(df['date'])
-    dateparser = lambda x: int(x.strftime('%m'))
-    df['Month'] = df['date'].apply(lambda x: int(dateparser(x)))
+    df['Month'] = df['date'].apply(lambda x: int(time_as_int(x)))
     df2 = df.groupby(['Month', 'NodeID'])['gambiae'].apply(np.mean).reset_index()
     df2['funestus'] = list(df.groupby(['Month', 'NodeID'])['funestus'].apply(np.mean))
 
