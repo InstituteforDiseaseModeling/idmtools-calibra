@@ -1,8 +1,7 @@
 import os
-
 from itertool.algorithms.fisher_inf_matrix import perturbed_points
 from itertool.resamplers.base_resampler import BaseResampler
-from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
+from itertool.resamplers.calibration_point import CalibrationPoint
 
 
 class RandomPerturbationResampler(BaseResampler):
@@ -24,7 +23,7 @@ class RandomPerturbationResampler(BaseResampler):
 
         Args:
             calibrated_points: input points for this resampling method
-        
+
         Returns: 
             A list of resampled Point objects
         """

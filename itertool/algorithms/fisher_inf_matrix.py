@@ -143,7 +143,7 @@ def perturbed_points(center, xmin, xmax, m=10, n=5, sample_size=1, resolution_ra
     return df_perturbed
 
 
-def fisher_inf_matrix(center_point, df_ll_points, data_columns):
+def compute_fisher_inf_matrix(center_point, df_ll_points, data_columns):
     """
     Compute the Fisher Information matrix using the LL of perturbed points
 

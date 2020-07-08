@@ -1,10 +1,19 @@
+import copy
+import numpy as np
 import logging
 import operator
+import os
 import sys
 import pickle
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
-from .fun_pbnb_support_functions import *
+import pandas as pd
 import itertool.algorithms.pbnb.m_intial_paramters_setting as par
+from itertool.algorithms.pbnb.c_sub_region import cSubRegion
+from itertool.algorithms.pbnb.fun_pbnb_support_functions import fun_order_subregion, fun_replication_update, \
+    fun_sample_points_generator_deterministic, fun_sample_points_generator_noise, fun_ci_builder, fun_order_region, \
+    fun_pruning_indicator, fun_maintaining_indicator, fun_quantile_update, fun_pruning_labeler, fun_maintaining_labeler, \
+    fun_plot2D, fun_elite_indicator, fun_worst_indicator, fun_results_organizer_deterministic, \
+    fun_results_organizer_noise, fun_reg_branching
 
 logger = logging.getLogger('PBnB_application')
 fh = logging.FileHandler('PBnB_running' + '-debug.log')
@@ -115,8 +124,7 @@ class OptimToolPBnB(NextPointAlgorithm):
             if self.s_stage == 'stage_2':
                 logger.info('stage_2')
 
-                for c_subr in (c_subr for c_subr in self.l_subr if
-                               c_subr.s_label == 'C' and c_subr.b_activate is True and len(
+                for c_subr in (c_subr for c_subr in self.l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True and len(
                                        c_subr.pd_sample_record) > 0):
                     c_subr = copy.copy(fun_order_subregion(c_subr))
 
@@ -375,8 +383,7 @@ class OptimToolPBnB(NextPointAlgorithm):
         self.logging_saver(iteration)
 
         if iteration == 0:
-            if not os.path.exists(self.s_running_file_name + '/All_region_sampling_record/'):
-                os.makedirs(self.s_running_file_name + '/All_region_sampling_record/')
+            os.makedirs(self.s_running_file_name + '/All_region_sampling_record/', exist_ok=True)
         if self.s_problem_type is 'deterministic':
             self.l_subr = fun_results_organizer_deterministic(self.l_subr, self.df_testing_samples,
                                                               self.params)  # <-- Update the self.l_subr based on df_testing_samples

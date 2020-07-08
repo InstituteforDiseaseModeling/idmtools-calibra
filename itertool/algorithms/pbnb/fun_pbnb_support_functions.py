@@ -29,18 +29,25 @@ def fun_sample_points_generator_deterministic(l_subr, i_n_sampling, i_n_rep, s_s
     df_testing_samples['replication'].astype(int)
     l_sampling_subregions = []
     if s_stage == 'stage_1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if c_subr.s_label == 'C' and c_subr.b_activate is True]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True:
+                l_sampling_subregions.append(c_subr)
     elif s_stage == 'stage_2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0)]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and len(c_subr.pd_sample_record) > 0:
+                l_sampling_subregions.append(c_subr)
     elif s_stage == 'stage_4-1':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                c_subr.b_worst is True or c_subr.b_elite is True))]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True):
+                l_sampling_subregions.append(c_subr)
     elif s_stage == 'stage_4-2':
-        l_sampling_subregions = [c_subr for c_subr in l_subr if (
-                c_subr.s_label == 'C' and c_subr.b_activate is True and (
-                c_subr.b_worst is True or c_subr.b_elite is True))]
+        l_sampling_subregions = []
+        for c_subr in l_subr:
+            if c_subr.s_label == 'C' and c_subr.b_activate is True and (c_subr.b_worst is True or c_subr.b_elite is True):
+                l_sampling_subregions.append(c_subr)
     if not l_sampling_subregions:
         return [l_subr, pd.DataFrame()]
     for c_subr in l_sampling_subregions:

@@ -19,7 +19,7 @@ class BasePlotter:
     def get_plot_directory(self):
         plot_dir = os.path.join(self.iteration_state.calibration_name, '_plots')
         os.makedirs(plot_dir, exist_ok=True)
-        
+
         return os.path.join(self.iteration_state.calibration_name, '_plots')
 
     @property

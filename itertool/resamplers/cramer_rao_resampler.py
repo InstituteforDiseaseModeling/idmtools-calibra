@@ -9,7 +9,7 @@ from matplotlib.patches import Ellipse
 
 from itertool.resamplers.base_resampler import BaseResampler
 from itertool.resamplers.calibration_point import CalibrationPoint
-from itertool.algorithms.FisherInfMatrix import FisherInfMatrix, trunc_gauss
+from itertool.algorithms.fisher_inf_matrix import trunc_gauss, compute_fisher_inf_matrix
 
 
 class CramerRaoResampler(BaseResampler):
@@ -34,7 +34,7 @@ class CramerRaoResampler(BaseResampler):
 
         Args:
             calibrated_points: input points for this resampling method
-        
+
         Returns: 
             A list of resampled Point objects
         """
@@ -80,10 +80,10 @@ class CramerRaoResampler(BaseResampler):
         center_point_as_list = list(
             pd.DataFrame([center_point.to_value_dict(parameter_type=CalibrationPoint.DYNAMIC)]).as_matrix()[0])
 
-        fisher_inf_matrix = FisherInfMatrix(center_point_as_list, likelihood_df, names)
+        fisher_inf_matrix = compute_fisher_inf_matrix(center_point_as_list, likelihood_df, names)
         covariance = np.linalg.pinv(fisher_inf_matrix)
 
-        ## the 2 principal components using PCA
+        # the 2 principal components using PCA
         scaled_covariance = np.dot(
             np.dot(np.asmatrix(np.diag(1 / (np.array(maximums) - np.array(minimums)))), covariance),
             np.asmatrix(np.diag(1 / (np.array(maximums) - np.array(minimums)))))
@@ -151,7 +151,6 @@ class CramerRaoResampler(BaseResampler):
             ellipse patch artist.
 
             Args:
-            
                 cov : The 2x2 covariance matrix to base the ellipse on
                 pos : The location of the center of the ellipse. Expects a 2-element
                     sequence of [x0, y0].
@@ -159,7 +158,7 @@ class CramerRaoResampler(BaseResampler):
                     Defaults to 2 standard deviations.
                 ax : The axis that the ellipse will be plotted on. Defaults to the
                     current axis.
-                
+
                 Additional keyword arguments are pass on to the ellipse patch.
 
             Returns:
@@ -251,7 +250,7 @@ class CramerRaoResampler(BaseResampler):
         plt.close(fig)
         del pp, fig
 
-        ## just to test plot the first two dynamic parameters
+        # just to test plot the first two dynamic parameters
         fig, ax = plt.subplots()
         x = resampled_points_dynamic[resampled_points_dynamic.columns[0]]
         y = resampled_points_dynamic[resampled_points_dynamic.columns[1]]
@@ -270,7 +269,7 @@ class CramerRaoResampler(BaseResampler):
         plt.close(fig)
         del ax, fig
 
-        ## scatter plot matrix
+        # scatter plot matrix
         minimums = resampled_points[0].get_attribute(key='Min', parameter_type=CalibrationPoint.DYNAMIC)
         maximums = resampled_points[0].get_attribute(key='Max', parameter_type=CalibrationPoint.DYNAMIC)
         fig = scatterplot_matrix(np.array(resampled_points_dynamic[resampled_points_dynamic.columns[0:-1]]).T,
@@ -287,95 +286,3 @@ class CramerRaoResampler(BaseResampler):
         fig.savefig(os.path.join(self.output_location, 'scatterplot_matrix_NoScale.pdf'))
         fig.clf
         del fig
-
-    # def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
-    #     """
-    #     Plots an `nstd` sigma error ellipse based on the specified covariance
-    #     matrix (`cov`). Additional keyword arguments are passed on to the
-    #     ellipse patch artist.
-    #
-    #     Parameters
-    #     ----------
-    #         cov : The 2x2 covariance matrix to base the ellipse on
-    #         pos : The location of the center of the ellipse. Expects a 2-element
-    #             sequence of [x0, y0].
-    #         nstd : The radius of the ellipse in numbers of standard deviations.
-    #             Defaults to 2 standard deviations.
-    #         ax : The axis that the ellipse will be plotted on. Defaults to the
-    #             current axis.
-    #         Additional keyword arguments are pass on to the ellipse patch.
-    #
-    #     Returns
-    #     -------
-    #         A matplotlib ellipse artist
-    #     """
-    #
-    #     def eigsorted(cov):
-    #         vals, vecs = np.linalg.eigh(cov)
-    #         order = vals.argsort()[::-1]
-    #         return vals[order], vecs[:, order]
-    #
-    #     if ax is None:
-    #         ax = plt.gca()
-    #
-    #     vals, vecs = eigsorted(cov)
-    #     theta = np.degrees(np.arctan2(*vecs[:, 0][::-1]))
-    #
-    #     # Width and height are "full" widths, not radius
-    #     width, height = 2 * nstd * np.sqrt(vals)
-    #     ellip = Ellipse(xy=pos, width=width, height=height, angle=theta, **kwargs)
-    #
-    #     ax.add_artist(ellip)
-    #     return ellip
-    #
-    # def scatterplot_matrix(samples, names, range_min, range_max, Covariance, center, **kwargs):
-    #     """Plots a scatterplot matrix of subplots.  Each row of "data" is plotted
-    #     against other rows, resulting in a nrows by nrows grid of subplots with the
-    #     diagonal subplots labeled with "names".  Additional keyword arguments are
-    #     passed on to matplotlib's "plot" command. Returns the matplotlib figure
-    #     object containg the subplot grid."""
-    #     numvars, numdata = samples.shape
-    #     fig, axes = plt.subplots(nrows=numvars, ncols=numvars, figsize=(8, 8))
-    #     fig.subplots_adjust(right=0.8, hspace=0.05, wspace=0.05)
-    #
-    #     for ax in axes.flat:
-    #         # Hide all ticks and labels
-    #         ax.xaxis.set_visible(False)
-    #         ax.yaxis.set_visible(False)
-    #
-    #         # Set up ticks only on one side for the "edge" subplots...
-    #         if ax.is_first_col():
-    #             ax.yaxis.set_ticks_position('left')
-    #         if ax.is_last_col():
-    #             ax.yaxis.set_ticks_position('right')
-    #         if ax.is_first_row():
-    #             ax.xaxis.set_ticks_position('top')
-    #         if ax.is_last_row():
-    #             ax.xaxis.set_ticks_position('bottom')
-    #
-    #     # Plot the data.
-    #     for i, j in zip(*np.triu_indices_from(axes, k=1)):
-    #         for x, y in [(i, j), (j, i)]:
-    #             scatterPlot = axes[x, y].scatter(samples[y], samples[x], **kwargs)
-    #             plot_cov_ellipse(Covariance[x, x], center[x], ax=axes[x, y], nstd=3, alpha=0.6, color='green')
-    #             if not (range_min is None):
-    #                 axes[x, y].set_xlim(range_min[y],range_max[y])
-    #             if not (range_max is None):
-    #                 axes[x, y].set_ylim(range_min[x],range_max[x])
-    #
-    #     cax = fig.add_axes([0.85, 0.2, 0.05, 0.6])
-    #     fig.colorbar(scatterPlot, cax=cax)
-    #     plt.suptitle('Cramer Rao samples')
-    #
-    #
-    #     # Label the diagonal subplots...
-    #     for i, label in enumerate(names):
-    #         axes[i, i].annotate(label, (0.5, 0.5), xycoords='axes fraction',
-    #                             ha='center', va='center')
-    #
-    #     # Turn on the proper x or y axes ticks.
-    #     for i, j in zip(range(numvars), itertools.cycle((-1, 0))):
-    #         axes[j, i].xaxis.set_visible(True)
-    #         axes[i, j].yaxis.set_visible(True)
-    #
-    #     return fig

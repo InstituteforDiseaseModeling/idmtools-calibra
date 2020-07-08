@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import cm
 from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
 
@@ -57,22 +56,22 @@ class OptimToolSPSAPlotter(BasePlotter):
         else:
             raise Exception('Unknown stage %s' % iteration_status.name)
 
-        ###gc.collect()
+        # ##gc.collect()
 
     def visualize_results(self):
 
-        data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
+        # data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
 
-        x_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
-        x_center = x_center_all[self.iteration_state.iteration]
-        x_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
-        x_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
-        dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
+        # x_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
+        # x_center = x_center_all[self.iteration_state.iteration]
+        # x_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
+        # x_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
+        # dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
 
-        latest_results = data_this_iter['Results'].values  # Sort by sample?
+        # latest_results = data_this_iter['Results'].values  # Sort by sample?
         # latest_fitted = data_this_iter['Fitted'].values  # Sort by sample?
 
-        ### VIOLIN PLOTS BY ITERATION ###
+        # ## VIOLIN PLOTS BY ITERATION ###
         all_results = self.all_results.copy().reset_index(drop=True)  # .set_index(['iteration', 'sample'])
         fig, ax = plt.subplots()
         g = sns.violinplot(x='iteration', y='total', data=all_results, ax=ax)
@@ -90,13 +89,13 @@ class OptimToolSPSAPlotter(BasePlotter):
         prev_results = data_prev_iter['Results'].values  # Sort by sample?
         # prev_fitted = data_prev_iter['Fitted'].values  # Sort by sample?
 
-        data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
+        # data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
         # latest_samples = data_this_iter[self.param_names].values
         # D = latest_samples.shape[1]
-        D = len(self.param_names)
+        d = len(self.param_names)
 
-        ### STATE EVOLUTION ###
-        cw = None if D < 3 else int(np.ceil(np.sqrt(D)))
+        # ## STATE EVOLUTION ###
+        cw = None if d < 3 else int(np.ceil(np.sqrt(d)))
         g = sns.FacetGrid(self.state, row=None, col='Parameter', hue=None, col_wrap=cw, sharex=False, sharey=False,
                           size=3, aspect=1, palette=None, row_order=None, col_order=None, hue_order=None, hue_kws=None,
                           dropna=True, legend_out=True, despine=True, margin_titles=True, xlim=None, ylim=None,
@@ -106,7 +105,7 @@ class OptimToolSPSAPlotter(BasePlotter):
         g.savefig(os.path.join(self.directory, 'Optimization_State_Evolution.pdf'))
         plt.close()
 
-        ## Regression based on results from previous iteration
+        # # Regression based on results from previous iteration
         # regression_by_iter = self.regression.pivot('Iteration', 'Parameter', 'Value')
         # rsquared = regression_by_iter.loc[prev_iter, 'Rsquared']
 
@@ -124,7 +123,7 @@ class OptimToolSPSAPlotter(BasePlotter):
         #
         #        del h1, h2, ax, fig
 
-        ### STATE ###
+        # ## STATE ###
 
         dynamic_state = self.state.query('Iteration == @prev_iter & Dynamic == True')
         d_dynamic = len(dynamic_state)
@@ -138,11 +137,11 @@ class OptimToolSPSAPlotter(BasePlotter):
             # sorted_fitted = data_sorted['Fitted']
 
             fig, ax = plt.subplots()
-            h1 = plt.plot(sorted_samples, sorted_results, 'ko', figure=fig)
+            plt.plot(sorted_samples, sorted_results, 'ko', figure=fig)
             yl = ax.get_ylim()
 
-            X_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
-            h2 = plt.plot(2 * [X_center], yl, 'b-', figure=fig)
+            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
+            plt.plot(2 * [x_center], yl, 'b-', figure=fig)
 
             #            h3 = plt.plot( sorted_samples, sorted_fitted, 'r-', figure=fig)
             #
@@ -154,7 +153,7 @@ class OptimToolSPSAPlotter(BasePlotter):
             fig.clf()
             plt.close(fig)
 
-            del h1, h2, ax, fig
+            del ax, fig
 
         elif d_dynamic == 2:
             x0 = data_prev_iter[dynamic_param_names[0]]
@@ -166,10 +165,10 @@ class OptimToolSPSAPlotter(BasePlotter):
 
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-            h1 = ax.scatter(x0, x1, y, c='k', marker='o', figure=fig)
+            ax.scatter(x0, x1, y, c='k', marker='o', figure=fig)
             # i = int(prev_iter)
 
-            X_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names].values[prev_iter]
+            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names].values[prev_iter]
 
             # h2 = ax.scatter( X_center[0],
             #            X_center[1], 
@@ -214,4 +213,4 @@ class OptimToolSPSAPlotter(BasePlotter):
             fig.clf()
             plt.close(fig)
 
-            del h1, ax, fig  # h2, h4, h5, h6, h3
+            del ax, fig  # h2, h4, h5, h6, h3
