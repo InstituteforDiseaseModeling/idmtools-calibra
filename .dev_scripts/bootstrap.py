@@ -95,6 +95,9 @@ def process_output(line):
         line = line.strip().translate(translator)
         logger.debug("".join(ch for ch in line if unicodedata.category(ch)[0] != "C"))
 
+# install wheel first to benefit from binaries
+for line in execute(["pip", "install", "wheel"], cwd=join(base_directory, 'docs')):
+    process_output(line)
 
 # install docs
 for install_dir in [join(base_directory, 'docs')]:
