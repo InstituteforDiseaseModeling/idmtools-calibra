@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from itertool.algorithms.fisher_inf_matrix import perturbed_points
 from itertool.resamplers.base_resampler import BaseResampler
 from itertool.resamplers.calibration_point import CalibrationPoint
@@ -10,6 +11,12 @@ class RandomPerturbationResampler(BaseResampler):
         :param kwargs: These are arguments passed directly to the perturbed points generation routine.
         """
         super().__init__()
+        # TODO What are these? EEK
+        self.center_point = None
+        self.resampled_points_df: pd.DataFrame = None
+        # Will hold out transforms perturbed points to CalibrationPoint Objects
+        self.resampled_points = None
+
         self.resample_kwargs = kwargs
 
     def resample(self, calibrated_points, selection_values, initial_calibration_points):
@@ -23,6 +30,8 @@ class RandomPerturbationResampler(BaseResampler):
 
         Args:
             calibrated_points: input points for this resampling method
+            selection_values:
+            initial_calibration_points:
 
         Returns: 
             A list of resampled Point objects
@@ -46,6 +55,16 @@ class RandomPerturbationResampler(BaseResampler):
         return self.resampled_points, for_post_analysis
 
     def post_analysis(self, resampled_points, analyzer_results, from_resample=None):
+        """
+
+        Args:
+            resampled_points:
+            analyzer_results:
+            from_resample:
+
+        Returns:
+
+        """
         super().post_analysis(resampled_points, analyzer_results, from_resample=from_resample)
 
         # write the initial center point for later reference
@@ -62,9 +81,15 @@ class RandomPerturbationResampler(BaseResampler):
         output_filename = os.path.join(self.output_location, 'LLdata.csv')
         resampled_points_df_ll.to_csv(output_filename)
 
-    def generate_perturbed_points(self, center_point):
+    def generate_perturbed_points(self, center_point) -> pd.DataFrame:
         """
         given center and generate perturbed points
+
+        Args:
+            center_point: center point
+
+        Returns:
+
         """
         as_type = CalibrationPoint.NUMPY
         names = center_point.get_attribute('Name', parameter_type=CalibrationPoint.DYNAMIC)

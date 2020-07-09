@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from itertools import zip_longest
 import os
-from simtools.Analysis.AnalyzeManager import AnalyzeManager
-from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
+from idmtools.analysis.analyze_manager import AnalyzeManager
+from idmtools.core import ItemType
 from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 
 
@@ -43,6 +43,7 @@ class BaseResampler(metaclass=ABCMeta):
         exp_builder = self.calib_manager.exp_builder_func(point_dicts, n_replicates=1)
 
         # Create an experiment manager
+        # TODO Refactor this portion
         manager = ExperimentManagerFactory.from_cb(self.calib_manager.config_builder)
         exp_name = self.calib_manager.name + '_resample_step_%d' % resample_step
 
@@ -58,7 +59,7 @@ class BaseResampler(metaclass=ABCMeta):
         :return: The supplied points_ran with their .likelihood attribute set, AND the direct results of the analyzer
                  as a list.
         """
-        am = AnalyzeManager(analyzers=analyzers, exp_list=experiment)
+        am = AnalyzeManager(analyzers=analyzers, ids=[(experiment.id, ItemType.EXPERIMENT)])
         am.analyze()
 
         # compute a single likelihood value from all of the analyzers on a per-simulation basis

@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-
 from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 from itertool.resamplers.calibration_points import CalibrationPoints
 

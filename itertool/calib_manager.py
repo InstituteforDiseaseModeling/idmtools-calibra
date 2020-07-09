@@ -5,6 +5,8 @@ import shutil
 from datetime import datetime
 from logging import getLogger
 import pandas as pd
+
+from idmtools.utils.json import IDMJSONEncoder
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
 from simtools.DataAccess.DataStore import DataStore
@@ -12,7 +14,6 @@ from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManage
 from simtools.ModBuilder import ModBuilder, ModFn
 from simtools.SetupParser import SetupParser
 from simtools.Utilities.COMPSUtilities import COMPS_login
-from simtools.Utilities.Encoding import NumpyEncoder
 from simtools.Utilities.Experiments import validate_exp_name, retrieve_experiment
 from simtools.Utilities import verbose_timedelta
 
@@ -236,7 +237,7 @@ class CalibManager(object):
                  'selected_block': SetupParser.selected_block,
                  'calibration_start': self.calibration_start}
         state.update(kwargs)
-        json.dump(state, open(os.path.join(self.name, 'CalibManager.json'), 'w'), indent=4, cls=NumpyEncoder)
+        json.dump(state, open(os.path.join(self.name, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
 
     def backup_calibration(self):
         """

@@ -1,11 +1,12 @@
 import argparse
 import os
-from calibtool import commands_args
+from itertool import commands_args
 from simtools.SetupParser import SetupParser
 import simtools.Utilities.Initialization as init
 from itertool.resample_manager import ResampleManager
 
 
+# TODO rewrite this in click if it can be done quickly
 def get_calib_manager(args, unknownArgs, force_metadata=False):
     mod = args.loaded_module
 

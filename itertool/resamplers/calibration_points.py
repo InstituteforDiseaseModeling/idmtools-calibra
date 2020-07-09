@@ -1,6 +1,5 @@
 import os
 import json
-
 from itertool.resamplers.calibration_point import CalibrationPoint
 
 

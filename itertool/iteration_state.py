@@ -2,18 +2,15 @@ import json
 import os
 import time
 from datetime import datetime
+from logging import getLogger
 import pandas as pd
+from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
-from simtools.Analysis.AnalyzeManager import AnalyzeManager
-from simtools.DataAccess.DataStore import DataStore
-from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.Utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
-from simtools.Utilities.Experiments import retrieve_experiment
-from simtools.Utilities.General import init_logging
 from simtools.Utilities import verbose_timedelta
 
-logger = init_logging("Calibration")
+logger = getLogger("Calibration")
 
 
 class IterationState:
@@ -99,6 +96,7 @@ class IterationState:
     def resume(self, iter_step):
         # step 1: If we know we are running -> recreate the exp_manager
         if iter_step.value >= StatusPoint.running.value:
+            # TODO port to new idmtools
             self.exp_manager = ExperimentManagerFactory.from_experiment(retrieve_experiment(self.experiment_id))
 
         # step 2: restore next_point
@@ -214,10 +212,12 @@ class IterationState:
         Cache the relevant experiment and simulation information to the IterationState.
         """
         if self.simulations:
+            # TODO port to idmtools code
             logger.info('Reloading simulation data from cached iteration (%s) state.' % self.iteration)
             self.exp_manager = ExperimentManagerFactory.from_experiment(
                 DataStore.get_experiment(self.experiment_id))
         else:
+            # TODO port to idmtools code
             logger.debug('Iteration has no simulations yet, creating them.')
             self.exp_manager = ExperimentManagerFactory.init()
 
@@ -250,8 +250,10 @@ class IterationState:
             return self.results['total']
 
         if not self.exp_manager:
+            # TODO port to idmtools code
             self.exp_manager = ExperimentManagerFactory.from_experiment(self.experiment_id)
 
+        # TODO port to new analyze manager
         analyzerManager = AnalyzeManager(exp_list=self.exp_manager.experiment,
                                          analyzers=self.analyzer_list,
                                          working_dir=self.iteration_directory,
@@ -354,19 +356,10 @@ class IterationState:
             return cls(**json.load(f, object_hook=json_numpy_obj_hook))
 
     def to_file(self):
-        state = {
-            'status': self.status.name,
-            'samples_for_this_iteration': self.samples_for_this_iteration,
-            'analyzers': self.analyzers,
-            'iteration': self.iteration,
-            'iteration_start': self.iteration_start,
-            'results': self.results,
-            'calibration_name': self.calibration_name,
-            'experiment_id': self.experiment_id,
-            'simulations': self.simulations,
-            'next_point': self.next_point_algo.get_state(),
-            'suite_id': self.suite_id
-        }
+        state = dict(status=self.status.name, samples_for_this_iteration=self.samples_for_this_iteration, analyzers=self.analyzers,
+                     iteration=self.iteration, iteration_start=self.iteration_start, results=self.results,
+                     calibration_name=self.calibration_name, experiment_id=self.experiment_id, simulations=self.simulations,
+                     next_point=self.next_point_algo.get_state(), suite_id=self.suite_id)
 
         with open(self.iteration_file, 'w') as f:
             json.dump(state, f, indent=4, cls=NumpyEncoder)
