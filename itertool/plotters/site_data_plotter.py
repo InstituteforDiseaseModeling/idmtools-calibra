@@ -216,7 +216,7 @@ class SiteDataPlotter(BasePlotter):
 
         # Retrieve the mapping between simID and output file path
         if location == "HPC":
-            sims_paths = CompsDTKOutputParser.createSimDirectoryMap(suite_id=suite_id, save=False)
+            sims_paths = CompsDTKOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
         else:
             sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
 
