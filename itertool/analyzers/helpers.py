@@ -8,14 +8,12 @@ import numpy.ma as ma
 import pandas as pd
 import numpy as np
 
-import dtk.utils.parsers.malaria_summary as malaria_summary
+from itertool.analyzers import malaria_summary
 
 logger = logging.getLogger(__name__)
 
 
 # TODO Where should we move some disease specific stuff?
-
-
 def grouped_df(df, pfprdict, index, column_keep, column_del):
     """
     Recut dataframe to recategorize data into desired age and parasitemia bins
