@@ -47,23 +47,7 @@ autodoc_default_options = {
     'exclude-members': '__all__'
 }
 
-autodoc_mock_imports = ['shapefile',
-                        'polyline',
-                        'psycopg2',
-                        'npyscreen',
-                        'wx',
-                        '_curses',
-                        'ConfigParser',
-                        'MenuForm',
-                        'osm2nx',
-                        'pika',
-                        'create_experiment',
-                        'create_simulation',
-                        'dramatiq',
-                        'docker_run',
-                        'dramatiq.GenericActor',
-                        'GenericActor'
-                        ]
+autodoc_mock_imports = []
 
 
 napoleon_google_docstring = True
@@ -86,8 +70,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'IDM-Tools'
-copyright = u'2020, Intellectual Ventures Management, LLC (IVM). All rights reserved'
+project = u'itertool'
+copyright = u'2020, Bill & Melinda Gates Foundation. All rights reserved.'
 author = u'Institute for Disease Modeling'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -291,7 +275,7 @@ html_use_opensearch = 'www.idmod.org/docs/'
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'IDM-Tools'
+htmlhelp_basename = 'itertool'
 
 # -- Options for LaTeX output ---------------------------------------------
 

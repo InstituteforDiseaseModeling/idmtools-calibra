@@ -1,6 +1,6 @@
-=================
+=====================
 Welcome to |itertool|
-=================
+=====================
 
 |itertool| give short description on purpose of library.
 
