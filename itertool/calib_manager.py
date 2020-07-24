@@ -4,20 +4,24 @@ import re
 import shutil
 from datetime import datetime
 from logging import getLogger
-import pandas as pd
 
-from idmtools.utils.json import IDMJSONEncoder
-from itertool.iteration_state import IterationState
-from itertool.utils import StatusPoint
+import pandas as pd
 from simtools.DataAccess.DataStore import DataStore
 from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
 from simtools.ModBuilder import ModBuilder, ModFn
 from simtools.SetupParser import SetupParser
+from simtools.Utilities import verbose_timedelta
 from simtools.Utilities.COMPSUtilities import COMPS_login
 from simtools.Utilities.Experiments import validate_exp_name, retrieve_experiment
-from simtools.Utilities import verbose_timedelta
 
+from idmtools.core.logging import setup_logging
+from idmtools.utils.json import IDMJSONEncoder
+from itertool.iteration_state import IterationState
+from itertool.utils import StatusPoint
+
+setup_logging(log_filename="itertool.log")
 logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 class SampleIndexWrapper(object):
@@ -211,9 +215,9 @@ class CalibManager(object):
         Get the final samples from the next point algorithm.
         """
         final_samples = self.next_point.get_final_samples()
-        print("\nFinal samples")
+        user_logger.info("\nFinal samples")
         for k, v in final_samples['final_samples'].items():
-            print("{}: {}".format(k, v))
+            user_logger.info("{}: {}".format(k, v))
 
         self.cache_calibration(**final_samples)
 

@@ -23,16 +23,20 @@
 #   pip install argparse
 # =============================================================================
 
-# =============================================================================
-import urllib
-import re
-from bs4 import BeautifulSoup
 import argparse
 import glob
-import sys
-import os.path
 import json
+import os.path
+# =============================================================================
+import re
+import sys
 from datetime import datetime
+from logging import getLogger
+
+from bs4 import BeautifulSoup
+
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 # -----------------------------------------------------------------------------
@@ -43,7 +47,8 @@ def process_file(file):
         f = open(file, encoding="utf-8")
         html = f.readlines()
     except BaseException as ex:
-        print("Exception processing file {0}: {1}", file, str(ex))
+        logger.exception(ex)
+        user_logger.error("Exception processing file {0}: {1}", file, str(ex))
         return None
     html = " ".join(html)
     soup = BeautifulSoup(html, "html.parser")

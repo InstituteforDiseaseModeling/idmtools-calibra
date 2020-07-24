@@ -1,14 +1,16 @@
 import logging
 import math
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import norm
 from scipy.special import gammaln  # for calculation of mu_r
+from scipy.stats import norm
+
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
-logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger('user')
 
 
 class OptimTool(NextPointAlgorithm):
@@ -64,7 +66,7 @@ class OptimTool(NextPointAlgorithm):
                 """
                 /!\\ WARNING /!\\ the OptimTool requires at least one of params with Dynamic set to True. Exiting...                  
                 """
-            print(warning_note)
+            user_logger.warning(warning_note)
             exit()
 
     def resolve_args(self, iteration):
@@ -109,7 +111,7 @@ class OptimTool(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         with pd.option_context("display.max_rows", 500, "display.max_columns", 500):
-            print(self.state)
+            logger.info(self.state)
             raw_input('resolve_args')
         """
 
@@ -145,7 +147,7 @@ class OptimTool(NextPointAlgorithm):
 
     def clamp(self, X):
 
-        # print('X.before:\n', X)
+        # logger.info('X.before:\n', X)
 
         # X should be a data frame
         for pname in X.columns:
@@ -188,7 +190,7 @@ class OptimTool(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         for param in self.params:
-            print(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
+            user_logger.info(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
             self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], param['Min'], param['Max'],
                                                param['Dynamic']]
 
@@ -213,7 +215,7 @@ class OptimTool(NextPointAlgorithm):
         mod = sm.OLS(latest_results, sm.add_constant(latest_dynamic_samples))
 
         mod_fit = mod.fit()
-        # print(mod_fit.summary())
+        # user_logger.info(mod_fit.summary())
 
         # Regression parameters for plotting / analysis
         self.regression = self.regression.query('Iteration < @iteration')
@@ -234,28 +236,28 @@ class OptimTool(NextPointAlgorithm):
         """
         #L1_wt : scalar : The fraction of the penalty given to the L1 penalty term. Must be between 0 and 1 (inclusive). If 0, the fit is ridge regression. If 1, the fit is the lasso.
         mod_fit = mod.fit_regularized(method='coord_descent', maxiter=10000, alpha=1.0, L1_wt=1.0, start_params=None, cnvrg_tol=1e-08, zero_tol=1e-08)
-        print(mod_fit.summary())
+        user_logger.info(mod_fit.summary())
 
         from sklearn import linear_model
         clf = linear_model.Lasso(alpha=1.0, fit_intercept=True, normalize=True, precompute=False, copy_X=True, max_iter=1000, tol=0.0001, warm_start=False, positive=False, random_state=None, selection='cyclic')
         clf.fit(latest_dynamic_samples, latest_results)
 
-        print(clf.coef_)
-        print(clf.intercept_)
+        user_logger.info(clf.coef_)
+        user_logger.info(clf.intercept_)
         y = clf.predict(latest_dynamic_samples)
-        print(zip(latest_results, y))
-        print('R2:', clf.score(latest_dynamic_samples, latest_results))
+        user_logger.info(zip(latest_results, y))
+        user_logger.info('R2:', clf.score(latest_dynamic_samples, latest_results))
 
 
-        print('LassoCV')
+        user_logger.info('LassoCV')
         cvf = linear_model.LassoCV(eps=0.001, n_alphas=100, alphas=None, fit_intercept=True, normalize=True, precompute='auto', max_iter=1000, tol=0.0001, copy_X=True, cv=None, verbose=False, n_jobs=-1, positive=False, random_state=None, selection='cyclic')
         cvf.fit(latest_dynamic_samples, latest_results)
 
-        print(cvf.coef_)
-        print(cvf.intercept_)
+        user_logger.info(cvf.coef_)
+        user_logger.info(cvf.intercept_)
         y = cvf.predict(latest_dynamic_samples)
-        print(zip(latest_results, y))
-        print('R2:', cvf.score(latest_dynamic_samples, latest_results))
+        user_logger.info(zip(latest_results, y))
+        user_logger.info('R2:', cvf.score(latest_dynamic_samples, latest_results))
         """
 
         self.fit_summary = mod_fit.summary().as_csv()
@@ -266,7 +268,7 @@ class OptimTool(NextPointAlgorithm):
         # Choose X_center for this iteration based on previous
         old_center = self._get_X_center(iteration - 1)
         if mod_fit.rsquared > self.rsquared_thresh:
-            # print('Good R^2 (%f), using params: '%mod_fit.rsquared, mod_fit.params)
+            # user_logger.info('Good R^2 (%f), using params: '%mod_fit.rsquared, mod_fit.params)
             coef = mod_fit.params[1:]  # Drop constant
             den = np.sqrt(
                 sum([(self.Xmax[pname] - self.Xmin[pname]) ** 2 * c ** 2 for c, pname in zip(coef, dynamic_params)]))
@@ -276,7 +278,7 @@ class OptimTool(NextPointAlgorithm):
                                   in zip(old_center_of_dynamic_params, coef, dynamic_params)]
 
         else:
-            # print('Bad R^2 (%f)'%mod_fit.rsquared)
+            # user_logger.info('Bad R^2 (%f)'%mod_fit.rsquared)
             max_idx = np.argmax(latest_results)
             logger.info('Stepping to argmax of %f at:' % latest_results[max_idx], latest_dynamic_samples[max_idx])
             new_dynamic_center = latest_dynamic_samples[max_idx].tolist()
@@ -360,7 +362,7 @@ class OptimTool(NextPointAlgorithm):
         return samples
 
     def end_condition(self):
-        # print("end_condition")
+        # user_logger.info("end_condition")
         # Stopping Criterion: good rsqared with small norm?
         # Return True to stop, False to continue
         logger.info('Continuing iterations ...')

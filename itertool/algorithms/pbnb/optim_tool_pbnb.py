@@ -1,13 +1,15 @@
 import copy
-import numpy as np
 import logging
 import operator
 import os
-import sys
 import pickle
-from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
+import sys
+
+import numpy as np
 import pandas as pd
+
 import itertool.algorithms.pbnb.m_intial_paramters_setting as par
+from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 from itertool.algorithms.pbnb.c_sub_region import cSubRegion
 from itertool.algorithms.pbnb.fun_pbnb_support_functions import fun_order_subregion, fun_replication_update, \
     fun_sample_points_generator_deterministic, fun_sample_points_generator_noise, fun_ci_builder, fun_order_region, \
@@ -19,6 +21,7 @@ logger = logging.getLogger('PBnB_application')
 fh = logging.FileHandler('PBnB_running' + '-debug.log')
 fh.setLevel(logging.INFO)
 logger.addHandler(fh)
+user_logger = logging.getLogger('user')
 
 
 class OptimToolPBnB(NextPointAlgorithm):
@@ -83,7 +86,7 @@ class OptimToolPBnB(NextPointAlgorithm):
     def get_samples_for_iteration(self, iteration):
         df_samples = self.fun_probability_branching_and_bound(iteration)
         if len(df_samples) >= self.i_max_num_simulation_per_run:
-            print("simulation per run sent to COMPS is exceeded the limitation {}".format(
+            user_logger.error("simulation per run sent to COMPS is exceeded the limitation {}".format(
                 self.i_max_num_simulation_per_run))
             sys.exit()
         # return self.fun_generate_samples_from_df(df_samples[[p['Name'] for p in self.params]+['Run_Number']])
@@ -322,49 +325,49 @@ class OptimToolPBnB(NextPointAlgorithm):
 
     def print_results_for_iteration(self):
         if self.b_stopping_branchable is True:
-            print('no branchable subregions')
+            user_logger.info('no branchable subregions')
             for i in (i for i in self.l_subr if i.b_activate is True):
-                print('l_coordinate_lower: ' + str(i.l_coordinate_lower))
-                print('l_coordinate_upper: ' + str(i.l_coordinate_upper))
-                print('activate: ' + str(i.b_activate))
-                print('label: ' + str(i.s_label))
-                print('worst: ' + str(i.b_worst))
-                print('elite: ' + str(i.b_elite))
+                user_logger.info('l_coordinate_lower: ' + str(i.l_coordinate_lower))
+                user_logger.info('l_coordinate_upper: ' + str(i.l_coordinate_upper))
+                user_logger.info('activate: ' + str(i.b_activate))
+                user_logger.info('label: ' + str(i.s_label))
+                user_logger.info('worst: ' + str(i.b_worst))
+                user_logger.info('elite: ' + str(i.b_elite))
         else:
-            print('reach the maximum number of iteration')
-            print('[f_CI_u,f_CI_l]: ' + str([self.f_CI_u, self.f_CI_l]))
+            user_logger.info('reach the maximum number of iteration')
+            user_logger.info('[f_CI_u,f_CI_l]: ' + str([self.f_CI_u, self.f_CI_l]))
             for i in (i for i in self.l_subr if i.b_activate is True and i.s_label == 'P'):
-                print('l_coordinate_lower: ' + str(i.l_coordinate_lower))
-                print('l_coordinate_upper: ' + str(i.l_coordinate_upper))
-                print('activate: ' + str(i.b_activate))
-                print('label: ' + str(i.s_label))
-                print('worst: ' + str(i.b_worst))
-                print('elite: ' + str(i.b_elite))
-                print('i_min_sample: ' + str(i.i_min_sample))
-                print('i_max_sample: ' + str(i.i_max_sample))
-                print('f_min_diff_sample_mean: ' + str(i.f_min_diff_sample_mean))
-                print('f_max_var: ' + str(i.f_max_var))
-                # print ('pd_sample_record: ')
-                # print (i.pd_sample_record)
-                print('')
+                user_logger.info('l_coordinate_lower: ' + str(i.l_coordinate_lower))
+                user_logger.info('l_coordinate_upper: ' + str(i.l_coordinate_upper))
+                user_logger.info('activate: ' + str(i.b_activate))
+                user_logger.info('label: ' + str(i.s_label))
+                user_logger.info('worst: ' + str(i.b_worst))
+                user_logger.info('elite: ' + str(i.b_elite))
+                user_logger.info('i_min_sample: ' + str(i.i_min_sample))
+                user_logger.info('i_max_sample: ' + str(i.i_max_sample))
+                user_logger.info('f_min_diff_sample_mean: ' + str(i.f_min_diff_sample_mean))
+                user_logger.info('f_max_var: ' + str(i.f_max_var))
+                # user_logger.info ('pd_sample_record: ')
+                # user_logger.info (i.pd_sample_record)
+                user_logger.info('')
             for i in (i for i in self.l_subr if i.b_activate is True and i.s_label == 'M'):
-                print('l_coordinate_lower: ' + str(i.l_coordinate_lower))
-                print('l_coordinate_upper: ' + str(i.l_coordinate_upper))
-                print('activate: ' + str(i.b_activate))
-                print('label: ' + str(i.s_label))
-                print('worst: ' + str(i.b_worst))
-                print('elite: ' + str(i.b_elite))
-                print('i_min_sample: ' + str(i.i_min_sample))
-                print('i_max_sample: ' + str(i.i_max_sample))
-                print('f_min_diff_sample_mean: ' + str(i.f_min_diff_sample_mean))
-                print('f_max_var: ' + str(i.f_max_var))
-                # print ('pd_sample_record: ')
-                # print (i.pd_sample_record)
-                print('')
-                # print ('pd_sample_record: ')
-                # print (i.pd_sample_record.loc[0])
-                # print ('pd_sample_record: ')
-                # print (i.pd_sample_record.loc[len(i.pd_sample_record)])
+                user_logger.info('l_coordinate_lower: ' + str(i.l_coordinate_lower))
+                user_logger.info('l_coordinate_upper: ' + str(i.l_coordinate_upper))
+                user_logger.info('activate: ' + str(i.b_activate))
+                user_logger.info('label: ' + str(i.s_label))
+                user_logger.info('worst: ' + str(i.b_worst))
+                user_logger.info('elite: ' + str(i.b_elite))
+                user_logger.info('i_min_sample: ' + str(i.i_min_sample))
+                user_logger.info('i_max_sample: ' + str(i.i_max_sample))
+                user_logger.info('f_min_diff_sample_mean: ' + str(i.f_min_diff_sample_mean))
+                user_logger.info('f_max_var: ' + str(i.f_max_var))
+                # user_logger.info ('pd_sample_record: ')
+                # user_logger.info (i.pd_sample_record)
+                user_logger.info('')
+                # user_logger.info ('pd_sample_record: ')
+                # user_logger.info (i.pd_sample_record.loc[0])
+                # user_logger.info ('pd_sample_record: ')
+                # user_logger.info (i.pd_sample_record.loc[len(i.pd_sample_record)])
 
     def set_results_for_iteration(self, iteration, results):
         logger.info('================begin: set_results_for_iteration================')
@@ -519,7 +522,7 @@ class OptimToolPBnB(NextPointAlgorithm):
         return results.to_dict(orient='list')
 
     def get_final_samples(self):
-        # print the best sample
+        # user_logger.info(" the best sample")
         return {'best_sample': min([p.i_min_sample for p in self.l_subr])}
 
     def update_summary_table(self, iteration_state, previous_results):

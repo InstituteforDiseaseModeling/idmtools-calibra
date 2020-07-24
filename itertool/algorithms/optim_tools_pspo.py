@@ -7,8 +7,8 @@ import pandas as pd
 
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
-logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger('user')
 
 
 class OptimToolPSPO(NextPointAlgorithm):
@@ -78,7 +78,7 @@ class OptimToolPSPO(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         with pd.option_context("display.max_rows", 500, "display.max_columns", 500):
-            print self.state
+            user_logger.info(self.state)
             raw_input('resolve_args')
         """
 
@@ -119,7 +119,7 @@ class OptimToolPSPO(NextPointAlgorithm):
 
     def clamp(self, X):
 
-        print('X.before:\n', X)
+        user_logger.info('X.before:\n', X)
 
         # X should be a data frame
         for pname in X.columns:
@@ -158,10 +158,10 @@ class OptimToolPSPO(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         for param in self.params:
-            print(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
+            user_logger.info(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
             self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], param['aprioriHessian'],
                                                param['Min'], param['Max'], param['Dynamic']]
-            # print self.state
+            # user_logger.info(self.state)
 
         initial_samples = self.choose_and_clamp_samples_for_iteration(iteration)
 
@@ -390,10 +390,10 @@ class OptimToolPSPO(NextPointAlgorithm):
 
         samples = pd.concat([xc] * (M + 1)).reset_index(drop=True)
         # samples = pd.concat( [xc]*(4*M+1) ).reset_index(drop=True)
-        print('samples:\n', samples)
-        print('deviations:\n', deviations)
+        user_logger.info('samples:\n', samples)
+        user_logger.info('deviations:\n', deviations)
         dt = np.transpose(deviations)
-        print('dt:\n', dt)
+        user_logger.info('dt:\n', dt)
 
         dynamic_state_by_param = dynamic_state.set_index('Parameter')
         for i, pname in enumerate(dynamic_state['Parameter']):
@@ -404,14 +404,14 @@ class OptimToolPSPO(NextPointAlgorithm):
         return samples
 
     def end_condition(self):
-        print("end_condition")
+        user_logger.info("end_condition")
         # Stopping Criterion: good rsqared with small norm?
         # Return True to stop, False to continue
         logger.info('Continuing iterations ...')
         return False
 
     def get_final_samples(self):
-        print("get_final_samples")
+        user_logger.info("get_final_samples")
         '''
         Resample Stage:
         '''

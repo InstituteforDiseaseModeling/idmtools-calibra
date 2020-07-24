@@ -1,7 +1,9 @@
 from __future__ import division
+
 import numpy as np
 import pandas as pd
 
+# maybe look at https://nipy.org/nipy/api/generated/nipy.algorithms.statistics.models.model.html
 DEFAULT_PERTURBATION_AND_RESOLUTION = 0.01
 
 

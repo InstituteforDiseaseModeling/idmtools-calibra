@@ -3,14 +3,17 @@ import os
 import time
 from datetime import datetime
 from logging import getLogger
+
 import pandas as pd
+from simtools.Utilities import verbose_timedelta
+from simtools.Utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
+
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
-from simtools.Utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
-from simtools.Utilities import verbose_timedelta
 
-logger = getLogger("Calibration")
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 class IterationState:
@@ -261,7 +264,7 @@ class IterationState:
                                          force_manager_working_directory=True)
 
         if not analyzerManager.analyze():
-            print("Error encountered during analysis... Exiting")
+            user_logger.error("Error encountered during analysis... Exiting")
             exit()
 
         # Ask the analyzers to cache themselves
@@ -308,7 +311,7 @@ class IterationState:
             # If Calibration has been canceled -> exit
             if self.exp_manager.any_failed_or_cancelled():
                 # Kill the remaining simulations
-                print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
+                logger.error("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
                 self.kill()
                 exit()
 

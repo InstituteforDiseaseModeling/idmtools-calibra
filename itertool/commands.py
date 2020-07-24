@@ -1,9 +1,15 @@
 import argparse
 import os
-from itertool import commands_args
-from simtools.SetupParser import SetupParser
+from logging import getLogger
+
 import simtools.Utilities.Initialization as init
+from simtools.SetupParser import SetupParser
+
+from itertool import commands_args
 from itertool.resample_manager import ResampleManager
+
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 # TODO rewrite this in click if it can be done quickly
@@ -17,7 +23,7 @@ def get_calib_manager(args, unknownArgs, force_metadata=False):
 
                 run_calib_args = {'calib_manager': calib_manager}
             """
-        print(warning_note)
+        user_logger.warning(warning_note)
         manager = mod.calib_manager
     else:
         manager = mod.run_calib_args['calib_manager']
@@ -47,7 +53,7 @@ def get_resamplers(args, unknownArgs, force_metadata=False):
 
                 run_calib_args = {'resamplers': [xxx_resampler1, yyy_resampler2, ...]}
             """
-        print(warning_note)
+        user_logger.warning(warning_note)
         exit()
     else:
         resamplers = mod.run_calib_args['resamplers']
@@ -82,7 +88,7 @@ def resume(args, unknownArgs):
 
     if args.iter_step:
         if args.iter_step not in ['commission', 'analyze', 'plot', 'next_point']:
-            print("Invalid iter_step '%s', ignored." % args.iter_step)
+            user_logger.error("Invalid iter_step '%s', ignored." % args.iter_step)
             exit()
     manager = get_calib_manager(args, unknownArgs, force_metadata=True)
     iter_step = None if args.iter_step is None else StatusPoint[args.iter_step]
@@ -93,7 +99,7 @@ def cleanup(args, unknownArgs):
     manager = args.loaded_module.calib_manager
     # If no result present -> just exit
     if not os.path.exists(os.path.join(os.getcwd(), manager.name)):
-        print('No calibration to delete. Exiting...')
+        user_logger.error('No calibration to delete. Exiting...')
         exit()
     manager.cleanup()
 

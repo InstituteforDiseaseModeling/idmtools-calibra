@@ -2,12 +2,11 @@ import logging
 
 import numpy as np
 import pandas as pd
-from scipy.stats import multivariate_normal
 from scipy.spatial.distance import seuclidean
+from scipy.stats import multivariate_normal
 
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
-logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -401,9 +400,9 @@ class IMIS(NextPointAlgorithm):
             resample_idxs = np.random.choice(idxs, self.n_resamples, replace=True, p=probs)
         except ValueError:
             # To isolate dtk-tools issue #96
-            print(nonzero_idxs)
-            print(self.weights)
-            print(idxs)
+            logger.error(nonzero_idxs)
+            logger.error(self.weights)
+            logger.error(idxs)
             raise
 
         # Add the parameters

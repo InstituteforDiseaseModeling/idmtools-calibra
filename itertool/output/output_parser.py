@@ -4,6 +4,7 @@ import logging
 import os  # mkdir, path, etc.
 import threading  # for multi-threaded job submission and monitoring
 from io import StringIO, BytesIO
+
 import pandas as pd  # for reading csv files
 from COMPS.Data import QueryCriteria, Suite, Experiment
 
@@ -12,7 +13,8 @@ from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.simulation import Simulation
 from idmtools_platform_comps.utils.general import get_asset_for_comps_item
 
-logging.basicConfig(level=logging.DEBUG, format='(%(threadName)-10s) %(message)s')
+logger = logging.getLogger(__name__)
+user_logger = logging.getLogger('user')
 
 
 # TODO Remove this . Its very very very bad
@@ -29,7 +31,7 @@ def sims_from_experiment_id(exp_id):
 
 
 def workdirs_from_suite_id(suite_id):
-    # print('Simulation working directories for SuiteId = %s' % suite_id)
+    logger.debug('Simulation working directories for SuiteId = %s' % suite_id)
     s = Suite.get(suite_id)
     exps = s.get_experiments(QueryCriteria().select('id'))
     sims = []
@@ -186,7 +188,7 @@ class CompsDTKOutputParser(SimulationOutputParser):
             raise Exception('Unable to map COMPS simulations to output directories without Suite or Experiment ID.')
 
         if verbose:
-            print('Populated map of %d simulation IDs to output directories' % len(sim_map))
+            logger.info(f'Populated map of {len(sim_map)} simulation IDs to output directories')
 
         if save:
             cls.sim_dir_map = cls.sim_dir_map or {}
@@ -210,9 +212,9 @@ class CompsDTKOutputParser(SimulationOutputParser):
             try:
                 byte_arrays.update(dict(zip(transient, self.COMPS_simulation.retrieve_output_files(paths=transient))))
             except Exception as e:
-                print("Could not retrieve requested file(s) for simulation {} - Requested files: {}. Parser exiting..."
-                      .format(self.sim_id, transient))
-                print(e)
+                user_logger.error(f"Could not retrieve requested file(s) for simulation {self.sim_id} - "
+                                  f"Requested files: {transient}. Parser exiting...")
+                user_logger.error(e)
                 exit()
 
         if assets:
@@ -222,8 +224,8 @@ class CompsDTKOutputParser(SimulationOutputParser):
                 data_map = {k.replace("Assets", ""): v for k, v in data_map}
                 byte_arrays.update(data_map)
             except Exception:
-                print("Could not retrieve requested file(s) for simulation {} - Requested files: {}. Parser exiting..."
-                      .format(self.sim_id, assets))
+                user_logger.error(f"Could not retrieve requested file(s) for simulation {self.sim_id} - "
+                                  f"Requested files: {assets}. Parser exiting...")
                 exit()
 
         for filename, byte_array in byte_arrays.items():

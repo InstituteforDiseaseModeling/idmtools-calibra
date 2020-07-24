@@ -1,7 +1,13 @@
 import os
+from logging import getLogger
+
 import pandas as pd
+
 from itertool.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 from itertool.resamplers.calibration_points import CalibrationPoints
+
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 class ResampleManager:
@@ -31,7 +37,7 @@ class ResampleManager:
                 "Cannot restart from step 0. Run with no restart selected if resampling from the beginning is desired.")
 
     def resample_and_run(self):
-        print('Resampling (re)starting at step: %s' % self.first_step)
+        logger.info('Resampling (re)starting at step: %s' % self.first_step)
 
         # set the initial parameter points to resample from
         initial_calibrated_points = self.get_calibrated_points()

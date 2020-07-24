@@ -5,8 +5,8 @@ import pandas as pd
 
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
-logging.basicConfig(format='%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+user_logger = logging.getLogger(__name__)
 
 
 class OptimToolSPSA(NextPointAlgorithm):
@@ -77,7 +77,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         with pd.option_context("display.max_rows", 500, "display.max_columns", 500):
-            print(self.state)
+            user_logger.info(self.state)
             raw_input('resolve_args')
         """
 
@@ -118,7 +118,7 @@ class OptimToolSPSA(NextPointAlgorithm):
 
     def clamp(self, X):
 
-        # print("X.before:\n{}".format(X))
+        # logger.info("X.before:\n{}".format(X))
 
         # X should be a data frame
         for pname in X.columns:
@@ -161,12 +161,12 @@ class OptimToolSPSA(NextPointAlgorithm):
             hessian_dict = {p['Name']: p['aprioriHessian'] for p in self.params}
             # if (param['Dynamic'] is True):
             #     dummy_counter += 1
-            print(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
+            user_logger.info(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
             self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], hessian_dict,
                                                param['Min'], param['Max'], param['Dynamic']]
             # self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], param['aprioriHessian']*np.eye(1,size_of_dynamic_params,dummy_counter),
             #                                    param['Min'], param['Max'], param['Dynamic']]
-            print(self.state)
+            user_logger.info(self.state)
 
         initial_samples = self.choose_and_clamp_samples_for_iteration(iteration)
 
@@ -404,7 +404,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         xc.columns.name = ""
 
         samples = pd.concat([xc] * (4 * M + 1)).reset_index(drop=True)
-        # print(samples)
+        # user_logger.info(samples)
 
         dt = np.transpose(deviations)
 
@@ -416,7 +416,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         return samples
 
     def end_condition(self):
-        print("end_condition")
+        user_logger.info("end_condition")
         # Stopping Criterion: good rsqared with small norm?
         # Return True to stop, False to continue
         logger.info('Continuing iterations ...')
@@ -426,7 +426,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         """
         Resample Stage:
         """
-        print("get_final_samples")
+        user_logger.info("get_final_samples")
         state_by_iteration = self.state.set_index('Iteration')
         last_iter = sorted(state_by_iteration.index.unique())[-1]
 

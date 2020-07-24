@@ -1,8 +1,12 @@
 import argparse
-import os
 import glob
+import os
 import shutil
+from logging import getLogger
 from typing import List
+
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 def clean_package_dir(glob_file_patterns: List[str], glob_delete_patterns: List[str], delete_directories: List[str]):

@@ -1,6 +1,8 @@
 import logging
+
 import numpy as np
 import pandas as pd
+
 from itertool.algorithms.next_point_algorithm import NextPointAlgorithm
 
 logger = logging.getLogger(__name__)
@@ -253,7 +255,7 @@ class SeparatrixBHM(NextPointAlgorithm):
             tried = tried + n
             accepted = accepted + new_samples.shape[0]
             accepted_percent = 100 * accepted / tried
-            print('Found %d new samples, now have %d of %d. Acceptance rate is %.0f%%' % (
+            user_logger.info('Found %d new samples, now have %d of %d. Acceptance rate is %.0f%%' % (
                 new_samples.shape[0], next_samples.shape[0], N, accepted_percent))
 
         self.hyperparameters.loc[iteration] = np.append(self.gpc_vec[iteration].theta,

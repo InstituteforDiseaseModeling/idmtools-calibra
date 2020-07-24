@@ -1,15 +1,20 @@
+import itertools
 import os
+from logging import getLogger
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import itertools
-from sklearn.decomposition import PCA
 from matplotlib.patches import Ellipse
+from sklearn.decomposition import PCA
 
+from itertool.algorithms.fisher_inf_matrix import trunc_gauss, compute_fisher_inf_matrix
 from itertool.resamplers.base_resampler import BaseResampler
 from itertool.resamplers.calibration_point import CalibrationPoint
-from itertool.algorithms.fisher_inf_matrix import trunc_gauss, compute_fisher_inf_matrix
+
+logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 class CramerRaoResampler(BaseResampler):
@@ -89,9 +94,9 @@ class CramerRaoResampler(BaseResampler):
             np.asmatrix(np.diag(1 / (np.array(maximums) - np.array(minimums)))))
         pca = PCA(n_components=2)
         pca.fit(scaled_covariance)
-        print('covariance (scaled): \n', scaled_covariance)
-        print('principal axes: \n', pca.components_)
-        print('variance of first 2 principal components: \n', pca.explained_variance_)
+        user_logger.info('covariance (scaled): \n', scaled_covariance)
+        user_logger.info('principal axes: \n', pca.components_)
+        user_logger.info('variance of first 2 principal components: \n', pca.explained_variance_)
 
         resampled_points_list = trunc_gauss(center_point_as_list, covariance, minimums, maximums,
                                             **self.resample_kwargs)
