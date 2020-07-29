@@ -4,7 +4,7 @@ import os
 
 from idmtools_emodpy_malaria.analyzers.channel_by_season_cohort_analyzer import ChannelBySeasonCohortAnalyzer
 from idmtools_emodpy_malaria.analyzers.helpers import garki_ento_data
-from idmtools_emodpy_malaria.study_sites.entomology_calib_site import EntomologyCalibSite
+from idmtools_emodpy_malaria.emod_220.study_sites.entomology_calib_site import EntomologyCalibSite
 
 logger = logging.getLogger(__name__)
 

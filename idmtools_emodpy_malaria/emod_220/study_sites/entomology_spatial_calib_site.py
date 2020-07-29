@@ -1,10 +1,8 @@
 import logging
 from abc import ABCMeta
 
-from itertool.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
-
-from idmtools_emodpy_malaria.study_sites import \
-    vector_stats_report_fn
+from idmtools_emodpy_malaria.analyzers.channel_by_season_spatial_cohort_analyzer import ChannelBySeasonSpatialCohortAnalyzer
+from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import vector_stats_report_fn
 from itertool.calib_site import CalibSite
 
 logger = logging.getLogger(__name__)
