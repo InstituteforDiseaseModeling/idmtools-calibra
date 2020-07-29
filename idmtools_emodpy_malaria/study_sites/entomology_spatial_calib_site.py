@@ -1,14 +1,16 @@
 import logging
 from abc import ABCMeta
 
+from itertool.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
+
+from idmtools_emodpy_malaria.study_sites import \
+    vector_stats_report_fn
 from itertool.calib_site import CalibSite
-from itertool.study_sites.site_setup_functions import \
-    config_setup_fn, vector_stats_report_fn
 
 logger = logging.getLogger(__name__)
 
 
-class EntomologyCalibSite(CalibSite):
+class EntomologySpatialCalibSite(CalibSite):
     """
     An abstract class that implements the simulation setup for density-by-season-and-age analyses:
     - Laye, Burkina Faso
@@ -23,7 +25,6 @@ class EntomologyCalibSite(CalibSite):
 
     def get_setup_functions(self):
         return [
-            config_setup_fn(duration=21915),  # 60 years (with leap years)
             vector_stats_report_fn()
         ]
 
@@ -34,5 +35,5 @@ class EntomologyCalibSite(CalibSite):
             raise Exception("%s does not support %s reference_type, only %s.",
                             self.__class__.__name__, reference_type, site_ref_type)
 
-    # def get_analyzers(self):
-    #     return [ChannelBySeasonCohortAnalyzer(site=self, seasons=self.metadata['months'])]
+    def get_analyzers(self):
+        return [ChannelBySeasonSpatialCohortAnalyzer(site=self, seasons=self.metadata['months'])]

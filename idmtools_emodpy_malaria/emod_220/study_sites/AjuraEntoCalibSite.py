@@ -2,8 +2,8 @@ import calendar
 import logging
 import os
 
+from idmtools_emodpy_malaria.study_sites.entomology_calib_site import EntomologyCalibSite
 from itertool.analyzers.helpers import garki_multi_year_ento_data
-from itertool.study_sites.entomology_calib_site import EntomologyCalibSite
 
 logger = logging.getLogger(__name__)
 

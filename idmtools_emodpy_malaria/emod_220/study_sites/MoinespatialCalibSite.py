@@ -2,7 +2,7 @@ import calendar
 import logging
 import os
 
-from itertool.study_sites.entomology_spatial_calib_site import EntomologySpatialCalibSite
+from idmtools_emodpy_malaria.study_sites import EntomologySpatialCalibSite
 
 logger = logging.getLogger(__name__)
 
