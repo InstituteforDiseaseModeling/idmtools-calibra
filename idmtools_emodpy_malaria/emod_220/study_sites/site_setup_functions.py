@@ -1,6 +1,8 @@
 import json
 
 import numpy as np
+# TODO port this mess over
+# AHHHHHHHHHHHHH!
 from dtk.interventions.input_EIR import add_InputEIR
 from dtk.interventions.irs import add_node_IRS, add_IRS
 from dtk.interventions.itn import add_ITN

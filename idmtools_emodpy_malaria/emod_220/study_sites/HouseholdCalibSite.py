@@ -2,10 +2,9 @@ import logging
 from abc import ABCMeta
 
 import pandas as pd
-from calibtool.CalibSite import CalibSite
-from calibtool.analyzers.PositiveFractionByDistanceAnalyzer import PositiveFractionByDistanceAnalyzer
-from calibtool.analyzers.PrevalenceByRoundAnalyzer import PrevalenceByRoundAnalyzer
-from calibtool.study_sites.site_setup_functions import *
+
+from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import *
+from itertool.calib_site import CalibSite
 
 logger = logging.getLogger(__name__)
 

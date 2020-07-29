@@ -1,10 +1,10 @@
 import logging
 from abc import ABCMeta
 
-from calibtool.CalibSite import CalibSite
-from calibtool.analyzers.ChannelByAgeCohortAnalyzer import PrevalenceByAgeCohortAnalyzer
-from calibtool.analyzers.Helpers import channel_age_json_to_pandas
-from calibtool.study_sites.site_setup_functions import config_setup_fn, summary_report_fn, site_input_eir_fn
+from idmtools_emodpy_malaria.analyzers.channel_by_age_cohort_analyzer import PrevalenceByAgeCohortAnalyzer
+from idmtools_emodpy_malaria.analyzers.helpers import channel_age_json_to_pandas
+from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import *
+from itertool.calib_site import CalibSite
 
 logger = logging.getLogger(__name__)
 

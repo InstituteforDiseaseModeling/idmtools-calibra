@@ -1,8 +1,7 @@
 import logging
 
-from malaria.study_sites.IncidenceCalibSite import IncidenceCalibSite
-from malaria.study_sites.site_setup_functions import config_setup_fn, summary_report_fn, site_input_eir_fn, \
-    add_treatment_fn
+from idmtools_emodpy_malaria.emod_220.study_sites.IncidenceCalibSite import IncidenceCalibSite
+from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import *
 
 logger = logging.getLogger(__name__)
 

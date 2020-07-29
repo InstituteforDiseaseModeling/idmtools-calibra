@@ -2,8 +2,7 @@ import calendar
 import logging
 import os
 
-from calibtool.analyzers.Helpers import ento_spatial_data
-from calibtool.study_sites.EntomologySpatialCalibSite import EntomologySpatialCalibSite
+from itertool.study_sites.entomology_spatial_calib_site import EntomologySpatialCalibSite
 
 logger = logging.getLogger(__name__)
 

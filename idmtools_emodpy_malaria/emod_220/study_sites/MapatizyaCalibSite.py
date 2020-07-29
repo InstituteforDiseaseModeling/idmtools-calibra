@@ -2,8 +2,9 @@ import logging
 import os
 
 import pandas as pd
-from calibtool.study_sites.site_setup_functions import *
-from malaria.study_sites.HouseholdCalibSite import HouseholdCalibSite
+
+from idmtools_emodpy_malaria.emod_220.study_sites.HouseholdCalibSite import HouseholdCalibSite
+from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import *
 
 logger = logging.getLogger(__name__)
 

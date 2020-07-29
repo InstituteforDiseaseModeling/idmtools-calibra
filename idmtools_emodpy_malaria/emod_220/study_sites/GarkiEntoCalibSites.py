@@ -2,8 +2,8 @@ import calendar
 import logging
 import os
 
-from idmtools_emodpy_malaria.analyzers.ChannelBySeasonCohortAnalyzer import ChannelBySeasonCohortAnalyzer
-from idmtools_emodpy_malaria.analyzers.Helpers import garki_ento_data
+from idmtools_emodpy_malaria.analyzers.channel_by_season_cohort_analyzer import ChannelBySeasonCohortAnalyzer
+from idmtools_emodpy_malaria.analyzers.helpers import garki_ento_data
 from itertool.study_sites.entomology_calib_site import EntomologyCalibSite
 
 logger = logging.getLogger(__name__)

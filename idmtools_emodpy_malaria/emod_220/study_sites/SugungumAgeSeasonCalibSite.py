@@ -2,8 +2,9 @@ import logging
 import os
 
 import numpy as np
-from calibtool.analyzers.Helpers import season_channel_age_density_csv_to_pandas
-from calibtool.study_sites.DensityCalibSite import DensityCalibSite
+
+from idmtools_emodpy_malaria.analyzers.helpers import season_channel_age_density_csv_to_pandas
+from idmtools_emodpy_malaria.emod_220.study_sites.DensityCalibSite import DensityCalibSite
 
 logger = logging.getLogger(__name__)
 

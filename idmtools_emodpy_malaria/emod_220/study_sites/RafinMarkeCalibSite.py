@@ -1,6 +1,6 @@
 import logging
 
-from calibtool.study_sites.PrevalenceCalibSite import PrevalenceCalibSite
+from idmtools_emodpy_malaria.emod_220.study_sites.PrevalenceCalibSite import PrevalenceCalibSite
 
 logger = logging.getLogger(__name__)
 
