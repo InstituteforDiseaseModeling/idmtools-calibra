@@ -10,8 +10,8 @@ class update_params:
     def __init__(self, params):
         self.params = params
 
-    def __call__(self, simulation):
-        return simulation.task.update_parameters(self.params)
+    def __call__(self, cb):
+        return cb.update_params(self.params)
 
 class DielmoCalibSite(IncidenceCalibSite):
 
