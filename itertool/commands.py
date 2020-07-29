@@ -2,9 +2,6 @@ import argparse
 import os
 from logging import getLogger
 
-import simtools.Utilities.Initialization as init
-from simtools.SetupParser import SetupParser
-
 from itertool import commands_args
 from itertool.resample_manager import ResampleManager
 
@@ -39,7 +36,6 @@ def get_calib_manager(args, unknownArgs, force_metadata=False):
     # Update the SetupParser to match the existing experiment environment/block if force_metadata == True
     if force_metadata:
         exp = manager.get_experiment_from_iteration(iteration=args.iteration, force_metadata=force_metadata)
-        SetupParser.override_block(exp.selected_block)
     return manager
 
 
@@ -62,8 +58,6 @@ def get_resamplers(args, unknownArgs, force_metadata=False):
     if force_metadata:
         exp = resamplers[0].calib_manager.get_experiment_from_iteration(iteration=args.iteration,
                                                                         force_metadata=force_metadata)
-        SetupParser.override_block(exp.selected_block)
-
     return resamplers
 
 
@@ -90,6 +84,7 @@ def resume(args, unknownArgs):
         if args.iter_step not in ['commission', 'analyze', 'plot', 'next_point']:
             user_logger.error("Invalid iter_step '%s', ignored." % args.iter_step)
             exit()
+    # TODO rewrite to pull config from local calib json file
     manager = get_calib_manager(args, unknownArgs, force_metadata=True)
     iter_step = None if args.iter_step is None else StatusPoint[args.iter_step]
     manager.resume_calibration(args.iteration, iter_step=iter_step)
@@ -130,8 +125,6 @@ def main():
 
     # run specified function passing in function-specific arguments
     args, unknownArgs = parser.parse_known_args()
-    # This is it! This is where SetupParser gets set once and for all. Until you run 'dtk COMMAND' again, that is.
-    init.initialize_SetupParser_from_args(args, unknownArgs)
     args.func(args, unknownArgs)
 
 
