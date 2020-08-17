@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 import pandas as pd
 import numpy as np
-from simtools.Analysis.BaseAnalyzers import BaseCalibrationAnalyzer
+from itertool.analyzers.BaseCalibrationAnalyzer import BaseCalibrationAnalyzer
 
 from malaria.analyzers.Helpers import convert_annualized, convert_to_counts, age_from_birth_cohort, aggregate_on_index
 from scipy.stats import binom
@@ -44,15 +44,15 @@ class ChannelByAgeCohortAnalyzer(BaseCalibrationAnalyzer):
                                        'Observations': (self.reference[self.population_channel]
                                                         * self.reference[self.channel])})
 
-    def filter(self, simulation):
+    def filter(self, item):
         """
         This analyzer only needs to analyze simulations for the site it is linked to.
         N.B. another instance of the same analyzer may exist with a different site
              and correspondingly different reference data.
         """
-        return simulation.tags.get('__site__', False) == self.site.name
+        return item.tags.get('__site__', False) == self.site.name
 
-    def select_simulation_data(self, data, simulation):
+    def map(self, data, item):
         """
         Extract data from output data and accumulate in same bins as reference.
         """
@@ -81,8 +81,8 @@ class ChannelByAgeCohortAnalyzer(BaseCalibrationAnalyzer):
         # Re-bin according to reference and return single-channel Series
         sim_data = aggregate_on_index(df, self.reference.index, keep=['Observations', 'Trials'])
 
-        sim_data.sample = simulation.tags.get('__sample_index__')
-        sim_data.sim_id = simulation.id
+        sim_data.sample = item.tags.get('__sample_index__')
+        sim_data.sim_id = item.id
 
         return sim_data
 
@@ -98,7 +98,7 @@ class ChannelByAgeCohortAnalyzer(BaseCalibrationAnalyzer):
         """
         return self.compare_fn(self.join_reference(sample, self.reference))
 
-    def finalize(self, all_data):
+    def reduce(self, all_data):
         """
         Calculate the output result for each sample.
         """
@@ -169,3 +169,45 @@ class IncidenceByAgeCohortAnalyzer(ChannelByAgeCohortAnalyzer):
     def __init__(self, site, weight=1, compare_fn=gamma_poisson_pandas, **kwargs):
         super(IncidenceByAgeCohortAnalyzer, self).__init__(site, weight, compare_fn, **kwargs)
 
+    def reduce_bk(self, all_data: dict):
+        selected = list(all_data.values())
+
+        # Stack selected_data from each parser, adding unique (sim_id) and shared (sample) levels to MultiIndex
+        combine_levels = ['sample', 'sim_id', 'channel']
+        combined = pd.concat(selected, axis=1,
+                             keys=[(s.tags.get('__sample_index__'), s.id) for s in all_data.keys()],
+                             names=combine_levels)
+
+        data = combined.groupby(level=['sample', 'channel'], axis=1).mean()
+
+        return data.groupby(level='sample', axis=1).apply(self.compare)
+
+    def map_bk(self, data: dict, item):
+        # Load data from simulation
+        data = data[self.filenames[0]]
+
+        # Get channels by age and time series
+        channel_series = summary_channel_to_pandas(data, self.channel)
+        population_series = summary_channel_to_pandas(data, self.population_channel)
+        channel_data = pd.concat([channel_series, population_series], axis=1)
+
+        # Convert Average Population to Person Years
+        person_years = convert_annualized(channel_data[self.population_channel],
+                                          start_day=channel_series.Start_Day,
+                                          reporting_interval=channel_series.Reporting_Interval)
+        channel_data['Trials'] = person_years
+
+        # Calculate Incidents from Annual Incidence and Person Years
+        channel_data['Observations'] = convert_to_counts(channel_data[self.channel], channel_data.Trials)
+
+        # Reset multi-index and perform transformations on index columns
+        df = channel_data.reset_index()
+        df = age_from_birth_cohort(df)  # calculate age from time for birth cohort
+
+        # Re-bin according to reference and return single-channel Series
+        sim_data = aggregate_on_index(df, self.reference.index, keep=['Observations', 'Trials'])
+
+        sim_data.sample = item.tags.get('__sample_index__')
+        sim_data.sim_id = item.uid
+
+        return sim_data
