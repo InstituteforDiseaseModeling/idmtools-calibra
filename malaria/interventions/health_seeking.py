@@ -1,7 +1,4 @@
-from dtk.utils.Campaign.CampaignClass import *
-
-
-def add_health_seeking(config_builder,
+def add_health_seeking(simulation,
                        start_day: int=0,
                        # Note: potential for overlapping drug treatments in the same individual
                        targets: list=None,
@@ -68,9 +65,12 @@ def add_health_seeking(config_builder,
     if drug is None:
         drug = ['Artemether', 'Lumefantrine']
     if nodeIDs:
-        nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+        nodeset_config = {
+            "Node_List": [nodeIDs],
+            "class": "NodeSetNodeList"
+        }
     else:
-        nodeset_config = NodeSetAll()
+        nodeset_config = {"class": "NodeSetAll"}
     if not node_property_restrictions:
         node_property_restrictions = []
     if not ind_property_restrictions:
@@ -81,11 +81,18 @@ def add_health_seeking(config_builder,
         targets = [{'trigger': 'NewClinicalCase', 'coverage': 0.1, 'agemin': 15, 'agemax': 70, 'seek': 0.4, 'rate': 0.3},
                    {'trigger': 'NewSevereCase', 'coverage': 0.8, 'seek': 0.6, 'rate': 0.5}]
 
-    receiving_drugs_event = BroadcastEvent(Broadcast_Event=broadcast_event_name)
+    receiving_drugs_event = {
+                               "Broadcast_Event": broadcast_event_name,
+                               "class": "BroadcastEvent"
+                            }
 
-    expire_recent_drugs = PropertyValueChanger(Target_Property_Key="DrugStatus", Target_Property_Value="RecentDrug",
-                                               Daily_Probability=1, Maximum_Duration=0,
-                                               Revert=drug_ineligibility_duration)
+    expire_recent_drugs = {
+                           "Maximum_Duration": 0,
+                           "Revert": drug_ineligibility_duration,
+                           "Target_Property_Key": "DrugStatus",
+                           "Target_Property_Value": "RecentDrug",
+                           "class": "PropertyValueChanger"
+                        }
 
     drug_config, drugs = get_drug_config(drug, receiving_drugs_event,
                                          drug_ineligibility_duration, expire_recent_drugs)
@@ -109,26 +116,32 @@ def add_health_seeking(config_builder,
             target_age_min = t['agemin']
             target_age_max = t['agemax']
 
-        health_seeking_event = CampaignEvent(Start_Day=start_day,
-                                             Nodeset_Config=nodeset_config,
-                                             Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                                                 Number_Repetitions=repetitions,
-                                                 Timesteps_Between_Repetitions=tsteps_btwn_repetitions,
-                                                 Intervention_Config=NodeLevelHealthTriggeredIV(
-                                                     Trigger_Condition_List=[t['trigger']],
-                                                     Duration=duration,
-                                                     Target_Demographic=target_demographic,
-                                                     Target_Age_Min=target_age_min,
-                                                     Target_Age_Max=target_age_max,
-                                                     Demographic_Coverage=t['coverage'] * t['seek'],
-                                                     Node_Property_Restrictions=node_property_restrictions,
-                                                     Property_Restrictions_Within_Node=ind_property_restrictions,
-                                                     Actual_IndividualIntervention_Config=actual_config)))
+        health_seeking_event = {
+            'Start_Day': start_day,
+            'Event_Coordinator_Config': {
+                'Number_Repetitions': repetitions,
+                'Timesteps_Between_Repetitions': tsteps_btwn_repetitions,
+                'Intervention_Config': {
+                    'Trigger_Condition_List': [t['trigger']],
+                    'Duration': duration,
+                    'Target_Demographic': target_demographic,
+                    'Target_Age_Min': target_age_min,
+                    'Target_Age_Max': target_age_max,
+                    'Demographic_Coverage': t['coverage'] * t['seek'],
+                    'Node_Property_Restrictions': node_property_restrictions,
+                    'Property_Restrictions_Within_Node': ind_property_restrictions,
+                    'Actual_IndividualIntervention_Config': actual_config,
+                    'class': 'NodeLevelHealthTriggeredIV'
+                },
+                'class': 'StandardInterventionDistributionEventCoordinator'
+            },
+            'class': 'CampaignEvent'
+        }
 
-        config_builder.add_event(health_seeking_event)
+        simulation.task.campaign.add_event(health_seeking_event)
 
 
-def add_health_seeking_by_chw( config_builder,
+def add_health_seeking_by_chw(config_builder,
                                start_day: int = 0,
                                targets: list = None,
                                drug: list = None,
@@ -191,9 +204,13 @@ def add_health_seeking_by_chw( config_builder,
         :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` object.
     """
     if nodeIDs:
-        nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+        nodeset_config = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
     else:
-        nodeset_config = NodeSetAll()
+        nodeset_config = {"class": "NodeSetAll"}
+
     if not node_property_restrictions:
         node_property_restrictions = []
     if not ind_property_restrictions:
@@ -219,28 +236,38 @@ def add_health_seeking_by_chw( config_builder,
         else:
             ind_property_restrictions = [drugstatus]
 
-    receiving_drugs_event = BroadcastEvent(Broadcast_Event="Received_Treatment")
+    receiving_drugs_event = {
+        'Broadcast_Event': "Received_Treatment",
+        'class': 'BroadcastEvent'
+    }
 
-    expire_recent_drugs = PropertyValueChanger(Target_Property_Key="DrugStatus", Target_Property_Value="RecentDrug",
-                                               Daily_Probability=1, Maximum_Duration=0,
-                                               Revert=drug_ineligibility_duration)
+    expire_recent_drugs = {
+        'Target_Property_Key': "DrugStatus",
+        'Target_Property_Value': "RecentDrug",
+        'Daily_Probability': 1,
+        'Maximum_Duration': 0,
+        'Revert': drug_ineligibility_duration,
+        'class': 'PropertyValueChanger'
+    }
 
     # NOTE: node property restrictions isn't working yet for CHWEC (3/29/17)
-    chw_config = CommunityHealthWorkerEventCoordinator(
-        Duration=duration,
-        Initial_Amount_Constant=1000,
-        Initial_Amount_Distribution="CONSTANT_DISTRIBUTION",
-        Max_Stock=1000,
-        Waiting_Period=7,
-        Days_Between_Shipments=90,
-        Amount_In_Shipment=1000,
-        Max_Distributed_Per_Day=5,
-        Target_Demographic="Everyone",
-        Target_Residents_Only=False,
-        Demographic_Coverage=1,
-        Trigger_Condition_List=["CHW_Give_Drugs"],
-        Property_Restrictions_Within_Node=ind_property_restrictions,
-        Node_Property_Restrictions=node_property_restrictions)
+    chw_config = {
+        'Duration': duration,
+        'Initial_Amount_Constant': 1000,
+        'Initial_Amount_Distribution': "CONSTANT_DISTRIBUTION",
+        'Max_Stock': 1000,
+        'Waiting_Period': 7,
+        'Days_Between_Shipments': 90,
+        'Amount_In_Shipment': 1000,
+        'Max_Distributed_Per_Day': 5,
+        'Target_Demographic': "Everyone",
+        'Target_Residents_Only': 0,
+        'Demographic_Coverage': 1,
+        'Trigger_Condition_List': ["CHW_Give_Drugs"],
+        'Property_Restrictions_Within_Node': ind_property_restrictions,
+        'Node_Property_Restrictions': node_property_restrictions,
+        'class': 'CommunityHealthWorkerEventCoordinator'
+    }
 
     if chw:
         for param, value in chw:
@@ -257,18 +284,19 @@ def add_health_seeking_by_chw( config_builder,
     actual_config = build_actual_treatment_cfg(0, drug_config, drugs)
     chw_config.Intervention_Config = actual_config
 
-    chw_event = CampaignEvent(
-        Start_Day=start_day,
-        Event_Coordinator_Config=chw_config,
-        Nodeset_Config=nodeset_config
-    )
+    chw_event = {
+        'Start_Day': start_day,
+        'Event_Coordinator_Config': chw_config,
+        'Nodeset_Config': nodeset_config,
+        'class': 'CampaignEvent'
+    }
 
     config_builder.add_event(chw_event)
     return
 
 
-def get_drug_config(drug: list=None, receiving_drugs_event: BroadcastEvent=None,
-                    drug_ineligibility_duration: int=0, expire_recent_drugs: PropertyValueChanger=None):
+def get_drug_config(drug: list=None, receiving_drugs_event=None,
+                    drug_ineligibility_duration: int = 0, expire_recent_drugs=None):
     """
     Create a list of drugs and (optional) broadcast event.
 
@@ -291,11 +319,19 @@ def get_drug_config(drug: list=None, receiving_drugs_event: BroadcastEvent=None,
 
     drugs = []
     for d in drug:
-        drugs.append(AntimalarialDrug(Cost_To_Consumer=1, Drug_Type=d))
+        antimalarial_drug = {
+            'Cost_To_Consumer': 1,
+            'Drug_Type': d,
+            'class': 'AntimalarialDrug'
+        }
+        drugs.append(antimalarial_drug)
     drugs.append(receiving_drugs_event)
     if drug_ineligibility_duration > 0:
         drugs.append(expire_recent_drugs)
-    drug_config = MultiInterventionDistributor(Intervention_List=drugs)
+    drug_config = {
+        'Intervention_List': drugs,
+        'class': 'MultiInterventionDistributor'
+    }
 
     return drug_config, drugs
 
@@ -318,10 +354,12 @@ def build_actual_treatment_cfg(rate: float=0, drug_config: any=None, drugs: list
         Drug distribution config
     """
     if rate > 0:
-        actual_config = DelayedIntervention(
-            Delay_Period_Distribution="EXPONENTIAL_DISTRIBUTION",
-            Delay_Period_Exponential=1.0/rate,
-            Actual_IndividualIntervention_Configs=drugs)
+        actual_config = {
+            'Delay_Period_Distribution': "EXPONENTIAL_DISTRIBUTION",
+            'Delay_Period_Exponential': 1.0/rate,
+            'Actual_IndividualIntervention_Configs': drugs,
+            'class': 'DelayedIntervention'
+        }
     else:
         actual_config = drug_config
 
