@@ -4,24 +4,15 @@ import re
 import shutil
 from datetime import datetime
 from logging import getLogger
-
 import pandas as pd
-from simtools.DataAccess.DataStore import DataStore
-from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
-from simtools.ModBuilder import ModBuilder, ModFn
-from simtools.SetupParser import SetupParser
-from simtools.Utilities import verbose_timedelta
-from simtools.Utilities.COMPSUtilities import COMPS_login
-from simtools.Utilities.Experiments import validate_exp_name, retrieve_experiment
-
-from idmtools.core.logging import setup_logging
 from idmtools.utils.json import IDMJSONEncoder
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
+from itertool.utilities.ModBuilder import ModBuilder, ModFn
+from itertool.utilities.helper import validate_exp_name
+from itertool.utilities.Display import verbose_timedelta
 
-setup_logging(log_filename="itertool.log")
 logger = getLogger(__name__)
-user_logger = getLogger('user')
 
 
 class SampleIndexWrapper(object):
@@ -34,9 +25,9 @@ class SampleIndexWrapper(object):
     def __init__(self, map_sample_to_model_input_fn):
         self.map_sample_to_model_input_fn = map_sample_to_model_input_fn
 
-    def __call__(self, cb, idx, *args, **kwargs):
-        params_dict = self.map_sample_to_model_input_fn(cb, *args, **kwargs)
-        params_dict.update(cb.set_param('__sample_index__', idx))
+    def __call__(self, simulation, idx, *args, **kwargs):
+        params_dict = self.map_sample_to_model_input_fn(simulation, *args, **kwargs)
+        params_dict.update(simulation.task.set_parameter('__sample_index__', idx))
         return params_dict
 
 
@@ -47,11 +38,13 @@ class CalibManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, config_builder, map_sample_to_model_input_fn,
+    def __init__(self, platform, task, map_sample_to_model_input_fn,
                  sites, next_point, name='calib_test', sim_runs_per_param_set=1, max_iterations=5, plotters=None):
 
         self.name = name
-        self.config_builder = config_builder
+        self.platform = platform
+        # self.config_builder = config_builder
+        self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
         self.sites = sites
         self.next_point = next_point
@@ -75,7 +68,8 @@ class CalibManager(object):
 
     @property
     def location(self):
-        return SetupParser.get('type') if self._location is None else self._location
+        # return SetupParser.get('type') if self._location is None else self._location
+        return 'HPC'  # zdu: te,p
 
     @location.setter
     def location(self, value):
@@ -85,8 +79,10 @@ class CalibManager(object):
     def suite_id(self):
         # Generate the suite ID if not present
         if not self.suites or self.suites[-1]['type'] != self.location:
-            exp_manager = ExperimentManagerFactory._factory(self.location)
-            suite_id = exp_manager.create_suite(self.name)
+            from idmtools.entities import Suite
+            suite = Suite(name="test")
+            suites = self.platform.create_items(suite)
+            suite_id = suites[0][1]
             self.suites.append({'id': suite_id, 'type': self.location})
             self.cache_calibration()
 
@@ -104,7 +100,8 @@ class CalibManager(object):
         if not validate_exp_name(self.name):
             exit()
 
-        self.location = SetupParser.get('type')
+        # self.location = SetupParser.get('type')
+        self.location = 'HPC'  # [TODO]: zdu: temp
 
         self.create_calibration(self.location)
 
@@ -167,13 +164,18 @@ class CalibManager(object):
 
         return IterationState(iteration=iteration,
                               calibration_name=self.name,
-                              location=self.location,
+                              platform=self.platform,
+                              sites=self.sites,
+                              # location=self.location,
                               suite_id=self.suite_id,
                               next_point_algo=self.next_point,
-                              exp_builder_func=self.exp_builder_func,
+                              map_sample_to_model_input_fn=self.map_sample_to_model_input_fn,
+                              # exp_builder_func=self.exp_builder_func,
+                              sim_runs_per_param_set=self.sim_runs_per_param_set,
                               site_analyzer_names=self.site_analyzer_names(),
                               analyzer_list=self.analyzer_list,
-                              config_builder=self.config_builder,
+                              # config_builder=self.config_builder,
+                              task=self.task,
                               plotters=self.plotters,
                               all_results=self.all_results,
                               calibration_start=self.calibration_start)
@@ -215,14 +217,14 @@ class CalibManager(object):
         Get the final samples from the next point algorithm.
         """
         final_samples = self.next_point.get_final_samples()
-        user_logger.info("\nFinal samples")
+        print("\nFinal samples")
         for k, v in final_samples['final_samples'].items():
-            user_logger.info("{}: {}".format(k, v))
+            print("{}: {}".format(k, v))
 
         self.cache_calibration(**final_samples)
 
         # remove any leftover experiments
-        self.cleanup_orphan_experiments()
+        # self.cleanup_orphan_experiments()     # no need for idmtools
 
     def cache_calibration(self, **kwargs):
         """
@@ -237,8 +239,8 @@ class CalibManager(object):
                  'param_names': self.param_names(),
                  'sites': self.site_analyzer_names(),
                  'results': self.serialize_results(),
-                 'setup_overlay_file': SetupParser.setup_file,
-                 'selected_block': SetupParser.selected_block,
+                 # 'setup_overlay_file': SetupParser.setup_file,
+                 # 'selected_block': SetupParser.selected_block,
                  'calibration_start': self.calibration_start}
         state.update(kwargs)
         json.dump(state, open(os.path.join(self.name, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
@@ -347,82 +349,30 @@ class CalibManager(object):
         else:
             return it, StatusPoint[iter_step]
 
-    def check_location(self, iteration_state):
-        """
-        - Handle the case: process got interrupted but it still runs on remote
-        - Handle location change case: may resume from commission instead
-        """
-        # Step 1: Checking possible location changes
-        exp_id = iteration_state.experiment_id
-        if not exp_id and iteration_state.status == StatusPoint.iteration_start:
-            return
-
-        exp = retrieve_experiment(exp_id)
-
-        if not exp:
-            var = input(
-                "Cannot restore Experiment 'exp_id: %s'. Force to resume from commission... Continue ? [Y/N]" % exp_id if exp_id else 'None')
-            # force to resume from commission
-            if var.upper() == 'Y':
-                iteration_state.resume_point = StatusPoint.commission
-            else:
-                logger.info("Answer is '%s'. Exiting...", var.upper())
-                exit()
-
-        # If location has been changed, will double check user for a special case before proceed...
-        if self.location != exp.location:
-            location = SetupParser.get('type')
-            var = input(
-                "Location has been changed from '%s' to '%s'. Resume will start from commission instead, do you want to continue? [Y/N]:  " % (
-                    exp.location, location))
-            if var.upper() == 'Y':
-                self.current_iteration.resume_point = StatusPoint.commission
-            else:
-                logger.info("Answer is '%s'. Exiting...", var.upper())
-                exit()
-
-    def load_experiment_from_iteration(self, iteration=None):
-        """
-        Load experiment for a given or the latest iteration
-        """
-        if iteration is None:
-            # restore the existing calibration data
-            calib_data = self.read_calib_data()
-
-            # Get the last iteration
-            latest_iteration = calib_data.get('iteration', None)
-        else:
-            latest_iteration = iteration
-
-        try:
-            # Restore IterationState
-            it = IterationState.from_file(os.path.join(self.name, 'iter%d' % latest_iteration, 'IterationState.json'))
-
-            # Get experiment by id
-            return DataStore.get_experiment(it.experiment_id)
-        except Exception as ex:
-            logger.exception(ex)
-            return None
-
     def kill(self):
-        """
-        Kill the current calibration
-        """
-        exp = self.load_experiment_from_iteration()
-        if not exp:
+        from idmtools.core import ItemType
+
+        calib_data = self.read_calib_data()
+        if not calib_data:
             return
 
-        # Cancel simulations for all active managers
-        try:
-            exp_manager = ExperimentManagerFactory.from_experiment(exp)
-            exp_manager.cancel_experiment()
-        except RuntimeError:
-            logger.info("Could not delete the associated experiment...")
-            return
+        suites = calib_data.get('suites')
+        for suite in suites:
+            suite_id = suite['id']
+            comps_suite = self.platform.get_item(suite_id, ItemType.SUITE, raw=True)
+            comps_exps = comps_suite.get_experiments()
+            for comps_exp in comps_exps:
+                try:
+                    comps_exp.delete()
+                except RuntimeError:
+                    logger.info("Could not delete the associated experiment...")
+                    return
 
-        logger.info("Waiting to complete cancellation...")
-        if exp_manager.location != "CLUSTER":
-            exp_manager.wait_for_finished(verbose=False, sleep_time=1)
+            try:
+                comps_suite.delete()
+            except RuntimeError:
+                logger.info(f"Could not delete suite ({suite_id})...")
+                return
 
         # Print confirmation
         logger.info("Calibration %s successfully cancelled!" % self.name)
@@ -440,41 +390,8 @@ class CalibManager(object):
             logger.info('Calib data cannot be read -> skip')
             calib_data = None
 
-        if calib_data:
-            with SetupParser.TemporaryBlock(calib_data['selected_block']):
-                # Retrieve suite ids and iter_count
-                suites = calib_data.get('suites')
-                iter_count = calib_data.get('iteration')
-
-                # Kill
-                self.kill()
-
-                # Delete the simulations too
-                logger.info('Cleaning up calibration %s' % self.name)
-                for i in range(0, iter_count + 1):
-                    # Get the iteration cache
-                    iteration_cache = os.path.join(self.name, 'iter%d' % i, 'IterationState.json')
-
-                    if not os.path.exists(iteration_cache):
-                        break
-                    # Retrieve the iteration state
-                    it = IterationState.from_file(iteration_cache)
-
-                    # Create the associated experiment manager and ask for deletion
-                    try:
-                        exp_mgr = ExperimentManagerFactory.from_experiment(DataStore.get_experiment(it.experiment_id))
-                        exp_mgr.hard_delete()
-                    except Exception as ex:
-                        logger.exception(ex)
-                        continue
-
-                # Delete all HPC suites (the local suites are only carried by experiments)
-                for suite in suites:
-                    if suite['type'] == "HPC":
-                        logger.info('Delete COMPS suite %s' % suite['id'])
-                        COMPS_login(SetupParser.get('server_endpoint'))
-                        from simtools.Utilities.COMPSUtilities import delete_suite
-                        delete_suite(suite['id'])
+        # Kill
+        self.kill()
 
         # Then delete the whole directory
         calib_dir = os.path.abspath(self.name)
@@ -498,91 +415,6 @@ class CalibManager(object):
         iteration_cache = os.path.join(self.name, 'iter%d' % iteration, 'IterationState.json')
         return IterationState.from_file(iteration_cache)
 
-    def get_experiment_from_iteration(self, iteration=None, force_metadata=False):
-        """
-        Retrieve experiment for a given iteration
-        """
-        exp = None
-
-        # Only check iteration for resume cases
-        if force_metadata:
-            iteration = self.adjust_iteration(iteration)
-            it = self.read_iteration_data(iteration)
-            exp = DataStore.get_experiment(it.experiment_id)
-
-        return exp
-
-    def adjust_iteration(self, iteration=None, calib_data=None):
-        """
-        Validate iteration against latest_iteration
-        return adjusted iteration
-        """
-        # If calib_data is None or Empty, load data
-        if calib_data is None or not calib_data:
-            calib_data = self.read_calib_data()
-
-        # Get latest iteration #
-        latest_iteration = calib_data.get('iteration', None)
-
-        # Handle special case
-        if latest_iteration is None:
-            return 0
-
-        # If no iteration passed in, take latest_iteration as instead
-        if iteration is None:
-            iteration = latest_iteration
-
-        # Adjust input iteration
-        if latest_iteration < iteration:
-            iteration = latest_iteration
-
-        return iteration
-
-    def cleanup_orphan_experiments(self):
-        """
-            - Display all orphan experiments for this calibration
-            - Hard delete all orphans
-        """
-        exp_orphan_list = self.list_orphan_experiments()
-        for experiment in exp_orphan_list:
-            ExperimentManagerFactory.from_experiment(experiment).hard_delete()
-
-        if len(exp_orphan_list) > 0:
-            orphan_str_list = ['- %s - %s' % (exp.exp_id, exp.exp_name) for exp in exp_orphan_list]
-            logger.info('\nOrphan Experiment List:')
-            logger.info('\n'.join(orphan_str_list))
-            logger.info('\n')
-            logger.info('Note: the detected orphan experiment(s) have been deleted.')
-
-    def list_orphan_experiments(self):
-        """
-        Get orphan experiment list for this calibration
-        """
-        suite_ids, exp_ids = self.get_experiments()
-        exp_orphan_list = DataStore.list_leftover(suite_ids, exp_ids)
-        return exp_orphan_list
-
-    def get_experiments(self):
-        """
-        Retrieve suite_ids and their associated exp_ids
-        """
-        # restore the existing calibration data
-        calib_data = self.read_calib_data()
-        latest_iteration = calib_data.get('iteration')
-
-        exp_ids = []
-        for i in range(0, latest_iteration + 1):
-            iter_dir = os.path.join(self.name, 'iter%d' % i)
-            iter_path = os.path.join(iter_dir, 'IterationState.json')
-            if not os.path.exists(iter_path):
-                continue
-
-            iter_data = json.load(open(iter_path, 'rb'))
-            exp_id = iter_data.get('experiment_id', None)
-            if exp_id:
-                exp_ids.append(exp_id)
-
-        return [suite['id'] for suite in calib_data['suites']], exp_ids
 
     @property
     def calibration_path(self):
