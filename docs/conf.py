@@ -54,7 +54,7 @@ autodoc_default_options = {
     'exclude-members': '__all__'
 }
 
-autodoc_mock_imports = []
+autodoc_mock_imports = ['history_matching']
 
 
 napoleon_google_docstring = True
