@@ -24,6 +24,8 @@ python:
    version: 3.7
    install:
       - requirements: requirements.txt
+      - requirements: dev_requirements.txt
+      - requirements: history_matching_requirements.txt
       - requirements: docs/requirements.txt
       - method: setuptools
         path: .
