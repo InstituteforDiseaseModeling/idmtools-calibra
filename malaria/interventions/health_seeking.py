@@ -107,7 +107,7 @@ def add_health_seeking(simulation,
     for t in targets:
 
         actual_config = build_actual_treatment_cfg(t['rate'], drug_config, drugs)
-        actual_config.Disqualifying_Properties = disqualifying_properties
+        actual_config["Disqualifying_Properties"] = disqualifying_properties
         target_age_min = 0 # age is in years
         target_age_max = 125 #setting defaults in case these are unused
         target_demographic = "Everyone"
