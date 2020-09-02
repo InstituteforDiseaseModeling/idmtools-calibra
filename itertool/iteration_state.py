@@ -1,19 +1,20 @@
 import json
 import os
 import time
+import pandas as pd
 from datetime import datetime
 from logging import getLogger
-
-import pandas as pd
-from simtools.Utilities import verbose_timedelta
-from simtools.Utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
-
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
+from itertool.utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
+from itertool.utilities.Display import verbose_timedelta
 
-logger = getLogger(__name__)
-user_logger = getLogger('user')
+
+def param_update(simulation, param, value):
+    return simulation.task.set_parameter(param, value)
+
+logger = getLogger("Calibration")
 
 
 class IterationState:
@@ -28,6 +29,9 @@ class IterationState:
     def __init__(self, **kwargs):
         self.iteration = 0
         self.calibration_name = None
+        self.platform = None
+        self.task = None
+        self.sites = []
         self.suite_id = {}
         self.samples_for_this_iteration = {}
         self.next_point = {}
@@ -35,12 +39,14 @@ class IterationState:
         self.analyzers = {}
         self.results = {}
         self.experiment_id = None
-        self.exp_manager = None
+        # self.exp_manager = None
         self.next_point_algo = None
         self.analyzer_list = []
         self.site_analyzer_names = {}
         self.config_builder = None
         self.exp_builder_func = None
+        self.map_sample_to_model_input_fn = None
+        self.sim_runs_per_param_set = None
         self.plotters = []
         self.all_results = None
         self.summary_table = None
@@ -100,7 +106,8 @@ class IterationState:
         # step 1: If we know we are running -> recreate the exp_manager
         if iter_step.value >= StatusPoint.running.value:
             # TODO port to new idmtools
-            self.exp_manager = ExperimentManagerFactory.from_experiment(retrieve_experiment(self.experiment_id))
+            # self.exp_manager = ExperimentManagerFactory.from_experiment(retrieve_experiment(self.experiment_id))
+            pass
 
         # step 2: restore next_point
         if iter_step not in (StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
@@ -147,7 +154,7 @@ class IterationState:
         # RUNNING
         if self.status == StatusPoint.commission:
             self.status = StatusPoint.running
-            self.wait_for_finished()
+            # self.wait_for_finished()
 
         # ANALYZE STEP
         if self.status == StatusPoint.running:
@@ -214,29 +221,28 @@ class IterationState:
         random seeds, calibration sites, and the next sample points.
         Cache the relevant experiment and simulation information to the IterationState.
         """
-        if self.simulations:
-            # TODO port to idmtools code
-            logger.info('Reloading simulation data from cached iteration (%s) state.' % self.iteration)
-            self.exp_manager = ExperimentManagerFactory.from_experiment(
-                DataStore.get_experiment(self.experiment_id))
-        else:
-            # TODO port to idmtools code
-            logger.debug('Iteration has no simulations yet, creating them.')
-            self.exp_manager = ExperimentManagerFactory.init()
+        from idmtools.entities.templated_simulation import TemplatedSimulations
+        from idmtools.entities.experiment import Experiment
 
-            # use passed in function to create exp_builder
-            exp_builder = self.exp_builder_func(next_params)
+        ts = TemplatedSimulations(base_task=self.task)
+        builder = self.exp_builder_func(next_params)
+        ts.add_builder(builder)
 
-            self.exp_manager.run_simulations(
-                config_builder=self.config_builder,
-                exp_name='%s_iter%d' % (self.calibration_name, self.iteration),
-                exp_builder=exp_builder,
-                suite_id=self.suite_id)
+        exp_name = '%s_iter%d' % (self.calibration_name, self.iteration)
+        experiment = Experiment(name=exp_name)
 
-            self.simulations = self.exp_manager.experiment.toJSON()['simulations']
-            self.experiment_id = self.exp_manager.experiment.exp_id
-            logger.debug('Commissioned new simulations for experiment id: %s' % self.experiment_id)
-            self.save()
+        # create mixed experiment from two templates
+        experiment.simulations = ts
+        experiment.parent_id = self.suite_id
+
+        self.platform.run_items(experiment)
+        self.platform.wait_till_done(experiment)
+
+        # self.simulations = experiment.to_json()['simulations']
+        self.simulations = {}  # zdu: temp
+        self.experiment_id = experiment.uid
+        logger.debug('Commissioned new simulations for experiment id: %s' % self.experiment_id)
+        self.save()
 
     def plot_iteration(self):
         # Run all the plotters
@@ -252,19 +258,23 @@ class IterationState:
             logger.info('Reloading results from cached iteration state.')
             return self.results['total']
 
-        if not self.exp_manager:
-            # TODO port to idmtools code
-            self.exp_manager = ExperimentManagerFactory.from_experiment(self.experiment_id)
+        # dtk
+        # analyzerManager = AnalyzeManager(exp_list=self.exp_manager.experiment,
+        #                                  analyzers=self.analyzer_list,
+        #                                  working_dir=self.iteration_directory,
+        #                                  verbose=True,
+        #                                  force_manager_working_directory=True)
 
-        # TODO port to new analyze manager
-        analyzerManager = AnalyzeManager(exp_list=self.exp_manager.experiment,
+        # idm
+        from idmtools.core import ItemType
+        analyzerManager = AnalyzeManager(ids=[(self.experiment_id, ItemType.EXPERIMENT)],
                                          analyzers=self.analyzer_list,
                                          working_dir=self.iteration_directory,
-                                         verbose=True,
+                                         verbose=False,
                                          force_manager_working_directory=True)
 
         if not analyzerManager.analyze():
-            user_logger.error("Error encountered during analysis... Exiting")
+            print("Error encountered during analysis... Exiting")
             exit()
 
         # Ask the analyzers to cache themselves
@@ -311,7 +321,7 @@ class IterationState:
             # If Calibration has been canceled -> exit
             if self.exp_manager.any_failed_or_cancelled():
                 # Kill the remaining simulations
-                logger.error("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
+                print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
                 self.kill()
                 exit()
 
@@ -359,9 +369,11 @@ class IterationState:
             return cls(**json.load(f, object_hook=json_numpy_obj_hook))
 
     def to_file(self):
-        state = dict(status=self.status.name, samples_for_this_iteration=self.samples_for_this_iteration, analyzers=self.analyzers,
+        state = dict(status=self.status.name, samples_for_this_iteration=self.samples_for_this_iteration,
+                     analyzers=self.analyzers,
                      iteration=self.iteration, iteration_start=self.iteration_start, results=self.results,
-                     calibration_name=self.calibration_name, experiment_id=self.experiment_id, simulations=self.simulations,
+                     calibration_name=self.calibration_name, experiment_id=self.experiment_id,
+                     simulations=self.simulations,
                      next_point=self.next_point_algo.get_state(), suite_id=self.suite_id)
 
         with open(self.iteration_file, 'w') as f:
