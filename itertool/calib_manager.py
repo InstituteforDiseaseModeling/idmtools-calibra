@@ -141,7 +141,7 @@ class CalibManager(object):
         """
         self.experiment_builder_function = exp_builder_function
 
-    def exp_builder_func(self, next_params, n_replicates=None):
+    def exp_builder_func_dtk(self, next_params, n_replicates=None):
         if self.experiment_builder_function is not None:
             builder = self.experiment_builder_function
         else:
@@ -153,6 +153,35 @@ class CalibManager(object):
                     [ModFn(site.setup_fn) for site in self.sites],
                     [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in  enumerate(next_params)]
             )
+        return builder
+
+    def exp_builder_func(self, next_params, n_replicates=None):
+        from idmtools.builders import SimulationBuilder
+        from emodpy.emod_task import EMODTask
+        from functools import partial
+
+        if self.experiment_builder_function is not None:
+            builder = self.experiment_builder_function
+            return builder
+
+        if not n_replicates:
+            n_replicates = self.sim_runs_per_param_set
+
+        fs1 = [ModFn(site.setup_fn) for site in self.sites]
+        fs2 = [ModFn(partial(EMODTask.set_parameter_sweep_callback, param="Run_Number", value=i + 1)) for i in
+               range(n_replicates)]  # use existing function
+        fs3 = [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+               index, samples in enumerate(next_params)]
+
+        # print(type(fs2), len(fs2))
+        if n_replicates > 1 and len(fs2) == 1:
+            fs2 = fs2[0]
+
+        builder = SimulationBuilder()
+        builder.sweeps.append(fs1)
+        builder.sweeps.append(fs2)
+        builder.sweeps.append(fs3)
+
         return builder
 
     def create_iteration_state(self, iteration):
