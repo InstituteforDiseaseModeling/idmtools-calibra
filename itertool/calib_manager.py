@@ -2,9 +2,9 @@ import json
 import os
 import re
 import shutil
+import pandas as pd
 from datetime import datetime
 from logging import getLogger
-import pandas as pd
 from idmtools.utils.json import IDMJSONEncoder
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
@@ -101,7 +101,7 @@ class CalibManager(object):
             exit()
 
         # self.location = SetupParser.get('type')
-        self.location = 'HPC'  # [TODO]: zdu: temp
+        self.location = 'HPC'  # [TODO]: zdu: temp, will remove
 
         self.create_calibration(self.location)
 
@@ -149,10 +149,9 @@ class CalibManager(object):
                 n_replicates = self.sim_runs_per_param_set
 
             builder = ModBuilder.from_combos(
-                [ModFn(self.config_builder.__class__.set_param, 'Run_Number', i + 1) for i in range(n_replicates)],
-                [ModFn(site.setup_fn) for site in self.sites],
-                [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
-                 index, samples in enumerate(next_params)]
+                    [ModFn(self.config_builder.__class__.set_param, 'Run_Number', i+1) for i in range(n_replicates)],
+                    [ModFn(site.setup_fn) for site in self.sites],
+                    [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in  enumerate(next_params)]
             )
         return builder
 
@@ -170,7 +169,7 @@ class CalibManager(object):
                               suite_id=self.suite_id,
                               next_point_algo=self.next_point,
                               map_sample_to_model_input_fn=self.map_sample_to_model_input_fn,
-                              # exp_builder_func=self.exp_builder_func,
+                              exp_builder_func=self.exp_builder_func,
                               sim_runs_per_param_set=self.sim_runs_per_param_set,
                               site_analyzer_names=self.site_analyzer_names(),
                               analyzer_list=self.analyzer_list,
