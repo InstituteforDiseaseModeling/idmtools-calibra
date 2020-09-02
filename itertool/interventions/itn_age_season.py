@@ -1,12 +1,12 @@
 import numpy as np
 import sys
-from dtk.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
-from dtk.interventions.support_scripts import validate_distribution_dictionary
-from dtk.utils.Campaign.CampaignClass import *
+from itertool.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
+from itertool.interventions.support_scripts import validate_distribution_dictionary
 
 
-def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: float = 1, blocking_config: any = None,
-                       killing_config: any = None, repelling_config: any = None, insecticide: str = None, discard_times: dict = None,
+def add_ITN_age_season(simulation, start: int = 1, demographic_coverage: float = 1, blocking_config: any = None,
+                       killing_config: any = None, repelling_config: any = None, insecticide: str = None,
+                       discard_times: dict = None,
                        age_dependence: dict = None, seasonal_dependence: dict = None, cost: int = 5,
                        nodeIDs: list = None,
                        birth_triggered: bool = False, duration: int = -1,
@@ -145,20 +145,42 @@ def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: flo
                         node_property_restrictions=[{"Place": "Rural"]):
     """
 
+    # if nodeIDs:
+    #     nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+    # else:
+    #     nodeset_config = NodeSetAll()
+
     if nodeIDs:
-        nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+        nodeset_config = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
     else:
-        nodeset_config = NodeSetAll()
+        nodeset_config = {"class": "NodeSetAll"}
+
     if not node_property_restrictions:
         node_property_restrictions = []
     if not ind_property_restrictions:
         ind_property_restrictions = []
     if not blocking_config:
-        blocking_config = WaningEffectExponential(Decay_Time_Constant=730, Initial_Effect=0.9)
+        blocking_config = {
+            "ecay_Time_Constant": 730,
+            "Initial_Effect": 0.9,
+            "class": "WaningEffectExponential"
+        }
     if not killing_config:
-        killing_config = WaningEffectExponential(Decay_Time_Constant=1460, Initial_Effect=0.6)
+        killing_config = {
+            "Decay_Time_Constant": 1460,
+            "Initial_Effect": 0.6,
+            "class": "WaningEffectExponential"
+        }
+
     if not repelling_config:
-        repelling_config = WaningEffectExponential(Decay_Time_Constant=1460, Initial_Effect=0.0)
+        repelling_config = {
+            "Decay_Time_Constant": 1460,
+            "Initial_Effect": 0.0,
+            "class": "WaningEffectExponential"
+        }
     if not discard_times:
         discard_times = {"Expiration_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
                          "Expiration_Period_Exponential": 10 * 365}
@@ -203,35 +225,70 @@ def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: flo
         raise ValueError('Did not find all the keys were were looking for. Possible dictionaries can be:\n'
                          '{"Times":[], "Values":[]} or {"youth_cov":0.7, "youth_min_age":3, "youth_max_age":13}\n')
 
-    itn_campaign = UsageDependentBednet(
-        Bednet_Type="ITN",
-        Blocking_Config=blocking_config,
-        Cost_To_Consumer=cost,
-        Killing_Config=killing_config,
-        Repelling_Config=repelling_config,
-        Usage_Config_List=
-        [
-            WaningEffectMapLinearAge(
-                Initial_Effect=1.0,
-                Durability_Map=
+    itn_campaign = {
+        "Bednet_Type": "ITN",
+        "Blocking_Config": blocking_config,
+        "Cost_To_Consumer": cost,
+        "Killing_Config": killing_config,
+        "Repelling_Config": repelling_config,
+        "Usage_Config_List":
+            [
                 {
-                    "Times": list(age_times),
-                    "Values": list(age_values)
-                }
-            ),
-            WaningEffectMapLinearSeasonal(
-                Initial_Effect=1.0,
-                Durability_Map=
+                    "Initial_Effect": 1.0,
+                    "Durability_Map":
+                        {
+                            "Times": list(age_times),
+                            "Values": list(age_values)
+                        },
+                    "class": "WaningEffectMapLinearAge"
+                },
                 {
-                    "Times": list(seasonal_times),
-                    "Values": list(seasonal_values)
+                    "Initial_Effect": 1.0,
+                    "Durability_Map":
+                        {
+                            "Times": list(seasonal_times),
+                            "Values": list(seasonal_values)
+                        },
+                    "class": "WaningEffectMapLinearSeasonal"
                 }
-            )
-        ],
-        Received_Event="Bednet_Got_New_One",
-        Using_Event="Bednet_Using",
-        Discard_Event="Bednet_Discarded"
-    )
+            ],
+        "Received_Event": "Bednet_Got_New_One",
+        "Using_Event": "Bednet_Using",
+        "Discard_Event": "Bednet_Discarded"
+    }
+
+    itn_campaign = {
+        "Bednet_Type": "ITN",
+        "Blocking_Config": blocking_config,
+        "Cost_To_Consumer": cost,
+        "Killing_Config": killing_config,
+        "Repelling_Config": repelling_config,
+        "Usage_Config_List":
+            [
+                {
+                    "Initial_Effect": 1.0,
+                    "Durability_Map":
+                        {
+                            "Times": list(age_times),
+                            "Values": list(age_values)
+                        },
+                    "class": "WaningEffectMapLinearAge"
+                },
+                {
+                    "Initial_Effect": 1.0,
+                    "Durability_Map":
+                        {
+                            "Times": list(seasonal_times),
+                            "Values": list(seasonal_values)
+                        },
+                    "class": "WaningEffectMapLinearSeasonal"
+                }
+            ],
+        "Received_Event": "Bednet_Got_New_One",
+        "Using_Event": "Bednet_Using",
+        "Discard_Event": "Bednet_Discarded",
+        "class": "UsageDependentBednet"
+    }
 
     validate_distribution_dictionary("Expiration_Period", discard_times)
     for param in discard_times:
@@ -242,19 +299,22 @@ def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: flo
 
     # General or birth-triggered
     if birth_triggered:
-        itn_event = CampaignEvent(
-            Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                Node_Property_Restrictions=node_property_restrictions,
-                Property_Restrictions_Within_Node=ind_property_restrictions,
-                Intervention_Config=BirthTriggeredIV(
-                    Actual_IndividualIntervention_Config=itn_campaign,
-                    Demographic_Coverage=demographic_coverage,
-                    Duration=duration
-                )
-            ),
-            Nodeset_Config=nodeset_config,
-            Start_Day=start
-        )
+        itn_event = {
+            "Event_Coordinator_Config": {
+                "Node_Property_Restrictions": node_property_restrictions,
+                "Property_Restrictions_Within_Node": ind_property_restrictions,
+                "Intervention_Config": {
+                    "Actual_IndividualIntervention_Config": itn_campaign,
+                    "Demographic_Coverage": demographic_coverage,
+                    "Duration": duration,
+                    "class": "BirthTriggeredIV"
+                },
+                "class": "StandardInterventionDistributionEventCoordinator"
+            },
+            "Nodeset_Config": nodeset_config,
+            "Start_Day": start,
+            "class": "CampaignEvent"
+        }
 
     else:
         if trigger_condition_list:
@@ -266,7 +326,7 @@ def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: flo
                     trigger_ind_property_restrictions = ind_property_restrictions
                     node_property_restrictions = []
                     ind_property_restrictions = []
-                trigger_condition_list = [triggered_campaign_delay_event(config_builder, start=start,
+                trigger_condition_list = [triggered_campaign_delay_event(simulation, start=start,
                                                                          nodeIDs=nodeIDs,
                                                                          triggered_campaign_delay=triggered_campaign_delay,
                                                                          trigger_condition_list=trigger_condition_list,
@@ -274,33 +334,38 @@ def add_ITN_age_season(config_builder, start: int = 1, demographic_coverage: flo
                                                                          ind_property_restrictions=trigger_ind_property_restrictions,
                                                                          node_property_restrictions=trigger_node_property_restrictions)]
 
-            itn_event = CampaignEvent(
-                Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                    Intervention_Config=NodeLevelHealthTriggeredIV(
-                        Demographic_Coverage=demographic_coverage,
-                        Duration=duration,
-                        Target_Residents_Only=True,
-                        Trigger_Condition_List=trigger_condition_list,
-                        Property_Restrictions_Within_Node=ind_property_restrictions,
-                        Node_Property_Restrictions=node_property_restrictions,
-                        Actual_IndividualIntervention_Config=itn_campaign
-                    )
-                ),
-                Nodeset_Config=nodeset_config,
-                Start_Day=start
-            )
+            itn_event = {
+                "Event_Coordinator_Config": {
+                    "Intervention_Config": {
+                        "Demographic_Coverage": demographic_coverage,
+                        "Duration": duration,
+                        "Target_Residents_Only": True,
+                        "Trigger_Condition_List": trigger_condition_list,
+                        "Property_Restrictions_Within_Node": ind_property_restrictions,
+                        "Node_Property_Restrictions": node_property_restrictions,
+                        "Actual_IndividualIntervention_Config": itn_campaign,
+                        "class": "BirthTriggeredIV"
+                    },
+                    "class": "StandardInterventionDistributionEventCoordinator"
+                },
+                "Nodeset_Config": nodeset_config,
+                "Start_Day": start,
+                "class": "CampaignEvent"
+            }
         else:
-            itn_event = CampaignEvent(
-                Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                    Intervention_Config=itn_campaign,
-                    Target_Demographic=StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.Everyone,
-                    Demographic_Coverage=demographic_coverage,
-                    Property_Restrictions_Within_Node=ind_property_restrictions,
-                    Node_Property_Restrictions=node_property_restrictions,
-                    Duration=duration
-                ),
-                Nodeset_Config=nodeset_config,
-                Start_Day=start
-            )
+            itn_event = {
+                "Event_Coordinator_Config": {
+                    "Intervention_Config": itn_campaign,
+                    "Target_Demographic": "Everyone",
+                    "Demographic_Coverage": demographic_coverage,
+                    "Property_Restrictions_Within_Node": ind_property_restrictions,
+                    "Node_Property_Restrictions": node_property_restrictions,
+                    "Duration": duration,
+                    "class": "StandardInterventionDistributionEventCoordinator"
+                },
+                "Nodeset_Config": nodeset_config,
+                "Start_Day": start,
+                "class": "CampaignEvent"
+            }
 
-    config_builder.add_event(itn_event)
+    simulation.task.campaign.add_event(itn_event)
