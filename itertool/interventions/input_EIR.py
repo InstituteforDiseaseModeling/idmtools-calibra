@@ -1,7 +1,7 @@
-from dtk.utils.Campaign.CampaignClass import *
+# from dtk.utils.Campaign.CampaignClass import *
 
 
-def add_InputEIR(cb, monthlyEIRs, age_dependence="SURFACE_AREA_DEPENDENT", start_day=0, nodeIDs=None,
+def add_InputEIR(simulation, monthlyEIRs, age_dependence="SURFACE_AREA_DEPENDENT", start_day=0, nodeIDs=None,
                  ind_property_restrictions=None):
     """
     Create an intervention introducing new malaria infections using the
@@ -38,27 +38,39 @@ def add_InputEIR(cb, monthlyEIRs, age_dependence="SURFACE_AREA_DEPENDENT", start
                          "Age_Bin_Property_From_0_To_6"}])
     """
 
-    nodes = NodeSetNodeList(Node_List=nodeIDs) if nodeIDs else NodeSetAll()
+    # nodes = NodeSetNodeList(Node_List=nodeIDs) if nodeIDs else NodeSetAll()
+    if nodeIDs:
+        nodes = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
+    else:
+        nodes = {"class": "NodeSetAll"}
+
     if ind_property_restrictions is None:
         ind_property_restrictions = []
 
     if len(monthlyEIRs) is not 12:
         raise Exception('The input argument monthlyEIRs should have 12 entries, not %d' % len(monthlyEIRs))
 
-    input_EIR_event = CampaignEvent(
-        Event_Name="Input EIR intervention",
-        Start_Day=start_day,
-        Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-            Number_Repetitions=-1,
-            Intervention_Config=InputEIR(
-                Age_Dependence=InputEIR_Age_Dependence_Enum[age_dependence],
-                Monthly_EIR=monthlyEIRs
-            )
-        ),
-        Nodeset_Config=nodes
-    )
+    input_EIR_event = {
+        'Event_Name': "Input EIR intervention",
+        'Start_Day': start_day,
+        'Nodeset_Config': nodes,
+        'Event_Coordinator_Config': {
+            'Number_Repetitions': -1,
+            'Intervention_Config': {
+                'Age_Dependence': age_dependence,
+                'Monthly_EIR': monthlyEIRs,
+                'class': 'InputEIR'
+            },
+            'class': 'StandardInterventionDistributionEventCoordinator'
+        },
+        'class': 'CampaignEvent'
+    }
 
     if ind_property_restrictions:
-        input_EIR_event.Event_Coordinator_Config.Intervention_Config["Property_Restrictions_Within_Node"] = ind_property_restrictions
+        input_EIR_event["Event_Coordinator_Config"]["Intervention_Config"][
+            "Property_Restrictions_Within_Node"] = ind_property_restrictions
 
-    cb.add_event(input_EIR_event)
+    simulation.task.campaign.add_event(input_EIR_event)
