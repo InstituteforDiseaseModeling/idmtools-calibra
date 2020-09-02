@@ -88,6 +88,7 @@ def add_health_seeking(simulation,
 
     expire_recent_drugs = {
                            "Maximum_Duration": 0,
+                           "Daily_Probability": 1,
                            "Revert": drug_ineligibility_duration,
                            "Target_Property_Key": "DrugStatus",
                            "Target_Property_Value": "RecentDrug",
@@ -118,6 +119,7 @@ def add_health_seeking(simulation,
 
         health_seeking_event = {
             'Start_Day': start_day,
+            'Nodeset_Config': nodeset_config,
             'Event_Coordinator_Config': {
                 'Number_Repetitions': repetitions,
                 'Timesteps_Between_Repetitions': tsteps_btwn_repetitions,
@@ -141,7 +143,7 @@ def add_health_seeking(simulation,
         simulation.task.campaign.add_event(health_seeking_event)
 
 
-def add_health_seeking_by_chw(config_builder,
+def add_health_seeking_by_chw(simulation,
                                start_day: int = 0,
                                targets: list = None,
                                drug: list = None,
@@ -223,7 +225,7 @@ def add_health_seeking_by_chw(config_builder,
 
     # we are not using disqualifying properties from healthseeking, just from chw - the still seek, be processed by
     # chw but will be disqualified when receiving drugs
-    add_health_seeking(config_builder, start_day=start_day, targets=targets, drug=[], nodeIDs=nodeIDs,
+    add_health_seeking(simulation, start_day=start_day, targets=targets, drug=[], nodeIDs=nodeIDs,
                        node_property_restrictions=node_property_restrictions,
                        ind_property_restrictions=ind_property_restrictions,
                        duration=duration, broadcast_event_name='CHW_Give_Drugs')
@@ -271,9 +273,9 @@ def add_health_seeking_by_chw(config_builder,
 
     if chw:
         for param, value in chw:
-            setattr(chw_config, param, value)
+            chw_config[param] = value
 
-    add_health_seeking(config_builder, start_day=start_day, targets=targets, drug=[], nodeIDs=nodeIDs,
+    add_health_seeking(simulation, start_day=start_day, targets=targets, drug=[], nodeIDs=nodeIDs,
                        node_property_restrictions=node_property_restrictions,
                        ind_property_restrictions=ind_property_restrictions,
                        duration=duration, broadcast_event_name='CHW_Give_Drugs')
@@ -291,7 +293,7 @@ def add_health_seeking_by_chw(config_builder,
         'class': 'CampaignEvent'
     }
 
-    config_builder.add_event(chw_event)
+    simulation.task.campaign.add_event(chw_event)
     return
 
 
