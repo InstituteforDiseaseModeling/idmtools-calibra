@@ -1,14 +1,13 @@
-from dtk.interventions.support_scripts import validate_distribution_dictionary
-from dtk.utils.Campaign.CampaignClass import *
+from itertool.interventions.support_scripts import validate_distribution_dictionary
 import random
 
 
-def triggered_campaign_delay_event(config_builder, start: int=0,  nodeIDs: list=None,
-                                   delay_distribution: dict = None, coverage: float=1,
-                                   triggered_campaign_delay: int = 7,trigger_condition_list: list=None,
-                                   listening_duration: int=-1, event_to_send_out: str=None,
-                                   node_property_restrictions: list=None, ind_property_restrictions: list=None,
-                                   only_target_residents: bool=1):
+def triggered_campaign_delay_event(simulation, start: int = 0, nodeIDs: list = None,
+                                   delay_distribution: dict = None, coverage: float = 1,
+                                   triggered_campaign_delay: int = 7, trigger_condition_list: list = None,
+                                   listening_duration: int = -1, event_to_send_out: str = None,
+                                   node_property_restrictions: list = None, ind_property_restrictions: list = None,
+                                   only_target_residents: bool = 1):
     """
     Create a triggered campaign that broadcasts an event after a delay. The
     event it broadcasts can be specified or randomly generated.
@@ -73,9 +72,13 @@ def triggered_campaign_delay_event(config_builder, start: int=0,  nodeIDs: list=
 
     """
     if nodeIDs:
-        node_cfg = NodeSetNodeList(Node_List=nodeIDs)
+        node_cfg = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
     else:
-        node_cfg = NodeSetAll()
+        node_cfg = {"class": "NodeSetAll"}
+
     if not node_property_restrictions:
         node_property_restrictions = []
     if not ind_property_restrictions:
@@ -86,29 +89,39 @@ def triggered_campaign_delay_event(config_builder, start: int=0,  nodeIDs: list=
         delay_distribution = {"Delay_Period_Distribution": "CONSTANT_DISTRIBUTION",
                               "Delay_Period_Constant": triggered_campaign_delay}
 
-    event_cfg = BroadcastEvent(Broadcast_Event=event_to_send_out)
+    event_cfg = {
+        "Broadcast_Event": event_to_send_out,
+        "class": "BroadcastEvent"
+    }
 
-    intervention = DelayedIntervention(Actual_IndividualIntervention_Configs=[event_cfg])
+    intervention = {
+        "Actual_IndividualIntervention_Configs": [event_cfg],
+        "class": "DelayedIntervention"
+    }
 
     # setting distribution parameters
     validate_distribution_dictionary("Delay_Period", delay_distribution)
     for param in delay_distribution:
         setattr(intervention, param, delay_distribution[param])
 
-    triggered_delay = CampaignEvent(
-        Start_Day=start,
-        Nodeset_Config=node_cfg,
-        Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                Intervention_Config=NodeLevelHealthTriggeredIV(
-                    Trigger_Condition_List=trigger_condition_list,
-                    Duration=listening_duration,
-                    Demographic_Coverage=coverage,
-                    Target_Residents_Only=only_target_residents,
-                    Node_Property_Restrictions=node_property_restrictions,
-                    Property_Restrictions_Within_Node=ind_property_restrictions,
-                    Actual_IndividualIntervention_Config=intervention)
-        )
-        )
-    config_builder.add_event(triggered_delay)
+    triggered_delay = {
+        "Start_Day": start,
+        "Nodeset_Config": node_cfg,
+        "Event_Coordinator_Config": {
+            "Intervention_Config": {
+                "Trigger_Condition_List": trigger_condition_list,
+                "Duration": listening_duration,
+                "Demographic_Coverage": coverage,
+                "Target_Residents_Only": only_target_residents,
+                "Node_Property_Restrictions": node_property_restrictions,
+                "Property_Restrictions_Within_Node": ind_property_restrictions,
+                "Actual_IndividualIntervention_Config": intervention,
+                "class": "NodeLevelHealthTriggeredIV"
+            },
+            "class": "StandardInterventionDistributionEventCoordinator"
+        },
+        "class": "CampaignEvent"
+    }
+    simulation.task.campaign.add_event(triggered_delay)
 
     return event_to_send_out
