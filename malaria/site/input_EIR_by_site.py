@@ -1,7 +1,11 @@
 from collections import deque
-from dtk.generic.geography import set_geography
-from dtk.vector.study_sites import geography_from_site
-from dtk.interventions.input_EIR import add_InputEIR
+# from dtk.generic.geography import set_geography
+# from dtk.vector.study_sites import geography_from_site
+# from dtk.interventions.input_EIR import add_InputEIR
+from itertool.utilities.generic.geography import set_geography
+# from dtk.vector.study_sites import geography_from_site
+# from itertool.utilities.interventions.input_EIR import add_InputEIR
+from itertool.interventions.input_EIR import add_InputEIR
 
 # Study-site EIR by month of year
 study_site_monthly_EIRs = {
@@ -35,7 +39,7 @@ def mAb_vs_EIR(EIR):
 
 # Configuration of study-site input EIR
 
-def configure_site_EIR(cb, site, habitat=1, circular_shift=0, birth_cohort=True, set_site_geography=True, **geo_kwargs):
+def configure_site_EIR(simulation, site, habitat=1, circular_shift=0, birth_cohort=True, set_site_geography=True, **geo_kwargs):
 
     if site not in study_site_monthly_EIRs.keys():
         raise Exception("Don't know how to configure site: %s " % site)
@@ -46,15 +50,15 @@ def configure_site_EIR(cb, site, habitat=1, circular_shift=0, birth_cohort=True,
     # but with a downscaling to account for maternal immunity levels
     # Here, we'll keep the CONSTANT model and downscale as a function of annual EIR
     annual_EIR = sum(EIRs)
-    mAb = cb.get_param('Maternal_Antibody_Protection') * mAb_vs_EIR(annual_EIR)
+    mAb = simulation.task.get_parameter('Maternal_Antibody_Protection') * mAb_vs_EIR(annual_EIR)
 
     if birth_cohort:
-        set_geography(cb, "Birth_Cohort")
+        set_geography(simulation, "Birth_Cohort")
     elif set_site_geography:
         geo = geography_from_site(site)
-        set_geography(cb, geo, **geo_kwargs)
-    cb.update_params({ 'Config_Name': site,
-                       'Vector_Species_Params':[], # no vectors for this sim
+        set_geography(simulation, geo, **geo_kwargs)
+    simulation.task.update_parameters({'Config_Name': site,
+                       'Vector_Species_Names': [], # no mosquitoes
                        'Maternal_Antibodies_Type': 'CONSTANT_INITIAL_IMMUNITY',
                        'Maternal_Antibody_Protection': mAb
                        })
@@ -63,6 +67,22 @@ def configure_site_EIR(cb, site, habitat=1, circular_shift=0, birth_cohort=True,
     EIR_deque = deque(EIRs)
     EIR_deque.rotate(circular_shift)
     monthlyEIRs=list(EIR_deque)
-    add_InputEIR(cb, monthlyEIRs=monthlyEIRs)
+    add_InputEIR(simulation, monthlyEIRs=monthlyEIRs)
 
-    return {'monthlyEIRs':monthlyEIRs}
+    return {'monthlyEIRs': monthlyEIRs}
+
+
+# copy over from dtk
+def geography_from_site(site):
+    site_splits = site.split('.')  # e.g. to accommodate site='Chipepo.static'
+    site_to_geography = {
+        'Sugungum': 'Garki_Single',
+        'Matsari': 'Garki_Single',
+        'Rafin_Marke': 'Garki_Single',
+
+        'Chipepo': 'Sinazongwe',
+        'SinazongweConstant': 'Sinazongwe'
+    }
+
+    geo = site_to_geography.get(site_splits[0], '')
+    return '.'.join([geo] + site_splits[1:]) if geo else site
