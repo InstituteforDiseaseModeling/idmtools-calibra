@@ -1,4 +1,3 @@
-# from dtk.utils.Campaign.CampaignClass import *
 
 
 def add_InputEIR(simulation, monthlyEIRs, age_dependence="SURFACE_AREA_DEPENDENT", start_day=0, nodeIDs=None,
