@@ -1,8 +1,11 @@
 import itertools
+from emodpy.emod_task import EMODTask
+from functools import partial
 
-from simtools.ModBuilder import ModBuilder, ModFn
-from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
-from dtk.vector.study_sites import configure_site
+# from simtools.ModBuilder import ModBuilder, ModFn
+from itertool.utilities.ModBuilder import ModBuilder, ModFn
+# from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
+from itertool.utilities.vector.study_sites import configure_site
 
 
 class RunNumberSweepBuilder(ModBuilder):
@@ -10,7 +13,7 @@ class RunNumberSweepBuilder(ModBuilder):
         self.tags = {}
         self.mod_generator = (
             self.set_mods(
-                [ModFn(DTKConfigBuilder.set_param, 'Run_Number', i)]
+                [ModFn(partial(EMODTask.set_parameter_sweep_callback, param="Run_Number", value=i))]
             ) for i in range(nsims)
         )
 
@@ -42,7 +45,7 @@ class GenericSweepBuilder(ModBuilder):
             p, v = pv_pair
             if p == '_site_':
                 return ModFn(configure_site, v)
-            return ModFn(DTKConfigBuilder.set_param, p, v)
+            return ModFn(partial(EMODTask.set_parameter_sweep_callback, p, v))
 
         return ModBuilder.set_mods([convert_to_mod_fn(pv_pair) for pv_pair in pv_pairs])
 
