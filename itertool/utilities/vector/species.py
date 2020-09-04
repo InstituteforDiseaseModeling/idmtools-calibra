@@ -1,4 +1,3 @@
-import copy
 import warnings
 # from dtk.utils.core.DTKConfigBuilder import *
 
@@ -253,7 +252,7 @@ vector_params_by_species = {
 }
 
 
-def filter_species(cb, species: list):
+def filter_species(simulation, species: list):
     """
     Removes species present in config.json that are NOT in the list that's passed in
     throws ValueError exception is the species you want left are not present in config
@@ -266,19 +265,19 @@ def filter_species(cb, species: list):
         Nothing.
     """
     unwanted_vectors = []
-    for sp in cb.config["parameters"]["Vector_Species_Params"]:
+    for sp in simulation.task.config["parameters"]["Vector_Species_Params"]:
         if sp["Name"] not in species:
             unwanted_vectors.append(sp)
     for vector in species:
         found = False
-        for sp in cb.config["parameters"]["Vector_Species_Params"]:
+        for sp in simulation.task.config["parameters"]["Vector_Species_Params"]:
             if sp["Name"] == vector:
                 found = True
         if not found:
             raise ValueError(f"Species {vector} not found in the config.json file, please make sure you are "
                              f"filtering the file down to species present.\n")
     for unwanted in unwanted_vectors:
-        cb.config["parameters"]["Vector_Species_Params"].remove(unwanted)
+        simulation.task.config["parameters"]["Vector_Species_Params"].remove(unwanted)
 
 
 def set_params_by_species(params: dict, ss: list, sim_type: str="VECTOR_SIM"):
@@ -305,7 +304,7 @@ def set_params_by_species(params: dict, ss: list, sim_type: str="VECTOR_SIM"):
     params.update(vector_species_params)
 
 
-def set_species(cb, species_list: list, overwrite: bool=True):
+def set_species(simulation, species_list: list, overwrite: bool=True):
     """
         Adds species from the list to the config.json in your simulation,
         By default, overwrites whatever species are in config now.
@@ -321,28 +320,28 @@ def set_species(cb, species_list: list, overwrite: bool=True):
     Returns:
         nothing
     """
-    pp = [] if overwrite else cb.params["Vector_Species_Params"]
-    sim_type = cb.params["Simulation_Type"]
+    pp = [] if overwrite else simulation.task.config['parameters']["Vector_Species_Params"]
+    sim_type = simulation.task.config['parameters']["Simulation_Type"]
     for s in species_list:
-        if overwrite or not get_species_param_block(cb, s):
+        if overwrite or not get_species_param_block(simulation, s):
             current_species = vector_params_by_species[s].copy()
             if sim_type == "MALARIA_SIM":
                 current_species["Acquire_Modifier"] = 0.8  ## gametocyte success modeled explicitly
             pp.append(current_species)
 
-    cb.config["parameters"]['Vector_Species_Params'] = pp
+    simulation.task.config["parameters"]['Vector_Species_Params'] = pp
 
 
-def set_species_param(cb, species, parameter, value):
-    block = get_species_param_block(cb, species)
+def set_species_param(simulation, species, parameter, value):
+    block = get_species_param_block(simulation, species)
     if block is not None:
-        cb.config["parameters"]['Vector_Species_Params'][block][parameter] = value
+        simulation.task.config["parameters"]['Vector_Species_Params'][block][parameter] = value
         return {'.'.join([species, parameter]): value}
     else:
         return None
 
 
-def get_species_names(cb):
+def get_species_names(simulation):
     """
         Returns the list of names of vector species found in the config.
     Args:
@@ -352,15 +351,15 @@ def get_species_names(cb):
         List of all the species present in the config.json
     """
     species = []
-    for species_params in cb.config["parameters"]["Vector_Species_Params"]:
+    for species_params in simulation.task.config["parameters"]["Vector_Species_Params"]:
         species.append(species_params["Name"])
 
     return species
 
 
-def get_species_param_block(cb, species):
+def get_species_param_block(simulation, species):
     species_available = []
-    for block, vector_species in enumerate(cb.config["parameters"]['Vector_Species_Params']):
+    for block, vector_species in enumerate(simulation.task.config["parameters"]['Vector_Species_Params']):
         if vector_species["Name"] == species:
             return block
         else:
@@ -372,7 +371,7 @@ def get_species_param_block(cb, species):
         raise Exception(f"Species {species} not found in Vector_Species_Params. \n")
 
 
-def update_species_param(cb, species, parameter, value, overwrite=True):
+def update_species_param(simulation, species, parameter, value, overwrite=True):
     """ Update a 'Vector_Species_Param' variable in a config file; return a length-one dict with a numeric value.
     
     Args:
@@ -389,43 +388,43 @@ def update_species_param(cb, species, parameter, value, overwrite=True):
         a dict whose key traces the config parameters from 'species' onward (including the key of 'value' if 'value'
         is a dict) and whose value is equal to the updated config value.
     """
-    block = get_species_param_block(cb, species)
+    block = get_species_param_block(simulation, species)
     if isinstance(value, dict):
         if not overwrite:
             # update values in 'parameter' without deleting what's already there.
             # i.e: update the "TEMPORARY RAINFALL" value in a "Larval_Habitat_Types" object
             # without eliminating the "CONSTANT" value
             for k, v in value.items():
-                cb.config['parameters']['Vector_Species_Params'][block][parameter][k] = v
+                simulation.task.config['parameters']['Vector_Species_Params'][block][parameter][k] = v
         else:
-            cb.config['parameters']['Vector_Species_Params'][block][parameter] = value
+            simulation.task.config['parameters']['Vector_Species_Params'][block][parameter] = value
 
         if len(value) > 1:
             warnings.warn("value is a dict of length>1, returning only the first value.")
 
         return {'.'.join([species, key]): val for key, val in value.items()}
     else:
-        cb.config['parameters']['Vector_Species_Params'][block][parameter] = value
+        simulation.task.config['parameters']['Vector_Species_Params'][block][parameter] = value
         return {'.'.join([species, parameter]): value}
 
 
-def get_species_param(cb, species, parameter):
-    block = get_species_param_block(cb, species)
+def get_species_param(simulation, species, parameter):
+    block = get_species_param_block(simulation, species)
     try:
-        return cb.get_param("Vector_Species_Params")[block][parameter]
+        return simulation.task.get_parameter("Vector_Species_Params")[block][parameter]
     except:
         print('Unable to get parameter %s for species %s' % (parameter, species))
         return None
 
 
-def scale_all_habitats(cb, scale):
-    for species_params in cb.get_param("Vector_Species_Params"):
+def scale_all_habitats(simulation, scale):
+    for species_params in simulation.task.get_parameter("Vector_Species_Params"):
         habitats = species_params["Larval_Habitat_Types"]
         scaled_habitats = {h: scale * v for (h, v) in habitats.items()}
         species_params["Larval_Habitat_Types"] = scaled_habitats
 
 
-def set_larval_habitat(cb, habitats):
+def set_larval_habitat(simulation, habitats):
     """
     Set vector species and habitat parameters of config argument and return
     
@@ -434,10 +433,10 @@ def set_larval_habitat(cb, habitats):
         habitats = {"arabiensis": {"TEMPORARY_RAINFALL": 1.7e9, "CONSTANT": 1e7}}
     """
     for species, habitat in habitats.items():
-        set_species_param(cb, species, 'Larval_Habitat_Types', habitat)
+        set_species_param(simulation, species, 'Larval_Habitat_Types', habitat)
 
 
-def set_species_genes(cb, genes):
+def set_species_genes(simulation, genes):
     """
     Set vector species and gene parameters of config argument and return
     
@@ -466,10 +465,10 @@ def set_species_genes(cb, genes):
     """
 
     for species, gene in genes.items():
-        set_species_param(cb, species, 'Genes', gene)
+        set_species_param(simulation, species, 'Genes', gene)
 
 
-def set_species_trait_modifiers(cb, traits):
+def set_species_trait_modifiers(simulation, traits):
     """
         Set vector species and gene parameters of config argument and return
         
@@ -499,10 +498,10 @@ def set_species_trait_modifiers(cb, traits):
         """
 
     for species, trait in traits.items():
-        set_species_param(cb, species, 'Gene_To_Trait_Modifiers', trait)
+        set_species_param(simulation, species, 'Gene_To_Trait_Modifiers', trait)
 
 
-def set_species_drivers(cb, drivers):
+def set_species_drivers(simulation, drivers):
     """
         Set vector species and gene parameters of config argument and return.
         
@@ -535,4 +534,4 @@ def set_species_drivers(cb, drivers):
         """
 
     for species, driver in drivers.items():
-        set_species_param(cb, species, 'Drivers', driver)
+        set_species_param(simulation, species, 'Drivers', driver)
