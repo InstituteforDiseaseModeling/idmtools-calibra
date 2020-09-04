@@ -1,4 +1,5 @@
-import dtk.utils.builders.BaseTemplate as BaseTemplate
+# import dtk.utils.builders.BaseTemplate as BaseTemplate
+import itertool.utilities.builders.BaseTemplate as BaseTemplate
 
 
 class ConfigTemplate(BaseTemplate.BaseTemplate):
@@ -25,7 +26,7 @@ class ConfigTemplate(BaseTemplate.BaseTemplate):
         """
         return {"parameters": self.contents}
 
-    def set_params_and_modify_cb(self, params, cb):
+    def set_params_and_modify_cb(self, params, simulation):
         """
         Set parameters and modify a DTKConfigBuilder
         :param params: Dictionary of params
@@ -33,5 +34,5 @@ class ConfigTemplate(BaseTemplate.BaseTemplate):
         :return: Dictionary of tags
         """
         tags = self.set_params(params)
-        cb.config = self.get_contents()
+        simulation.task.config = self.get_contents()
         return tags

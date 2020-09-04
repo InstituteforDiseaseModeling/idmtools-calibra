@@ -3,7 +3,8 @@ import os
 import logging
 
 import re
-from dtk.utils.parsers.JSON import json2dict
+# from dtk.utils.parsers.JSON import json2dict
+from itertool.utilities.parsers.JSON import json2dict
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ class ITemplate(object):
         """
 
     @abc.abstractmethod
-    def set_params_and_modify_cb(self, params, cb):
+    def set_params_and_modify_cb(self, params, simulation):
         """
         Sets parameters and potentially also modifies a config builder instance
         :param params: A dictionary of parameters to set

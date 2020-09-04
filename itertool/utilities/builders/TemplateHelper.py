@@ -1,9 +1,5 @@
-import copy
-import logging
-
-from simtools.ModBuilder import ModBuilder, ModFn
-
-#logger = logging.getLogger(__name__)
+# from simtools.ModBuilder import ModBuilder, ModFn
+from itertool.utilities.ModBuilder import ModBuilder, ModFn
 
 
 class TemplateHelper():
@@ -45,7 +41,7 @@ class TemplateHelper():
 
         #logger.info("Table with %d configurations of %d parameters." % (nRow, nParm))
 
-    def mod_dynamic_parameters(self, cb, dynamic_params):
+    def mod_dynamic_parameters(self, simulation, dynamic_params):
         # Modify the config builder according to the dynamic_parameters
 
         #logger.info('-----------------------------------------')
@@ -76,7 +72,7 @@ class TemplateHelper():
                 param, active_template_filenames))
 
         for template in self.active_templates:
-            new_tags = template.set_params_and_modify_cb(all_params, cb)
+            new_tags = template.set_params_and_modify_cb(all_params, simulation)
             if new_tags:
                 tags.update(new_tags)
 

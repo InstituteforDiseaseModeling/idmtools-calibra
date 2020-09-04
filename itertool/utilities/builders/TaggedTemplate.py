@@ -1,9 +1,7 @@
-from dtk.utils.Campaign.utils.CampaignManager import CampaignManager
-from dtk.utils.parsers.JSON import json2dict
+from itertool.utilities.parsers.JSON import json2dict
 import os
 import logging
-
-import dtk.utils.builders.BaseTemplate as BaseTemplate
+import itertool.utilities.builders.BaseTemplate as BaseTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -208,12 +206,12 @@ class CampaignTemplate(TaggedTemplate):
 
         return cls(template_filename, content, tag)
 
-    def set_params_and_modify_cb(self, params, cb):
+    def set_params_and_modify_cb(self, params, simulation):
         tags = self.set_params(params)
 
-        cb.set_param('Campaign_Filename', self.get_filename())
-        cb.campaign = CampaignManager.json_to_classes(self.get_contents())
-
+        simulation.task.set_param('Campaign_Filename', self.get_filename())
+        # simulation.task.campaign = CampaignManager.json_to_classes(self.get_contents())
+        simulation.task.campaign = self.get_contents()
         return tags
 
 
