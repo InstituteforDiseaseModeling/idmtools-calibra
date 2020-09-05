@@ -1,14 +1,22 @@
 
-from dtk.vector.species import set_larval_habitat, set_species_param, set_params_by_species
-from dtk.interventions.input_EIR import add_InputEIR
-from dtk.interventions.mosquito_release import add_mosquito_release
-from dtk.interventions.itn import add_ITN
-from dtk.interventions.itn_age_season import add_ITN_age_season
-from dtk.interventions.irs import add_node_IRS, add_IRS
-from dtk.interventions.outbreakindividual import recurring_outbreak
-from dtk.interventions.migrate_to import add_migration_event
+from itertool.utilities.vector.species import set_larval_habitat, set_species_param, set_params_by_species
+# from dtk.interventions.input_EIR import add_InputEIR
+# from dtk.interventions.mosquito_release import add_mosquito_release
+# from dtk.interventions.itn import add_ITN
+# from dtk.interventions.itn_age_season import add_ITN_age_season
+# from dtk.interventions.irs import add_node_IRS, add_IRS
+# from dtk.interventions.outbreakindividual import recurring_outbreak
+# from dtk.interventions.migrate_to import add_migration_event
+from itertool.interventions.input_EIR import add_InputEIR
+from itertool.interventions.mosquito_release import add_mosquito_release
+from itertool.interventions.itn import add_ITN
+from itertool.interventions.itn_age_season import add_ITN_age_season
+from itertool.interventions.irs import add_node_IRS, add_IRS
+from itertool.interventions.outbreakindividual import recurring_outbreak
+from itertool.interventions.migrate_to import add_migration_event
 from malaria.interventions.health_seeking import add_health_seeking
-from dtk.utils.reports.CustomReport import BaseReport, BaseVectorStatsReport
+# from dtk.utils.reports.CustomReport import BaseReport, BaseVectorStatsReport
+from itertool.utilities.reports.CustomReport import BaseReport, BaseVectorStatsReport
 
 import json
 import numpy as np
@@ -18,15 +26,15 @@ class update_params:
     def __init__(self, params):
         self.params = params
 
-    def __call__(self, cb):
-        return cb.update_params(self.params)
+    def __call__(self, simulation):
+        return simulation.task.update_parameters(self.params)
 
 class config_setup_fn:
     def __init__(self, duration=21915):
         self.duration = duration
 
-    def __call__(self, cb):
-        return cb.update_params({'Simulation_Duration': self.duration,
+    def __call__(self, simulation):
+        return simulation.task.update_parameters({'Simulation_Duration': self.duration,
                             'Infection_Updates_Per_Timestep': 8})
 
 # reporters
@@ -44,9 +52,9 @@ class summary_report_fn:
         self.nodes = nodes or {"class": "NodeSetAll"}
         self.ip_filter = "" if not ipfilter else ipfilter
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_summary_report
-        return add_summary_report(cb, start=self.start, interval=self.interval, nreports=self.nreports,
+        return add_summary_report(simulation, start=self.start, interval=self.interval, nreports=self.nreports,
                                   description=self.description, age_bins=self.age_bins,
                                   parasitemia_bins=self.parasitemia_bins, infection_bins=self.infection_bins,
                                   nodes=self.nodes, ipfilter=self.ip_filter)
@@ -57,8 +65,8 @@ class vector_stats_report_fn:
         self.species_list = species_list
         self.stratify_by_species = stratify_by_species
 
-    def __call__(self, cb):
-        return cb.add_reports(BaseVectorStatsReport(type="ReportVectorStats",
+    def __call__(self, simulation):
+        return simulation.task.reporters.add_reports(BaseVectorStatsReport(type="ReportVectorStats",
                                                     stratify_by_species=self.stratify_by_species,
                                                     species_list=self.species_list))
 
@@ -71,9 +79,9 @@ class survey_report_fn:
         self.survey_days = survey_days or self.days
         self.reporting_interval = reporting_interval or self.interval
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_survey_report
-        return add_survey_report(cb, survey_days=self.survey_days, reporting_interval=self.reporting_interval,
+        return add_survey_report(simulation, survey_days=self.survey_days, reporting_interval=self.reporting_interval,
                                  nreports=self.nreports)
 class patient_report_fn:
     def __init__(self, interval=10000, nreports=1, survey_days=None, reporting_interval=None):
@@ -82,9 +90,9 @@ class patient_report_fn:
         self.survey_days = survey_days
         self.reporting_interval = reporting_interval or self.interval
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_patient_report
-        return add_patient_report(cb)
+        return add_patient_report(simulation)
 
 
 class add_challenge_trial_fn:
@@ -92,9 +100,9 @@ class add_challenge_trial_fn:
 
         self.start_day = start_day
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.interventions.malaria_challenge import add_challenge_trial
-        return add_challenge_trial(cb, start_day=self.start_day)
+        return add_challenge_trial(simulation, start_day=self.start_day)
 
 
 class filtered_report_fn:
@@ -104,9 +112,9 @@ class filtered_report_fn:
         self.nodes = nodes
         self.description = description
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_filtered_report
-        return add_filtered_report(cb, start=self.start, end=self.end, nodes=self.nodes, description=self.description)
+        return add_filtered_report(simulation, start=self.start, end=self.end, nodes=self.nodes, description=self.description)
 
 class filtered_spatial_report_fn:
     def __init__(self, start, end, channels, nodes=[], description=''):
@@ -116,9 +124,9 @@ class filtered_spatial_report_fn:
         self.nodes = nodes
         self.description = description
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_filtered_spatial_report
-        return add_filtered_spatial_report(cb, start=self.start, end=self.end, channels=self.channels,
+        return add_filtered_spatial_report(simulation, start=self.start, end=self.end, channels=self.channels,
                                            nodes=self.nodes, description=self.description)
 
 class event_counter_report_fn:
@@ -129,9 +137,9 @@ class event_counter_report_fn:
         self.nodes = nodes
         self.description = description
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.reports.MalariaReport import add_event_counter_report
-        return add_event_counter_report(cb, self.channels, start=self.start, duration=self.duration,
+        return add_event_counter_report(simulation, self.channels, start=self.start, duration=self.duration,
                                         nodes=self.nodes, description=self.description)
 
 
@@ -141,8 +149,8 @@ class larval_habitat_fn:
         self.species = species
         self.habitats = habitats
 
-    def __call__(self, cb):
-        return set_larval_habitat(cb, {self.species: self.habitats})
+    def __call__(self, simulation):
+        return set_larval_habitat(simulation, {self.species: self.habitats})
 
 class species_param_fn:
     def __init__(self, species, param, value):
@@ -150,24 +158,24 @@ class species_param_fn:
         self.param = param
         self.value = value
 
-    def __call__(self, cb):
-        return set_species_param(cb, self.species, self.param, self.value)
+    def __call__(self, simulation):
+        return set_species_param(simulation, self.species, self.param, self.value)
 
 class set_params_by_species_fn:
     def __init__(self, species):
         self.species = species
 
-    def __call__(self, cb):
-        return set_params_by_species(cb.params, self.species, 'MALARIA_SIM')
+    def __call__(self, simulation):
+        return set_params_by_species(simulation.task.config['parameters'], self.species, 'MALARIA_SIM')
 
 # immune overlays
 class add_immunity_fn:
     def __init__(self, tags):
         self.tags = tags
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.immunity import add_immune_overlays
-        return add_immune_overlays(cb, tags=self.tags)
+        return add_immune_overlays(simulation, tags=self.tags)
 
 # input EIR
 class site_input_eir_fn:
@@ -176,9 +184,9 @@ class site_input_eir_fn:
         self.birth_cohort = birth_cohort
         self.set_site_geography = set_site_geography
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.site.input_EIR_by_site import configure_site_EIR
-        return configure_site_EIR(cb, site=self.site, birth_cohort=self.birth_cohort, set_site_geography=False)
+        return configure_site_EIR(simulation, site=self.site, birth_cohort=self.birth_cohort, set_site_geography=False)
 
 class input_eir_fn:
     def __init__(self, monthlyEIRs, start_day=0, nodes=None):
@@ -186,8 +194,8 @@ class input_eir_fn:
         self.start_day = start_day
         self.nodes = nodes or None
 
-    def __call__(self, cb):
-        return add_InputEIR(cb, monthlyEIRs=self.monthlyEIRs, start_day=self.start_day, nodeIDs=self.nodes)
+    def __call__(self, simulation):
+        return add_InputEIR(simulation, monthlyEIRs=self.monthlyEIRs, start_day=self.start_day, nodeIDs=self.nodes)
 
 # importation pressure
 class add_outbreak_fn:
@@ -198,8 +206,8 @@ class add_outbreak_fn:
         self.tsteps_btwn = tsteps_btwn
         self.nodes = nodes or {"class": "NodeSetAll"}
 
-    def __call__(self, cb):
-        return recurring_outbreak(cb, outbreak_fraction=self.outbreak_fraction, repetitions=self.repetitions,
+    def __call__(self, simulation):
+        return recurring_outbreak(simulation, outbreak_fraction=self.outbreak_fraction, repetitions=self.repetitions,
                                   tsteps_btwn=self.tsteps_btwn, start_day=self.start_day, nodes=self.nodes)
 
 # migration
@@ -224,8 +232,8 @@ class add_migration_fn:
         self.target = target
         self.nodesfrom = nodesfrom or {"class": "NodeSetAll"}
 
-    def __call__(self, cb):
-        return add_migration_event(cb, self.nodeto, start_day=self.start_day, coverage=self.coverage,
+    def __call__(self, simulation):
+        return add_migration_event(simulation, self.nodeto, start_day=self.start_day, coverage=self.coverage,
                                            repetitions=self.repetitions,
                                            tsteps_btwn=self.tsteps_btwn,
                                            duration_at_node_distr_type=self.duration_at_node_distr_type,
@@ -247,8 +255,8 @@ class add_mosquito_release_fn:
         self.tsteps_btwn = tsteps_btwn
         self.nodes = nodes or {"class": "NodeSetAll"}
 
-    def __call__(self, cb):
-        return add_mosquito_release(cb, self.start_day, self.vector_species, self.number_vectors,
+    def __call__(self, simulation):
+        return add_mosquito_release(simulation, self.start_day, self.vector_species, self.number_vectors,
                                     repetitions=self.repetitions, tsteps_btwn=self.tsteps_btwn, nodes=self.nodes)
 
 
@@ -264,26 +272,26 @@ class add_treatment_fn:
         self.node_property_restrictions=node_property_restrictions
         self.durg_ineligibility_duration=drug_ineligibility_duration
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
-        add_health_seeking(cb, start_day=self.start, drug=self.drug, targets=self.targets, nodes=self.nodes,
+    def fn(self, simulation):
+        add_health_seeking(simulation, start_day=self.start, drug=self.drug, targets=self.targets, nodeIDs=self.nodes,
                            drug_ineligibility_duration=self.durg_ineligibility_duration,
                            node_property_restrictions=self.node_property_restrictions)
-        cb.update_params({'PKPD_Model': 'CONCENTRATION_VERSUS_TIME'})
+        simulation.task.update_parameters({'PKPD_Model': 'CONCENTRATION_VERSUS_TIME'})
 
 
 # health-seeking from nodeid-coverage specified in json
 def add_HS_by_node_id_fn(reffname, start=0) :        
-    def fn(cb) :
+    def fn(simulation):
         with open(reffname) as fin :
             cov = json.loads(fin.read())
         for hscov in cov['hscov'] :
             targets = [ { 'trigger': 'NewClinicalCase', 'coverage': 1, 'agemin':15, 'agemax':200, 'seek': hscov['coverage'], 'rate': 0.3 },
                         { 'trigger': 'NewClinicalCase', 'coverage': 1, 'agemin':0, 'agemax':15, 'seek':  min([1, hscov['coverage']*1.5]), 'rate': 0.3 },
                         { 'trigger': 'NewSevereCase',   'coverage': 1, 'seek': 0.8, 'rate': 0.5 } ]
-            add_health_seeking(cb, start_day = start, targets=targets, nodes={'Node_List' : hscov['nodes'], "class": "NodeSetNodeList"})
+            add_health_seeking(simulation, start_day=start, targets=targets, nodes={'Node_List' : hscov['nodes'], "class": "NodeSetNodeList"})
     return fn
 
 # seasonal health-seeking from nodeid-coverage specified in json
@@ -292,17 +300,17 @@ class add_HS_by_node_id_fn:
         self.reffname = reffname
         self.start = start
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
-        with open(self.reffname) as fin :
+    def fn(self, simulation):
+        with open(self.reffname) as fin:
             cov = json.loads(fin.read())
-        for hscov in cov['hscov'] :
+        for hscov in cov['hscov']:
             targets = [{'trigger': 'NewClinicalCase', 'coverage': 1, 'agemin':15, 'agemax':200, 'seek': hscov['coverage'], 'rate': 0.3},
                        {'trigger': 'NewClinicalCase', 'coverage': 1, 'agemin':0, 'agemax':15, 'seek':  min([1, hscov['coverage']*1.5]), 'rate': 0.3},
                        {'trigger': 'NewSevereCase',   'coverage': 1, 'seek': 0.8, 'rate': 0.5}]
-            add_health_seeking(cb, start_day=self.start, targets=targets, nodes={'Node_List': hscov['nodes'], "class": "NodeSetNodeList"})
+            add_health_seeking(simulation, start_day=self.start, targets=targets, nodes={'Node_List': hscov['nodes'], "class": "NodeSetNodeList"})
 
 
 class add_seasonal_HS_by_node_id_fn:
@@ -312,10 +320,10 @@ class add_seasonal_HS_by_node_id_fn:
         self.scale_by_month = scale_by_month
         self.start = start
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
+    def fn(self, simulation):
         with open(self.reffname) as fin :
             cov = json.loads(fin.read())
         for hscov in cov['hscov']:
@@ -336,7 +344,7 @@ class add_seasonal_HS_by_node_id_fn:
                     {'trigger': 'NewSevereCase', 'coverage': 1,
                      'seek': min([1, max([sev_cov*scale, kid_cov*scale])]), 'rate': 0.5}]
 
-                add_health_seeking(cb, start_day=start_day, targets=targets,
+                add_health_seeking(simulation, start_day=start_day, targets=targets,
                                    duration=duration, repetitions=-1,
                                    drug_ineligibility_duration=14,
                                    nodes={'Node_List': hscov['nodes'], "class": "NodeSetNodeList"})
@@ -351,14 +359,14 @@ class add_seasonal_HS_by_NP_fn:
         self.duration_years = duration_years
         self.prop_name = 'HScategory' if self.channel == 'hscov' else 'CHWcategory'
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
-        self.set_hs_group(cb)
-        self.seasonal_health_seeking(cb)
+    def fn(self, simulation):
+        self.set_hs_group(simulation)
+        self.seasonal_health_seeking(simulation)
 
-    def set_hs_group(self, cb):
+    def set_hs_group(self, simulation):
 
         from dtk.interventions.property_change import change_node_property
 
@@ -368,9 +376,9 @@ class add_seasonal_HS_by_NP_fn:
         covlist = interv[self.channel]
         for i, item in enumerate(covlist):
             code = 'group%d' % i
-            change_node_property(cb, self.prop_name, code, start_day=self.date, nodeIDs=item['nodes'])
+            change_node_property(simulation, self.prop_name, code, start_day=self.date, nodeIDs=item['nodes'])
 
-    def seasonal_health_seeking(self, cb):
+    def seasonal_health_seeking(self, simulation):
 
         with open(self.fname) as fin:
             cov = json.loads(fin.read())
@@ -393,7 +401,7 @@ class add_seasonal_HS_by_NP_fn:
                     {'trigger': 'NewSevereCase', 'coverage': 1,
                      'seek': min([1, max([sev_cov * scale, kid_cov * scale])]), 'rate': 0.5}]
 
-                add_health_seeking(cb, start_day=start_day, targets=targets,
+                add_health_seeking(simulation, start_day=start_day, targets=targets,
                                    duration=duration, repetitions=self.duration_years + 1,
                                    drug_ineligibility_duration=14,
                                    node_property_restrictions=[{self.prop_name: code}])
@@ -407,12 +415,12 @@ class add_itn_fn:
         self.waning = waning or {}
         self.nodeIDs = nodeIDs or []
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
+    def fn(self, simulation):
         coverage_by_age = {'min': 0, 'max': 200, 'coverage': self.coverage}
-        add_ITN(cb, start=self.start, coverage_by_ages=[coverage_by_age], waning=self.waning, nodeIDs=self.nodeIDs)
+        add_ITN(simulation, start=self.start, coverage_by_ages=[coverage_by_age], waning=self.waning, nodeIDs=self.nodeIDs)
 
 class add_itn_age_season_fn:
     def __init__(self, start=0, coverage=1, age_dep=[], seasonal_dep={}, discard={}):
@@ -422,11 +430,11 @@ class add_itn_age_season_fn:
         self.seasonal_dep = seasonal_dep
         self.discard = discard
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
-        add_ITN_age_season(cb, start=self.start,
+    def fn(self, simulation):
+        add_ITN_age_season(simulation, start=self.start,
                            age_dep=self.age_dep,
                            coverage_all=self.coverage,
                            as_birth=False,
@@ -443,10 +451,10 @@ class add_itn_by_node_id_fn:
         self.channel = channel
         self.waning = waning or {}
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb) :
+    def fn(self, simulation) :
         birth_durations = [self.itn_dates[x] - self.itn_dates[x + 1] for x in range(len(self.itn_dates) - 1)]
         # itn_distr = zip(self.itn_dates[:-1], self.itn_fracs)
         with open(self.reffname) as fin :
@@ -457,7 +465,7 @@ class add_itn_by_node_id_fn:
                     c = itncov['coverage'] * itn_frac
                     if i < len(self.itn_fracs) - 1:
                         c /= np.prod([1 - x * itncov['coverage'] for x in self.itn_fracs[i + 1:]])
-                    add_ITN(cb, itn_date,
+                    add_ITN(simulation, itn_date,
                             coverage_by_ages=[{'min': 0, 'max': 5, 'coverage': min([1, c*1.3])},
                                               {'birth': 1, 'coverage': min([1,c*1.3]), 'duration': max([-1, birth_durations[i]])},
                                               {'min': 5, 'max': 20, 'coverage': c / 2},
@@ -473,12 +481,12 @@ class add_irs_fn:
         self.waning = waning or {}
         self.nodeIDs = nodeIDs or []
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
+    def fn(self, simulation):
         coverage_by_age = {'min': 0, 'max': 200, 'coverage': self.coverage}
-        add_IRS(cb, start=self.start, coverage_by_ages=[coverage_by_age], waning=self.waning, nodeIDs=self.nodeIDs)
+        add_IRS(simulation, start=self.start, coverage_by_ages=[coverage_by_age], waning=self.waning, nodeIDs=self.nodeIDs)
 
 # IRS from nodeid-coverage specified in json
 class add_node_level_irs_by_node_id_fn:
@@ -491,10 +499,10 @@ class add_node_level_irs_by_node_id_fn:
         self.initial_killing = initial_killing
         self.box_duration = box_duration
 
-    def __call__(self, cb):
-        return self.fn(cb)
+    def __call__(self, simulation):
+        return self.fn(simulation)
 
-    def fn(self, cb):
+    def fn(self, simulation):
         nodelist = {x: [] for x in self.irs_dates}
 
         irs_distr = zip(self.irs_dates, self.irs_fracs)
@@ -511,7 +519,7 @@ class add_node_level_irs_by_node_id_fn:
 
         for i, (irs_date, irs_frac) in enumerate(irs_distr):
             if len(nodelist[irs_date]) > 0 :
-                add_node_IRS(cb, irs_date, initial_killing=self.initial_killing,
+                add_node_IRS(simulation, irs_date, initial_killing=self.initial_killing,
                              box_duration=self.box_duration, nodeIDs=nodelist[irs_date])
 
 
@@ -536,9 +544,9 @@ class add_drug_campaign_fn:
         self.node_property_restrictions = node_property_restrictions
         self.drug_ineligibility_duration = drug_ineligibility_duration
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.interventions.malaria_drug_campaigns import add_drug_campaign
-        return add_drug_campaign(cb, self.campaign_type, self.drug_code, start_days=self.start_days,
+        return add_drug_campaign(simulation, self.campaign_type, self.drug_code, start_days=self.start_days,
                                  coverage=self.coverage, repetitions=self.repetitions, tsteps_btwn_repetitions=self.interval,
                                  diagnostic_threshold=self.diagnostic_threshold,
                                  diagnostic_type=self.diagnostic_type,
@@ -562,9 +570,9 @@ class add_delayed_diagnostic_fn:
         self.listening_duration = listening_duration
         self.triggered_campaign_delay = triggered_campaign_delay
 
-    def __call__(self, cb):
+    def __call__(self, simulation):
         from malaria.interventions.malaria_diagnostic import add_diagnostic_survey
-        return add_diagnostic_survey(cb, start_day=self.start_day,
+        return add_diagnostic_survey(simulation, start_day=self.start_day,
                                      diagnostic_type=self.diagnostic_type,
                                      diagnostic_threshold=self.diagnostic_threshold,
                                      positive_diagnosis_configs=self.positive_diagnosis_configs,
