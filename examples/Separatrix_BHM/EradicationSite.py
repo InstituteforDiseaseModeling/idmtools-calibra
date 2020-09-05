@@ -1,9 +1,6 @@
-import importlib
-import os
-import pandas as pd
 import logging
 from calibtool.CalibSite import CalibSite
-from EradicationAnalyzer import EradicationAnalyzer
+from . EradicationAnalyzer import EradicationAnalyzer
 
 logger = logging.getLogger(__name__)
 
