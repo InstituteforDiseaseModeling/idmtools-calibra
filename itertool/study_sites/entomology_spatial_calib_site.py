@@ -1,10 +1,12 @@
 import logging
 from abc import ABCMeta
-
 from itertool.calib_site import CalibSite
-from itertool.study_sites.site_setup_functions import \
+# from itertool.study_sites.site_setup_functions import \
+#     vector_stats_report_fn
+# from itertool.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
+from malaria.study_sites.site_setup_functions import \
     vector_stats_report_fn
-from itertool.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
+from malaria.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
 
 logger = logging.getLogger(__name__)
 
