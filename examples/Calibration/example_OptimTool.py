@@ -1,11 +1,7 @@
-# Execute directly: 'python example_optimization.py'
-# or via the calibtool.py script: 'calibtool run example_optimization.py'
+# Execute directly: 'python example_OptimTool.py'
+
 import copy
 import os
-# from idmtools.core.platform_factory import Platform
-# from emodpy.emod_task import EMODTask
-# from emodpy.emod_file import ClimateModel
-# from itertool.utilities.emod_malaria_sim import EMODMalariaSim
 from itertool.calib_manager import CalibManager
 from itertool.algorithms.optim_tool import OptimTool
 from itertool.plotters.likelihood_plotter import LikelihoodPlotter
@@ -20,7 +16,6 @@ from itertool.utilities.emod_malaria_sim import EMODMalariaSim
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
-print("INPUT_PATH: ", INPUT_PATH)
 
 # Test latest bamboo Eradication.exe
 exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
@@ -181,20 +176,18 @@ optimtool = OptimTool(params,
                       sigma_r=r / 10.,  # <-- stdev of radius
                       center_repeats=2,
                       # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=3
+                      samples_per_iteration=9
                       # 32 # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
 # platform = Platform('COMPS2')
-calib_manager = CalibManager(name='Optimtool_test_4',  # <-- Please customize this name
-                             # platform=platform,
-                             platform=None,
+calib_manager = CalibManager(name='Optimtool_test',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=2,  # <-- Iterations
+                             max_iterations=3,  # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
@@ -203,8 +196,7 @@ run_calib_args = {
 
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
-    print("ENTER __main__")
     platform = Platform('COMPS2')
     cm = run_calib_args["calib_manager"]
-    cm.check_for_platform_from_context(platform)
+    cm.platform = platform  # avoid multiple INI Section printout
     cm.run_calibration()

@@ -1,6 +1,7 @@
-import json
+
 import os
 import re
+import json
 import shutil
 import pandas as pd
 from datetime import datetime
@@ -38,12 +39,12 @@ class CalibManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, platform, task, map_sample_to_model_input_fn,
-                 sites, next_point, name='calib_test', sim_runs_per_param_set=1, max_iterations=5, plotters=None):
+    def __init__(self, task, map_sample_to_model_input_fn,
+                 sites, next_point, platform=None, name='calib_test', sim_runs_per_param_set=1, max_iterations=5,
+                 plotters=None):
 
         self.name = name
         self.platform = platform
-        # self.__check_for_platform_from_context(platform)
         self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
         self.sites = sites
@@ -91,30 +92,6 @@ class CalibManager(object):
     @property
     def iteration(self):
         return self.current_iteration.iteration if self.current_iteration else 0
-
-    def check_for_platform_from_context(self, platform) -> 'IPlatform':  # noqa: F821
-        """
-        Try to determine platform of current object from self or current platform
-
-        Args:
-            platform: Passed in platform object
-
-        Raises:
-            NoPlatformException: when no platform is on current context
-        Returns:
-            Platform object
-        """
-        from idmtools.core import NoPlatformException
-
-        if self.platform is None:
-            # check context for current platform
-            if platform is None:
-                from idmtools.core.context import CURRENT_PLATFORM
-                if CURRENT_PLATFORM is None:
-                    raise NoPlatformException("No Platform defined on object, in current context, or passed to run")
-                platform = CURRENT_PLATFORM
-            self.platform = platform
-        return self.platform
 
     def run_calibration(self):
         """
@@ -173,9 +150,10 @@ class CalibManager(object):
                 n_replicates = self.sim_runs_per_param_set
 
             builder = ModBuilder.from_combos(
-                    [ModFn(self.config_builder.__class__.set_param, 'Run_Number', i+1) for i in range(n_replicates)],
-                    [ModFn(site.setup_fn) for site in self.sites],
-                    [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in  enumerate(next_params)]
+                [ModFn(self.config_builder.__class__.set_param, 'Run_Number', i + 1) for i in range(n_replicates)],
+                [ModFn(site.setup_fn) for site in self.sites],
+                [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+                 index, samples in enumerate(next_params)]
             )
         return builder
 
@@ -462,7 +440,6 @@ class CalibManager(object):
     def read_iteration_data(self, iteration):
         iteration_cache = os.path.join(self.name, 'iter%d' % iteration, 'IterationState.json')
         return IterationState.from_file(iteration_cache)
-
 
     @property
     def calibration_path(self):
