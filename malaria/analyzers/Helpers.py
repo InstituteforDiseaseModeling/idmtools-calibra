@@ -4,14 +4,10 @@ from datetime import date, datetime
 import calendar
 import logging
 from collections import OrderedDict
-# from geopy.distance import vincenty
 import numpy.ma as ma
-import json
-
 import pandas as pd
 import numpy as np
-
-import dtk.utils.parsers.malaria_summary as malaria_summary
+import itertool.utilities.parsers.malaria_summary as malaria_summary
 
 logger = logging.getLogger(__name__)
 

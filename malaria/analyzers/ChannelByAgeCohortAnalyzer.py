@@ -3,12 +3,10 @@ from abc import abstractmethod
 import pandas as pd
 import numpy as np
 from itertool.analyzers.BaseCalibrationAnalyzer import BaseCalibrationAnalyzer
-
 from malaria.analyzers.Helpers import convert_annualized, convert_to_counts, age_from_birth_cohort, aggregate_on_index
 from scipy.stats import binom
-from dtk.utils.parsers.malaria_summary import summary_channel_to_pandas
-
-from calibtool.LL_calculators import gamma_poisson_pandas, beta_binomial_pandas
+from itertool.utilities.parsers.malaria_summary import summary_channel_to_pandas
+from itertool.ll_calculators import gamma_poisson_pandas, beta_binomial_pandas
 
 logger = logging.getLogger(__name__)
 

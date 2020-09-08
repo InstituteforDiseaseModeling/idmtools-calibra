@@ -11,7 +11,7 @@ import seaborn as sns
 from itertool.iteration_state import IterationState
 from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
-from simtools.OutputParser import CompsDTKOutputParser
+from itertool.output.output_parser import CompsDTKOutputParser
 
 sns.set_style('white', {'axes.linewidth': 0.5})
 

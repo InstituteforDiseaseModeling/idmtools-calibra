@@ -3,7 +3,6 @@ import datetime
 import json
 from uuid import UUID
 import pandas as pd
-
 import numpy as np
 
 
@@ -39,8 +38,7 @@ class NumpyEncoder(json.JSONEncoder):
 class GeneralEncoder(NumpyEncoder):
     def default(self, obj):
         from COMPS.Data.Simulation import SimulationState
-        from simtools.DataAccess.Schema import Simulation
-
+        from idmtools.entities.simulation import Simulation
         if isinstance(obj, SimulationState):
             return obj.name
         elif isinstance(obj, set):
