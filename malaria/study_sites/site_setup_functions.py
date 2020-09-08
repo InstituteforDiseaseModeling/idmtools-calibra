@@ -1,12 +1,5 @@
 
 from itertool.utilities.vector.species import set_larval_habitat, set_species_param, set_params_by_species
-# from dtk.interventions.input_EIR import add_InputEIR
-# from dtk.interventions.mosquito_release import add_mosquito_release
-# from dtk.interventions.itn import add_ITN
-# from dtk.interventions.itn_age_season import add_ITN_age_season
-# from dtk.interventions.irs import add_node_IRS, add_IRS
-# from dtk.interventions.outbreakindividual import recurring_outbreak
-# from dtk.interventions.migrate_to import add_migration_event
 from itertool.interventions.input_EIR import add_InputEIR
 from itertool.interventions.mosquito_release import add_mosquito_release
 from itertool.interventions.itn import add_ITN
@@ -15,7 +8,6 @@ from itertool.interventions.irs import add_node_IRS, add_IRS
 from itertool.interventions.outbreakindividual import recurring_outbreak
 from itertool.interventions.migrate_to import add_migration_event
 from malaria.interventions.health_seeking import add_health_seeking
-# from dtk.utils.reports.CustomReport import BaseReport, BaseVectorStatsReport
 from itertool.utilities.reports.CustomReport import BaseReport, BaseVectorStatsReport
 
 import json
@@ -367,8 +359,7 @@ class add_seasonal_HS_by_NP_fn:
         self.seasonal_health_seeking(simulation)
 
     def set_hs_group(self, simulation):
-
-        from dtk.interventions.property_change import change_node_property
+        from itertool.interventions.property_change import change_node_property
 
         with open(self.fname) as fin:
             interv = json.loads(fin.read())
