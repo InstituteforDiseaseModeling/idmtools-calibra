@@ -3,7 +3,8 @@ import os
 import time
 import pandas as pd
 from datetime import datetime
-from logging import getLogger
+from logging import getLogger, DEBUG
+from idmtools.core.logging import VERBOSE, SUCCESS
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
@@ -15,6 +16,8 @@ def param_update(simulation, param, value):
     return simulation.task.set_parameter(param, value)
 
 logger = getLogger("Calibration")
+# logger = getLogger(__name__)
+user_logger = getLogger('user')
 
 
 class IterationState:
@@ -39,7 +42,6 @@ class IterationState:
         self.analyzers = {}
         self.results = {}
         self.experiment_id = None
-        # self.exp_manager = None
         self.next_point_algo = None
         self.analyzer_list = []
         self.site_analyzer_names = {}
@@ -239,7 +241,7 @@ class IterationState:
         self.platform.wait_till_done(experiment)
 
         # self.simulations = experiment.to_json()['simulations']
-        self.simulations = {}  # zdu: temp
+        self.simulations = {}  # [TODO]: zdu: temp
         self.experiment_id = experiment.uid
         logger.debug('Commissioned new simulations for experiment id: %s' % self.experiment_id)
         self.save()
@@ -258,14 +260,6 @@ class IterationState:
             logger.info('Reloading results from cached iteration state.')
             return self.results['total']
 
-        # dtk
-        # analyzerManager = AnalyzeManager(exp_list=self.exp_manager.experiment,
-        #                                  analyzers=self.analyzer_list,
-        #                                  working_dir=self.iteration_directory,
-        #                                  verbose=True,
-        #                                  force_manager_working_directory=True)
-
-        # idm
         from idmtools.core import ItemType
         analyzerManager = AnalyzeManager(ids=[(self.experiment_id, ItemType.EXPERIMENT)],
                                          analyzers=self.analyzer_list,
@@ -295,6 +289,8 @@ class IterationState:
         # Update the summary table and all the results
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
         logger.info(self.summary_table)
+        self.summary_table.index.name = 'sample'    # [TODO]: why not carry over??
+        user_logger.log(VERBOSE, self.summary_table)
 
     def wait_for_finished(self, verbose=True, init_sleep=1.0, sleep_time=30):
         logger.debug('Waiting for iteration %s simulations to complete' % self.iteration)
