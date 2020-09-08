@@ -1,7 +1,6 @@
 import sys
-from dtk.utils.reports.CustomReport import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
+from itertool.utilities.reports.CustomReport import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
     BaseMalariaTransmissionReport
-import numpy as np
 
 
 class MalariaReport(BaseEventReportIntervalOutput):
@@ -46,7 +45,7 @@ class MalariaReport(BaseEventReportIntervalOutput):
         return d
 
 
-def add_summary_report(cb, start=0, interval=365, nreports=10000,
+def add_summary_report(simulation, start=0, interval=365, nreports=10000,
                        description='AnnualAverage',
                        duration_days=100000,
                        age_bins=None,
@@ -64,19 +63,23 @@ def add_summary_report(cb, start=0, interval=365, nreports=10000,
     if not nodes:
         nodes = {"class": "NodeSetAll"}
 
-    summary_report = MalariaReport(event_trigger_list=['EveryUpdate'],
-                                   start_day=start,
-                                   duration_days=duration_days,
-                                   report_description=description,
-                                   age_bins=age_bins,
-                                   parasitemia_bins=parasitemia_bins,
-                                   infection_bins=infection_bins,
-                                   max_number_reports=nreports,
-                                   reporting_interval=interval,
-                                   nodeset_config=nodes,
-                                   ipfilter=ipfilter)
-    summary_report.type = "MalariaSummaryReport"
-    cb.add_reports(summary_report)
+    from emodpy.reporters.builtin import MalariaSummaryReport
+    summary_report = MalariaSummaryReport()
+    summary_report.parameters = {
+        "Age_Bins": age_bins,
+        "Duration_Days": duration_days,
+        "Event_Trigger_List": ['EveryUpdate'],
+        "Individual_Property_Filter": ipfilter,
+        "Infectiousness_Bins": infection_bins,
+        "Max_Number_Reports": nreports,
+        "Parasitemia_Bins": parasitemia_bins,
+        "Report_Description": description,
+        "Reporting_Interval": interval,
+        "nodeset_config": nodes,
+        "Start_Day": start
+    }
+
+    simulation.task.reporters.add_reporter(summary_report)
 
 
 def add_immunity_report(cb, start=0, interval=365, nreports=10000,
