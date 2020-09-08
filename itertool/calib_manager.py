@@ -43,6 +43,7 @@ class CalibManager(object):
 
         self.name = name
         self.platform = platform
+        # self.__check_for_platform_from_context(platform)
         self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
         self.sites = sites
@@ -90,6 +91,30 @@ class CalibManager(object):
     @property
     def iteration(self):
         return self.current_iteration.iteration if self.current_iteration else 0
+
+    def check_for_platform_from_context(self, platform) -> 'IPlatform':  # noqa: F821
+        """
+        Try to determine platform of current object from self or current platform
+
+        Args:
+            platform: Passed in platform object
+
+        Raises:
+            NoPlatformException: when no platform is on current context
+        Returns:
+            Platform object
+        """
+        from idmtools.core import NoPlatformException
+
+        if self.platform is None:
+            # check context for current platform
+            if platform is None:
+                from idmtools.core.context import CURRENT_PLATFORM
+                if CURRENT_PLATFORM is None:
+                    raise NoPlatformException("No Platform defined on object, in current context, or passed to run")
+                platform = CURRENT_PLATFORM
+            self.platform = platform
+        return self.platform
 
     def run_calibration(self):
         """

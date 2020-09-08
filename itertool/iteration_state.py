@@ -265,6 +265,7 @@ class IterationState:
                                          analyzers=self.analyzer_list,
                                          working_dir=self.iteration_directory,
                                          verbose=False,
+                                         platform=self.platform,
                                          force_manager_working_directory=True)
 
         if not analyzerManager.analyze():
