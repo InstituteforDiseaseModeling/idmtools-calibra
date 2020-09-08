@@ -40,7 +40,7 @@ When setting up your environment for the first time, you can use the following i
    On Unix(Mac/Linux) you can use venv or virtualenv
 3) Activate the virtualenv
 4) If you are on windows, run `pip install py-make --upgrade --force-reinstall`
-5) Then run `python ./dev_scripts/bootstrap.py`. This will install all the tools. 
+5) Then run `python ./.dev_scripts/bootstrap.py`. This will install all the tools. 
 
 ## Development Tips
 
