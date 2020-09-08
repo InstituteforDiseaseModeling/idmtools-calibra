@@ -145,11 +145,6 @@ def add_ITN_age_season(simulation, start: int = 1, demographic_coverage: float =
                         node_property_restrictions=[{"Place": "Rural"]):
     """
 
-    # if nodeIDs:
-    #     nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
-    # else:
-    #     nodeset_config = NodeSetAll()
-
     if nodeIDs:
         nodeset_config = {
             'Node_List': nodeIDs,

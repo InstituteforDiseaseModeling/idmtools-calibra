@@ -1,7 +1,8 @@
-from dtk.utils.Campaign.CampaignClass import *
 
 
-def recurring_outbreak(cb, outbreak_fraction=0.01, repetitions=-1, tsteps_btwn=365, target='Everyone', start_day=0, strain=(0,0), nodes={"class": "NodeSetAll"}, outbreak_source="PrevalenceIncrease"):
+def recurring_outbreak(simulation, outbreak_fraction=0.01, repetitions=-1, tsteps_btwn=365, target='Everyone',
+                       start_day=0,
+                       strain=(0, 0), nodes={"class": "NodeSetAll"}, outbreak_source="PrevalenceIncrease"):
     """
     Add introduction of new infections to the campaign using the
     **OutbreakIndividual** class. Outbreaks can be recurring.
@@ -39,24 +40,26 @@ def recurring_outbreak(cb, outbreak_fraction=0.01, repetitions=-1, tsteps_btwn=3
 
     """
 
+    outbreak_event = {
+        "Start_Day": start_day,
+        "Event_Coordinator_Config": {
+            "Number_Distributions": -1,
+            "Number_Repetitions": repetitions,
+            "Timesteps_Between_Repetitions": tsteps_btwn,
+            "Target_Demographic": target,
+            "Demographic_Coverage": outbreak_fraction,
+            "Intervention_Config": {
+                "Antigen": strain[0],
+                "Genome": strain[1],
+                "Outbreak_Source": outbreak_source,
+                "class": "OutbreakIndividual"
+            },
+            "class": "StandardInterventionDistributionEventCoordinator"
+        },
+        "Nodeset_Config": nodes,
+        "class": "CampaignEvent"
+    }
 
-    outbreak_event = CampaignEvent(
-        Start_Day=start_day,
-        Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-            Number_Distributions=-1,
-            Number_Repetitions=repetitions,
-            Timesteps_Between_Repetitions=tsteps_btwn,
-            Target_Demographic=StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum[target],
-            Demographic_Coverage=outbreak_fraction,
-            Intervention_Config=OutbreakIndividual(
-                Antigen=strain[0],
-                Genome=strain[1],
-                Outbreak_Source=outbreak_source
-            )
-        ),
-        Nodeset_Config=nodes
-    )
-
-    cb.add_event(outbreak_event)
+    simulation.task.campaign.add_event(outbreak_event)
     return {'outbreak_fraction': outbreak_fraction,
             'tsteps_btwn': tsteps_btwn}

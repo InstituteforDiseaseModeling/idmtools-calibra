@@ -1,7 +1,6 @@
-from dtk.utils.Campaign.CampaignClass import *
 
 
-def add_mosquito_release(cb, start_day: int = 0, species: str = "arabiensis",
+def add_mosquito_release(simulation, start_day: int = 0, species: str = "arabiensis",
                          number: int = 100, repetitions: int = -1, tsteps_btwn: int = 365,
                          released_genome: list = None,
                          released_wolbachia: str = "VECTOR_WOLBACHIA_FREE",
@@ -52,32 +51,51 @@ def add_mosquito_release(cb, start_day: int = 0, species: str = "arabiensis",
     """
     if not released_genome:
         released_genome = [['X', 'X']]
-    if not nodeIDs:
-        nodeset_config = NodeSetAll()
-    else:
-        nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+    # if not nodeIDs:
+    #     nodeset_config = NodeSetAll()
+    # else:
+    #     nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
 
-    mosquito_release = MosquitoRelease(
-                Cost_To_Consumer=cost,
-                Released_Genome=released_genome,
-                Released_Number=number,
-                Released_Species=species,
-                Released_Wolbachia=released_wolbachia)
+    if nodeIDs:
+        nodeset_config = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
+    else:
+        nodeset_config = {"class": "NodeSetAll"}
+
+    mosquito_release = {
+        "Cost_To_Consumer": cost,
+        "Released_Genome": released_genome,
+        "Released_Number": number,
+        "Released_Species": species,
+        "Released_Wolbachia": released_wolbachia,
+        "class": "MosquitoRelease"
+    }
 
     if release_event:
-        release_event = BroadcastNodeEvent(Broadcast_Event=release_event)
-        intervention_config = MultiNodeInterventionDistributor(
-                        Node_Intervention_List=[mosquito_release, release_event])
+        release_event = {"Broadcast_Event": release_event,
+                         "class": "BroadcastNodeEvent"
+                         }
+
+        intervention_config = {
+            "Node_Intervention_List": [mosquito_release, release_event],
+            "class": "MultiNodeInterventionDistributor"
+        }
     else:
         intervention_config = mosquito_release
 
-    intervention = CampaignEvent(
-        Start_Day=start_day,
-        Nodeset_Config=nodeset_config,
-        Event_Name="Mosquito Release",
-        Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-            Number_Repetitions=repetitions,
-            Timesteps_Between_Repetitions=tsteps_btwn,
-            Intervention_Config=intervention_config))
+    intervention = {
+        "Start_Day": start_day,
+        "Nodeset_Config": nodeset_config,
+        "Event_Name": "Mosquito Release",
+        "Event_Coordinator_Config": {
+            "Number_Repetitions": repetitions,
+            "Timesteps_Between_Repetitions": tsteps_btwn,
+            "Intervention_Config": intervention_config,
+            "class": "StandardInterventionDistributionEventCoordinator"
+        },
+        "class": "CampaignEvent"
+    }
 
-    cb.add_event(intervention)
+    simulation.task.campaign.add_event(intervention)

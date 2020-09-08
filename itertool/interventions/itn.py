@@ -1,9 +1,7 @@
-import copy
-from dtk.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
-from dtk.utils.Campaign.CampaignClass import *
+from itertool.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
 
 
-def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, waning: dict = None, cost: int = 0,
+def add_ITN(simulation, start: int = 0, coverage_by_ages: list = None, waning: dict = None, cost: int = 0,
             nodeIDs: list = None, insecticide: str = None, node_property_restrictions: list = None,
             ind_property_restrictions: list = None, triggered_campaign_delay: int = None,
             trigger_condition_list: list = None, listening_duration: int = -1,
@@ -78,24 +76,41 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
                     trigger_condition_list=["NewClinicalCase", "NewSevereCase"],
                     listening_duration=-1)
     """
-    itn_bednet = SimpleBednet(Bednet_Type='ITN',
-                              Killing_Config=WaningEffectExponential(Initial_Effect=0.6,
-                                                                     Decay_Time_Constant=1460),
-                              Blocking_Config=WaningEffectExponential(Initial_Effect=0.9,
-                                                                      Decay_Time_Constant=730),
-                              Usage_Config=WaningEffectRandomBox(Expected_Discard_Time=3650, Initial_Effect=1.0),
-                              Cost_To_Consumer=3.75
-                              )
+    itn_bednet = {
+        "Bednet_Type": 'ITN',
+        "Killing_Config": {
+            "Initial_Effect": 0.6,
+            "Decay_Time_Constant": 1460,
+            "class": "WaningEffectExponential"
+        },
+        "Blocking_Config": {
+            "Initial_Effect": 0.9,
+            "Decay_Time_Constant": 730,
+            "class": "WaningEffectExponential"
+        },
+        "Usage_Config": {
+            "Expected_Discard_Time": 3650,
+            "Initial_Effect": 1.0,
+            "clas": "WaningEffectRandomBox"
+        },
+        "Cost_To_Consumer": 3.75,
+        "class": "SimpleBednet"
+    }
 
     if waning:
         for w, w_config in waning.items():
             setattr(itn_bednet, w, w_config)
     if not coverage_by_ages:
         coverage_by_ages = [{"coverage": 1, "min": 0, "max": 125}]
+
     if nodeIDs:
-        nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
+        nodeset_config = {
+            'Node_List': nodeIDs,
+            'class': 'NodeSetNodeList'
+        }
     else:
-        nodeset_config = NodeSetAll()
+        nodeset_config = {"class": "NodeSetAll"}
+
     if not node_property_restrictions:
         node_property_restrictions = []
     if not ind_property_restrictions:
@@ -104,8 +119,15 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
         itn_bednet.Insecticide_Name = insecticide
     itn_bednet.Cost_To_Consumer = cost
 
-    receiving_itn_event = BroadcastEvent(Broadcast_Event='Received_ITN')
-    itn_bednet_w_event = MultiInterventionDistributor(Intervention_List=[itn_bednet, receiving_itn_event])
+    receiving_itn_event = {
+        "Broadcast_Event": 'Received_ITN',
+        "class": "BroadcastEvent"
+    }
+
+    itn_bednet_w_event = {
+        "Intervention_List": [itn_bednet, receiving_itn_event],
+        "class": "MultiInterventionDistributor"
+    }
 
     if triggered_campaign_delay:
         trigger_node_property_restrictions = []
@@ -116,7 +138,7 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
             node_property_restrictions = []
             ind_property_restrictions = []
 
-        trigger_condition_list = [str(triggered_campaign_delay_event(config_builder,
+        trigger_condition_list = [str(triggered_campaign_delay_event(simulation,
                                                                      start=start, nodeIDs=nodeIDs,
                                                                      triggered_campaign_delay=triggered_campaign_delay,
                                                                      trigger_condition_list=trigger_condition_list,
@@ -127,19 +149,24 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
     for coverage_by_age in coverage_by_ages:
         if trigger_condition_list:
             if not 'birth' in coverage_by_age.keys():
-                intervention_config = NodeLevelHealthTriggeredIV(
-                    Trigger_Condition_List=trigger_condition_list,
-                    Duration=listening_duration,
-                    Demographic_Coverage=coverage_by_age["coverage"],
-                    Target_Residents_Only=True,
-                    Actual_IndividualIntervention_Config=itn_bednet_w_event  # itn_bednet
-                )
+                intervention_config = {
+                    "Trigger_Condition_List": trigger_condition_list,
+                    "Duration": listening_duration,
+                    "Demographic_Coverage": coverage_by_age["coverage"],
+                    "Target_Residents_Only": 1,
+                    "Actual_IndividualIntervention_Config": itn_bednet_w_event,  # itn_bednet
+                    "class": "NodeLevelHealthTriggeredIV"
+                }
 
-                ITN_event = CampaignEvent(Start_Day=int(start),
-                                          Nodeset_Config=nodeset_config,
-                                          Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                                              Intervention_Config=intervention_config)
-                                          )
+                ITN_event = {
+                    "Start_Day": int(start),
+                    "Nodeset_Config": nodeset_config,
+                    "Event_Coordinator_Config": {
+                        "Intervention_Config": intervention_config,
+                        "class": "StandardInterventionDistributionEventCoordinator"
+                    },
+                    "class": "CampaignEvent"
+                }
 
                 if all([k in coverage_by_age.keys() for k in ['min', 'max']]):
                     ITN_event_e_i = ITN_event.Event_Coordinator_Config.Intervention_Config
@@ -154,16 +181,20 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
                     ITN_event_e_i.Node_Property_Restrictions = node_property_restrictions
 
         else:
-            event_coordinator_config = StandardInterventionDistributionEventCoordinator(
-                Node_Property_Restrictions=[],
-                Target_Residents_Only=1,
-                Demographic_Coverage=coverage_by_age["coverage"],
-                Intervention_Config=itn_bednet_w_event  # itn_bednet
-            )
-            ITN_event = CampaignEvent(Start_Day=int(start),
-                                      Nodeset_Config=nodeset_config,
-                                      Event_Coordinator_Config=event_coordinator_config
-                                      )
+            event_coordinator_config = {
+                "Node_Property_Restrictions": [],
+                "Target_Residents_Only": 1,
+                "Demographic_Coverage": coverage_by_age["coverage"],
+                "Intervention_Config": itn_bednet_w_event,  # itn_bednet
+                "class": "StandardInterventionDistributionEventCoordinator"
+            }
+
+            ITN_event = {
+                "Start_Day": int(start),
+                "Nodeset_Config": nodeset_config,
+                "Event_Coordinator_Config": event_coordinator_config,
+                "class": "CampaignEvent"
+            }
 
             if node_property_restrictions:
                 ITN_event.Event_Coordinator_Config.Node_Property_Restrictions.extend(node_property_restrictions)
@@ -174,11 +205,12 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
                 ITN_event.Event_Coordinator_Config.Target_Age_Max = coverage_by_age["max"]
 
             if 'birth' in coverage_by_age.keys() and coverage_by_age['birth']:
-                birth_triggered_intervention = BirthTriggeredIV(
-                    Duration=coverage_by_age.get('duration', -1),  # default to forever if  duration not specified
-                    Demographic_Coverage=coverage_by_age["coverage"],
-                    Actual_IndividualIntervention_Config=itn_bednet_w_event  # itn_bednet
-                )
+                birth_triggered_intervention = {
+                    "Duration": coverage_by_age.get('duration', -1),  # default to forever if  duration not specified
+                    "Demographic_Coverage": coverage_by_age["coverage"],
+                    "Actual_IndividualIntervention_Config": itn_bednet_w_event,  # itn_bednet
+                    "class": "BirthTriggeredIV"
+                }
 
                 ITN_event.Event_Coordinator_Config.Intervention_Config = birth_triggered_intervention
                 del ITN_event.Event_Coordinator_Config.Demographic_Coverage
@@ -190,4 +222,4 @@ def add_ITN(config_builder, start: int = 0, coverage_by_ages: list = None, wanin
             elif ind_property_restrictions:
                 ITN_event.Event_Coordinator_Config.Property_Restrictions_Within_Node = ind_property_restrictions
 
-        config_builder.add_event(ITN_event)
+        simulation.task.campaign.add_event(ITN_event)
