@@ -3,48 +3,32 @@
 import copy
 import os
 from idmtools.core.platform_factory import Platform
-from emodpy.defaults.emod_malaria_sim import EMODMalariaSim
+from itertool.utilities.emod_malaria_sim import EMODMalariaSim
+from emodpy.emod_file import ClimateModel
 from emodpy.emod_task import EMODTask
 from itertool.calib_manager import CalibManager
 from itertool.algorithms.optim_tool import OptimTool
 from itertool.plotters.likelihood_plotter import LikelihoodPlotter
 from itertool.plotters.optim_tool_plotter import OptimToolPlotter
 from itertool.plotters.site_data_plotter import SiteDataPlotter
-
-try:
-    from malaria.study_sites.DielmoCalibSite import DielmoCalibSite
-    from malaria.study_sites.NdiopCalibSite import NdiopCalibSite
-except ImportError as e:
-    message = "The malaria package needs to be installed before running this example...\n" \
-                "Please run `dtk get_package malaria -v HEAD` to install"
-    raise ImportError(message)
-
+from malaria.study_sites.DielmoCalibSite import DielmoCalibSite
+from malaria.study_sites.NdiopCalibSite import NdiopCalibSite
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
-input_root = os.path.join('..', 'inputs')
-input_root = os.path.abspath(input_root)
-print('input_root: ', os.path.abspath(input_root))
+INPUT_PATH = os.path.join('..', 'inputs')
+INPUT_PATH = os.path.abspath(INPUT_PATH)
+# print('input_root: ', os.path.abspath(input_root))
 
-# Zdu: test exe from dtktools
-# exe_path = r'C:\Projects\dtktools_master\examples\inputs\Eradication.exe'
-
-# latest bamboo
-exe_path = r'C:\Projects\idmtools_zdu\examples\inputs\bamboo\Eradication.exe'
+# Test really latest bamboo exe
+# exe_path = r'C:\Projects\itertools_zdu\examples\Calibration\inputs\Eradication.exe'
+exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
 
 task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
 
-# task.reporters.add_dll_folder()
-# For Old DTK; no such in new Bamboo Exe
-# dll_path = os.path.join(input_root, 'dlls', 'reporter_plugins', 'libmalariasummary_report_plugin.dll')
-# task.reporters.add_dll(dll_path)
+# manually set mode to fix emod_task issue: self.climate.set_task_config(self) changed the mode to off
+task.climate.Climate_Model = ClimateModel.CLIMATE_CONSTANT
 
-# task.demographics.add_directory(os.path.join(input_root, 'Calibration'), relative_path='Calibration')
-file_path = os.path.join(input_root, 'Calibration', 'birth_cohort_demographics.compiled.json')
-task.demographics.add_asset(file_path, relative_path='Calibration')
-
-task.legacy_exe = True      # --config config.json --input-path ./Assets --dll-path ./Assets
-# task.legacy_exe = False     # default: --config config.json --input-path ./Assets;. --dll-path ./Assets
-# task.is_linux = True
+task.legacy_exe = True
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -56,7 +40,7 @@ sites = [sites[0]]
 plotters = [LikelihoodPlotter(combine_sites=True),
             SiteDataPlotter(num_to_plot=5, combine_sites=True),
             OptimToolPlotter()  # OTP must be last because it calls gc.collect()
-]
+            ]
 
 # Antigen_Switch_Rate (1e-10 to 1e-8, log)
 # Falciparum_PfEMP1_Variants (900 to 1700, linear int)
@@ -71,14 +55,14 @@ params = [
     {
         'Name': 'Clinical Fever Threshold High',
         'Dynamic': True,
-        #'MapTo': 'Clinical_Fever_Threshold_High', # <-- DEMO: Custom mapping, see map_sample_to_model_input below
+        # 'MapTo': 'Clinical_Fever_Threshold_High', # <-- DEMO: Custom mapping, see map_sample_to_model_input below
         'Guess': 1.75,
         'Min': 0.5,
         'Max': 2.5
     },
     {
         'Name': 'MSP1 Merozoite Kill Fraction',
-        'Dynamic': False,   # <-- NOTE: this parameter is frozen at Guess
+        'Dynamic': False,  # <-- NOTE: this parameter is frozen at Guess
         'MapTo': 'MSP1_Merozoite_Kill_Fraction',
         'Guess': 0.65,
         'Min': 0.4,
@@ -90,7 +74,7 @@ params = [
         'MapTo': 'Falciparum_PfEMP1_Variants',
         'Guess': 1500,
         'Min': 1,  # 900 [0]
-        'Max': 5000 # 1700 [1e5]
+        'Max': 5000  # 1700 [1e5]
     },
     {
         'Name': 'Min Days Between Clinical Incidents',
@@ -155,16 +139,17 @@ def map_sample_to_model_input(simulation, sample):
             tags.update(simulation.task.set_parameter(p['MapTo'], value))
 
     for name, value in sample.items():
-        print('UNUSED PARAMETER:'+name)
-    assert(len(sample) == 0)  # All params used
+        print('UNUSED PARAMETER:' + name)
+    assert (len(sample) == 0)  # All params used
 
     # For testing only, the duration should be handled by the site !! Please remove before running in prod!
     tags.update(simulation.task.set_parameter("Simulation_Duration", 365 + 1))
 
     return tags
 
+
 # Just for fun, let the numerical derivative baseline scale with the number of dimensions
-volume_fraction = 0.01   # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
+volume_fraction = 0.01  # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
 num_params = len([p for p in params if p['Dynamic']])
 
 if num_params == 0:
@@ -181,25 +166,26 @@ r = OptimTool.get_r(num_params, volume_fraction)
 
 
 optimtool = OptimTool(params,
-    constrain_sample,   # <-- WILL NOT BE SAVED IN ITERATION STATE
-    mu_r=r,             # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
-    sigma_r=r/10.,      # <-- stdev of radius
-    center_repeats=2,   # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-    samples_per_iteration=3  # 32 # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
-)
+                      constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
+                      mu_r=r,
+                      # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
+                      sigma_r=r / 10.,  # <-- stdev of radius
+                      center_repeats=2,
+                      # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
+                      samples_per_iteration=3
+                      # 32 # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      )
 
 platform = Platform('COMPS2')
-calib_manager = CalibManager(name='Optimtool_test_1',    # <-- Please customize this name
-                             # config_builder=cb,
+calib_manager = CalibManager(name='Optimtool_test',  # <-- Please customize this name
                              platform=platform,
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=2,          # <-- Iterations
+                             max_iterations=2,  # <-- Iterations
                              plotters=plotters)
-
 
 run_calib_args = {
     "calib_manager": calib_manager
