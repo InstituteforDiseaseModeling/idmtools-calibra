@@ -43,7 +43,6 @@ class CalibManager(object):
 
         self.name = name
         self.platform = platform
-        # self.config_builder = config_builder
         self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
         self.sites = sites
@@ -100,8 +99,7 @@ class CalibManager(object):
         if not validate_exp_name(self.name):
             exit()
 
-        # self.location = SetupParser.get('type')
-        self.location = 'HPC'  # [TODO]: zdu: temp, will remove
+        self.location = 'HPC'  # [TODO]: zdu: temp, will be removed
 
         self.create_calibration(self.location)
 
@@ -124,6 +122,7 @@ class CalibManager(object):
         current_time = datetime.now()
         calibration_time_elapsed = current_time - self.calibration_start
         logger.info("Calibration done (took %s)" % verbose_timedelta(calibration_time_elapsed))
+        print("Calibration done (took %s)" % verbose_timedelta(calibration_time_elapsed))
 
     def post_iteration(self):
         self.all_results = self.current_iteration.all_results
@@ -141,7 +140,7 @@ class CalibManager(object):
         """
         self.experiment_builder_function = exp_builder_function
 
-    def exp_builder_func_dtk(self, next_params, n_replicates=None):
+    def exp_builder_func_dtk_bk(self, next_params, n_replicates=None):
         if self.experiment_builder_function is not None:
             builder = self.experiment_builder_function
         else:
@@ -202,7 +201,6 @@ class CalibManager(object):
                               sim_runs_per_param_set=self.sim_runs_per_param_set,
                               site_analyzer_names=self.site_analyzer_names(),
                               analyzer_list=self.analyzer_list,
-                              # config_builder=self.config_builder,
                               task=self.task,
                               plotters=self.plotters,
                               all_results=self.all_results,
@@ -250,9 +248,6 @@ class CalibManager(object):
             print("{}: {}".format(k, v))
 
         self.cache_calibration(**final_samples)
-
-        # remove any leftover experiments
-        # self.cleanup_orphan_experiments()     # no need for idmtools
 
     def cache_calibration(self, **kwargs):
         """
