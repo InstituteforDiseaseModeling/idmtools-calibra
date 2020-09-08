@@ -288,8 +288,6 @@ class IterationState:
 
         # Update the summary table and all the results
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
-        logger.info(self.summary_table)
-        self.summary_table.index.name = 'sample'    # [TODO]: why not carry over??
         user_logger.log(VERBOSE, self.summary_table)
 
     def wait_for_finished(self, verbose=True, init_sleep=1.0, sleep_time=30):
