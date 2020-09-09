@@ -217,8 +217,11 @@ class CalibManager(object):
         if os.path.exists(self.name):
             logger.info("Calibration with name %s already exists in current directory" % self.name)
             var = ""
-            while var not in ('R', 'B', 'C', 'P', 'A'):
-                var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, Re-[P]lot, [A]bort:  ')
+            # while var not in ('R', 'B', 'C', 'P', 'A'):
+            #     var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, Re-[P]lot, [A]bort:  ')
+            #     var = var.upper()
+            while var not in ('B', 'C', 'A'):
+                var = input('Do you want to [B]ackup + run, [C]leanup + run, [A]bort:  ')
                 var = var.upper()
 
             # Abort
