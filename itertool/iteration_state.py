@@ -156,7 +156,7 @@ class IterationState:
         # RUNNING
         if self.status == StatusPoint.commission:
             self.status = StatusPoint.running
-            # self.wait_for_finished()
+            self.wait_for_finished()
 
         # ANALYZE STEP
         if self.status == StatusPoint.running:
@@ -237,11 +237,13 @@ class IterationState:
         experiment.simulations = ts
         experiment.parent_id = self.suite_id
 
-        self.platform.run_items(experiment)
-        self.platform.wait_till_done(experiment)
+        experiment.run()
 
-        # self.simulations = experiment.to_json()['simulations']
-        self.simulations = {}  # [TODO]: zdu: temp
+        # self.platform.run_items(experiment)
+        # self.platform.wait_till_done(experiment)
+        # experiment.run(wait_until_done=True)
+
+        self.simulations = experiment.to_dict()['simulations']
         self.experiment_id = experiment.uid
         logger.debug('Commissioned new simulations for experiment id: %s' % self.experiment_id)
         self.save()
@@ -291,56 +293,50 @@ class IterationState:
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
         user_logger.log(VERBOSE, self.summary_table)
 
-    def wait_for_finished(self, verbose=True, init_sleep=1.0, sleep_time=30):
+    def wait_for_finished(self, sleep_time=30):
+        from idmtools.core import ItemType
         logger.debug('Waiting for iteration %s simulations to complete' % self.iteration)
-        while True:
-            time.sleep(init_sleep)
-            self.exp_manager.refresh_experiment()
 
-            # Output time info
-            current_time = datetime.now()
-            iteration_time_elapsed = current_time - self.iteration_start
-            calibration_time_elapsed = current_time - self.calibration_start
+        # Output time info
+        current_time = datetime.now()
 
-            logger.info('\n\nCalibration: %s' % self.calibration_name)
-            logger.info('Calibration started: %s' % self.calibration_start)
-            logger.info('Current iteration: Iteration %s' % self.iteration)
-            logger.info('Current Iteration Started: %s' % self.iteration_start)
-            logger.info('Time since iteration started: %s' % verbose_timedelta(iteration_time_elapsed))
-            logger.info('Time since calibration started: %s\n' % verbose_timedelta(calibration_time_elapsed))
+        experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT)
+        self.platform.wait_till_done(experiment)
+        # self.platform.refresh_status(experiment)
 
-            # Display the statuses
-            if verbose:
-                self.exp_manager.print_status()
+        # If Calibration has been canceled -> exit
+        if experiment.any_failed:
+            # Kill the remaining simulations
+            print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
+            self.kill()
+            exit()
 
-            # If Calibration has been canceled -> exit
-            if self.exp_manager.any_failed_or_cancelled():
-                # Kill the remaining simulations
-                print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
-                self.kill()
-                exit()
-
-            # Test if we are all done
-            if self.exp_manager.experiment.is_done():
-                break
-
-            time.sleep(sleep_time)
+        time.sleep(sleep_time)
 
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
-        logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
+        user_logger.log(VERBOSE, "Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
 
     def kill(self):
-        """
-        Kill the current calibration
-        """
-        self.exp_manager.cancel_experiment()
+        from idmtools.core import ItemType
 
-        logger.info("Waiting to complete cancellation...")
-        self.exp_manager.wait_for_finished(verbose=False, sleep_time=1)
+        comps_suite = self.platform.get_item(self.suite_id, ItemType.SUITE, raw=True)
+        comps_exps = comps_suite.get_experiments()
+        for comps_exp in comps_exps:
+            try:
+                comps_exp.delete()
+            except RuntimeError:
+                logger.info("Could not delete the associated experiment...")
+                return
+
+        try:
+            comps_suite.delete()
+        except RuntimeError:
+            logger.info(f"Could not delete suite ({self.suite_id})...")
+            return
 
         # Print confirmation
-        logger.info("Calibration %s successfully cancelled!" % self.calibration_name)
+        logger.info("Calibration %s successfully cancelled!" % self.name)
 
     @property
     def iteration_directory(self):
