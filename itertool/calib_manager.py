@@ -9,7 +9,7 @@ from logging import getLogger
 from idmtools.utils.json import IDMJSONEncoder
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
-from itertool.utilities.ModBuilder import ModBuilder, ModFn
+from itertool.utilities.ModBuilder import ModFn
 from itertool.utilities.helper import validate_exp_name
 from itertool.utilities.Display import verbose_timedelta
 
@@ -129,21 +129,6 @@ class CalibManager(object):
 
         """
         self.experiment_builder_function = exp_builder_function
-
-    def exp_builder_func_dtk_bk(self, next_params, n_replicates=None):
-        if self.experiment_builder_function is not None:
-            builder = self.experiment_builder_function
-        else:
-            if not n_replicates:
-                n_replicates = self.sim_runs_per_param_set
-
-            builder = ModBuilder.from_combos(
-                [ModFn(self.config_builder.__class__.set_param, 'Run_Number', i + 1) for i in range(n_replicates)],
-                [ModFn(site.setup_fn) for site in self.sites],
-                [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
-                 index, samples in enumerate(next_params)]
-            )
-        return builder
 
     def exp_builder_func(self, next_params, n_replicates=None):
         from idmtools.builders import SimulationBuilder
