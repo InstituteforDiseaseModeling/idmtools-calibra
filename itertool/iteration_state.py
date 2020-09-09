@@ -254,6 +254,7 @@ class IterationState:
 
         # Update the summary table and all the results
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
+        logger.info(self.summary_table)
         user_logger.log(VERBOSE, self.summary_table)
 
     def wait_for_finished(self, sleep_time=30):
