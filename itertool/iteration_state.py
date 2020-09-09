@@ -105,44 +105,7 @@ class IterationState:
             self.all_results = self.all_results[iteration]
 
     def resume(self, iter_step):
-        # step 1: If we know we are running -> recreate the exp_manager
-        if iter_step.value >= StatusPoint.running.value:
-            # TODO port to new idmtools
-            # self.exp_manager = ExperimentManagerFactory.from_experiment(retrieve_experiment(self.experiment_id))
-            pass
-
-        # step 2: restore next_point
-        if iter_step not in (StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
-            if iter_step == StatusPoint.commission or iter_step == StatusPoint.iteration_start:
-                iteration_state = IterationState.restore_state(self.calibration_name, self.iteration - 1)
-                self.next_point_algo.set_state(iteration_state.next_point, self.iteration - 1)
-            elif iter_step == StatusPoint.analyze:
-                iteration_state = IterationState.restore_state(self.calibration_name, self.iteration)
-                self.next_point_algo.set_state(iteration_state.next_point, self.iteration)
-
-                # For IMIS ONLY!
-                self.next_point_algo.restore(IterationState.restore_state(self.calibration_name, self.iteration - 1))
-        else:
-            self.next_point_algo.set_state(self.next_point, self.iteration)
-
-        # step 3: restore Calibration results
-        if self.iteration > 0 and iter_step.value < StatusPoint.plot.value:
-            # it will combine current results with previous results
-            self.restore_results(self.iteration - 1)
-        else:
-            # it will use the current results and resume from next iteration
-            self.restore_results(self.iteration)
-
-        # step 4: prepare resume states
-        if iter_step.value <= StatusPoint.commission.value:
-            # need to run simulations
-            self.simulations = {}
-
-        if iter_step.value <= StatusPoint.analyze.value:
-            # just need to calculate the results
-            self.results = {}
-
-        self._status = StatusPoint(iter_step.value - 1) if iter_step.value > 0 else None
+        pass
 
     def run(self):
         # START_STEP

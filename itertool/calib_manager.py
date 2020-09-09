@@ -58,7 +58,6 @@ class CalibManager(object):
         self.calibration_start = None
         self.latest_iteration = 0
         self.current_iteration = None
-        self._location = None
         self.resume = False
         self.experiment_builder_function = None  # if not overridden in the set method, use internally-generated func
 
@@ -68,23 +67,14 @@ class CalibManager(object):
                    name=calibration_directory)
 
     @property
-    def location(self):
-        # return SetupParser.get('type') if self._location is None else self._location
-        return 'HPC'  # zdu: te,p
-
-    @location.setter
-    def location(self, value):
-        self._location = value
-
-    @property
     def suite_id(self):
         # Generate the suite ID if not present
-        if not self.suites or self.suites[-1]['type'] != self.location:
+        if not self.suites:
             from idmtools.entities import Suite
             suite = Suite(name="test")
             suites = self.platform.create_items(suite)
             suite_id = suites[0][1]
-            self.suites.append({'id': suite_id, 'type': self.location})
+            self.suites.append({'id': suite_id})
             self.cache_calibration()
 
         return self.suites[-1]['id']
@@ -101,9 +91,7 @@ class CalibManager(object):
         if not validate_exp_name(self.name):
             exit()
 
-        self.location = 'HPC'  # [TODO]: zdu: temp, will be removed
-
-        self.create_calibration(self.location)
+        self.create_calibration()
 
         self.run_iterations()
 
@@ -196,7 +184,6 @@ class CalibManager(object):
                               calibration_name=self.name,
                               platform=self.platform,
                               sites=self.sites,
-                              # location=self.location,
                               suite_id=self.suite_id,
                               next_point_algo=self.next_point,
                               map_sample_to_model_input_fn=self.map_sample_to_model_input_fn,
@@ -209,7 +196,7 @@ class CalibManager(object):
                               all_results=self.all_results,
                               calibration_start=self.calibration_start)
 
-    def create_calibration(self, location):
+    def create_calibration(self):
         """
         Create the working directory for a new calibration.
         Cache the relevant suite-level information to allow re-initializing this instance.
@@ -230,10 +217,10 @@ class CalibManager(object):
             elif var == 'B':
                 tstamp = re.sub('[ :.-]', '_', str(datetime.now()))
                 shutil.move(self.name, "%s_backup_%s" % (self.name, tstamp))
-                self.create_calibration(location)
+                self.create_calibration()
             elif var == "C":
                 self.cleanup()
-                self.create_calibration(location)
+                self.create_calibration()
             elif var == "R":
                 self.resume_calibration()
                 exit()  # avoid calling self.run_iterations(**kwargs)
@@ -262,14 +249,11 @@ class CalibManager(object):
         As such, the 'resume' logic relies on the existence of the original configuration script.
         """
         state = {'name': self.name,
-                 'location': self.location,
                  'suites': self.suites,
                  'iteration': self.iteration,
                  'param_names': self.param_names(),
                  'sites': self.site_analyzer_names(),
                  'results': self.serialize_results(),
-                 # 'setup_overlay_file': SetupParser.setup_file,
-                 # 'selected_block': SetupParser.selected_block,
                  'calibration_start': self.calibration_start}
         state.update(kwargs)
         json.dump(state, open(os.path.join(self.name, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
@@ -299,84 +283,7 @@ class CalibManager(object):
         return data.to_dict(orient='list')
 
     def resume_calibration(self, iteration=None, iter_step=None):
-        self.resume = True
-
-        # load and validate calibration
-        self.load_calibration(iteration, iter_step)
-
-        # resume from a given iteration
-        self.run_iterations(self.iteration)
-
-    def load_calibration(self, iteration=None, iter_step=None):
-        # step 1: load calibration
-        if not os.path.isdir(self.name):
-            raise Exception('Unable to find existing calibration in directory: %s' % self.name)
-
-        calib_data = self.read_calib_data()
-        if calib_data is None or not calib_data:
-            raise Exception('Metadata is empty in %s/CalibManager.json' % self.name)
-
-        # step 2: load basic info
-        self.location = calib_data.get('location')
-        self.latest_iteration = int(calib_data.get('iteration', 0))
-        self.suites = calib_data['suites']
-
-        # step 3: validate inputs
-        self.current_iteration, resume_point = self.retrieve_iteration(iteration, iter_step)
-
-        # step 4: load all_results
-        results = calib_data.get('results')
-        if isinstance(results, dict):
-            self.all_results = pd.DataFrame.from_dict(results, orient='columns')
-        elif isinstance(results, list):
-            self.all_results = results
-
-        # step 5: update required objects for resume
-        self.current_iteration.update(**self.required_components)
-
-        # Resume the iteration
-        self.current_iteration.resume(resume_point)
-
-    def retrieve_iteration(self, iteration=None, iter_step=None):
-        if iteration is None:
-            resume_iteration = self.latest_iteration
-        else:
-            resume_iteration = iteration
-
-        # validate input iteration
-        if self.latest_iteration < resume_iteration:
-            raise Exception(
-                "The iteration '%s' is beyond the maximum iteration '%s'" % (resume_iteration, self.latest_iteration))
-
-        # validate input iter_step
-        it = IterationState.restore_state(self.name, resume_iteration)
-
-        latest_step = it.status
-        if iter_step is None:
-            iter_step = latest_step
-
-        if isinstance(iter_step, StatusPoint):
-            given_step = iter_step
-        else:
-            given_step = StatusPoint[iter_step]
-
-        if given_step == StatusPoint.analyze:
-            given_step = StatusPoint.running
-
-        if given_step.value > latest_step.value:
-            raise Exception("The iter_step '%s' is beyond the latest step '%s'" % (given_step.name, latest_step.name))
-
-        # move forward if status is done
-        if given_step == StatusPoint.done:
-            iter_step = StatusPoint.next_point
-
-        # finally check user input location and experiment location and provide options for resume
-        self.check_location(it)
-
-        if isinstance(iter_step, StatusPoint):
-            return it, iter_step
-        else:
-            return it, StatusPoint[iter_step]
+        pass
 
     def kill(self):
         from idmtools.core import ItemType
