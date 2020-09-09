@@ -302,7 +302,7 @@ class IterationState:
 
         experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT)
         self.platform.wait_till_done(experiment)
-        # self.platform.refresh_status(experiment)
+        self.platform.refresh_status(experiment)
 
         # If Calibration has been canceled -> exit
         if experiment.any_failed:
@@ -318,22 +318,22 @@ class IterationState:
         user_logger.log(VERBOSE, "Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
 
     def kill(self):
+        def experiment_is_running(e):
+            from COMPS.Data.Simulation import SimulationState
+            for sim in e.get_simulations():
+                if sim.state not in (SimulationState.Succeeded, SimulationState.Failed,
+                                     SimulationState.Canceled, SimulationState.Created,
+                                     SimulationState.CancelRequested):
+                    return True
+            return False
+
         from idmtools.core import ItemType
+        comps_experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT, raw=True)
+        if comps_experiment and experiment_is_running(comps_experiment):
+            comps_experiment.cancel()
 
-        comps_suite = self.platform.get_item(self.suite_id, ItemType.SUITE, raw=True)
-        comps_exps = comps_suite.get_experiments()
-        for comps_exp in comps_exps:
-            try:
-                comps_exp.delete()
-            except RuntimeError:
-                logger.info("Could not delete the associated experiment...")
-                return
-
-        try:
-            comps_suite.delete()
-        except RuntimeError:
-            logger.info(f"Could not delete suite ({self.suite_id})...")
-            return
+        logger.info("Waiting to complete cancellation...")
+        self.wait_for_finished()
 
         # Print confirmation
         logger.info("Calibration %s successfully cancelled!" % self.name)
