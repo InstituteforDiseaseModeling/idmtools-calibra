@@ -7,7 +7,6 @@ from collections import OrderedDict
 import numpy.ma as ma
 import pandas as pd
 import numpy as np
-
 from itertool.analyzers import malaria_summary
 
 logger = logging.getLogger(__name__)

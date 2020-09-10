@@ -1,6 +1,3 @@
-# from dtk.utils.Campaign.CampaignClass import *
-
-
 def format(reports):
     reports_json = {"Use_Defaults": 1, "Reports": []}
     for r in reports:

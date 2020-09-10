@@ -1,6 +1,4 @@
 import warnings
-# from dtk.utils.core.DTKConfigBuilder import *
-
 
 param_block = {
 

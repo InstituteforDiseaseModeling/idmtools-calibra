@@ -1,7 +1,5 @@
 import json
-
 from idmtools.entities import IAnalyzer
-# from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
 from itertool.utilities.Encoding import GeneralEncoder
 
 

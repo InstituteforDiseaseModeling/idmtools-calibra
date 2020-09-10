@@ -4,10 +4,8 @@ import logging
 import os  # mkdir, path, etc.
 import threading  # for multi-threaded job submission and monitoring
 from io import StringIO, BytesIO
-
 import pandas as pd  # for reading csv files
 from COMPS.Data import QueryCriteria, Suite, Experiment
-
 from idmtools.core import ItemType
 from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.simulation import Simulation
