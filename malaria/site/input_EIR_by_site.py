@@ -1,10 +1,5 @@
 from collections import deque
-# from dtk.generic.geography import set_geography
-# from dtk.vector.study_sites import geography_from_site
-# from dtk.interventions.input_EIR import add_InputEIR
 from itertool.utilities.generic.geography import set_geography
-# from dtk.vector.study_sites import geography_from_site
-# from itertool.utilities.interventions.input_EIR import add_InputEIR
 from itertool.interventions.input_EIR import add_InputEIR
 
 # Study-site EIR by month of year
