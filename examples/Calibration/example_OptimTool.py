@@ -1,7 +1,6 @@
 # Execute directly: 'python example_OptimTool.py'
-
-import copy
 import os
+import copy
 from itertool.calib_manager import CalibManager
 from itertool.algorithms.optim_tool import OptimTool
 from itertool.plotters.likelihood_plotter import LikelihoodPlotter
@@ -170,14 +169,11 @@ r = OptimTool.get_r(num_params, volume_fraction)
 
 
 optimtool = OptimTool(params,
-                      constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
-                      mu_r=r,
-                      # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
-                      sigma_r=r / 10.,  # <-- stdev of radius
-                      center_repeats=2,
-                      # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=9
-                      # 32 # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      constrain_sample,         # <-- WILL NOT BE SAVED IN ITERATION STATE
+                      mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
+                      sigma_r=r / 10.,          # <-- stdev of radius
+                      center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
+                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
 # platform = Platform('COMPS2')
