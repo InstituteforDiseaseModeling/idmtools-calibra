@@ -82,7 +82,7 @@ def add_summary_report(simulation, start=0, interval=365, nreports=10000,
     simulation.task.reporters.add_reporter(summary_report)
 
 
-def add_immunity_report(cb, start=0, interval=365, nreports=10000,
+def add_immunity_report(simulation, start=0, interval=365, nreports=10000,
                         description='AnnualAverage',
                         parasitemia_bins=None,
                         age_bins=None):
@@ -100,10 +100,10 @@ def add_immunity_report(cb, start=0, interval=365, nreports=10000,
                                     max_number_reports=nreports,
                                     reporting_interval=interval)
     immunity_report.type = "MalariaImmunityReport"
-    cb.add_reports(immunity_report)
+    simulation.task.reporters.add_report(immunity_report)
 
 
-def add_survey_report(cb, survey_days, reporting_interval=21,
+def add_survey_report(simulation, survey_days, reporting_interval=21,
                       trigger=None, nreports=1,
                       nodes=None, description=''):
     if not trigger:
@@ -119,15 +119,15 @@ def add_survey_report(cb, survey_days, reporting_interval=21,
         report_description='%sDay_%d' % (description, survey_day),
         type="MalariaSurveyJSONAnalyzer",
         nodeset_config=nodes) for survey_day in survey_days]
-    cb.add_reports(*survey_reports)
+    simulation.task.reporters.add_reports(*survey_reports)
 
 
-def add_patient_report(cb):
-    cb.add_reports(BaseReport(type="MalariaPatientJSONReport"))
+def add_patient_report(simulation):
+    simulation.task.reporters.add_report(BaseReport(type="MalariaPatientJSONReport"))
 
 
-def add_habitat_report(cb):
-    cb.add_reports(BaseReport(type="VectorHabitatReport"))
+def add_habitat_report(simulation):
+    simulation.task.reporter.add_reports(BaseReport(type="VectorHabitatReport"))
 
 
 class FilteredMalariaReport(BaseReport):
@@ -186,15 +186,15 @@ class FilteredMalariaSpatialReport(BaseReport):
         return d
 
 
-def add_filtered_report(cb, start=0, end=10000, nodes=None, description=''):
+def add_filtered_report(simulation, start=0, end=10000, nodes=None, description=''):
     if not nodes:
         nodes = []
     filtered_report = FilteredMalariaReport(start_day=start, end_day=end, nodes=nodes,
                                             description=description)
-    cb.add_reports(filtered_report)
+    simulation.task.reporters.add_report(filtered_report)
 
 
-def add_filtered_spatial_report(cb, start=0, end=10000, channels=None,
+def add_filtered_spatial_report(simulation, start=0, end=10000, channels=None,
                                 interval=1, nodes=None, description=''):
     if not nodes:
         nodes = []
@@ -204,19 +204,19 @@ def add_filtered_spatial_report(cb, start=0, end=10000, channels=None,
                                                   end_day=end, interval=interval,
                                                   nodes=nodes, description=description,
                                                   type="SpatialReportMalariaFiltered")
-    cb.add_reports(spatial_report)
+    simulation.task.reporters.add_report(spatial_report)
 
 
-def add_malaria_transmission_report(cb, start=0, duration=10000, description='',
+def add_malaria_transmission_report(simulation, start=0, duration=10000, description='',
                                     nodes=None):
     malaria_transmission_report = BaseMalariaTransmissionReport(start_day=start,
                                                                 duration_days=duration,
                                                                 report_description=description,
                                                                 nodes=nodes)
-    cb.add_reports(malaria_transmission_report)
+    simulation.task.reporters.add_report(malaria_transmission_report)
 
 
-def add_event_counter_report(cb, event_trigger_list, start=0, duration=10000, description='',
+def add_event_counter_report(simulation, event_trigger_list, start=0, duration=10000, description='',
                              nodes=None):
     if not nodes:
         nodes = {"class": "NodeSetAll"}
@@ -226,4 +226,4 @@ def add_event_counter_report(cb, event_trigger_list, start=0, duration=10000, de
                                            report_description=description,
                                            nodeset_config=nodes,
                                            type='ReportEventCounter')
-    cb.add_reports(event_counter_report)
+    simulation.task.reporters.add_reports(event_counter_report)
