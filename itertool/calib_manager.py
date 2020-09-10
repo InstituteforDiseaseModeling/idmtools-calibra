@@ -98,6 +98,10 @@ class CalibManager(object):
     def run_iterations(self, iteration=0):
         """
         Run iterations in a loop
+        Args:
+            iteration: the # of iteration
+
+        Returns: None
         """
         self.calibration_start = datetime.now().replace(microsecond=0)
 
@@ -125,8 +129,7 @@ class CalibManager(object):
         Args:
             exp_builder_function: an experiment builder object
 
-        Returns: no return
-
+        Returns: None
         """
         self.experiment_builder_function = exp_builder_function
 
@@ -160,6 +163,13 @@ class CalibManager(object):
         return builder
 
     def create_iteration_state(self, iteration):
+        """
+        Create iteation state
+        Args:
+            iteration: the # of the iteration
+
+        Returns: created IterationState
+        """
         if self.resume:
             self.resume = False
             self.current_iteration.calibration_start = self.calibration_start
@@ -232,6 +242,10 @@ class CalibManager(object):
         Cache information about the CalibManager that is needed to resume after an interruption.
         N.B. This is not currently the complete state, some of which relies on nested and frozen functions.
         As such, the 'resume' logic relies on the existence of the original configuration script.
+        Args:
+            **kwargs: extra info
+
+        Returns: None
         """
         state = {'name': self.name,
                  'suites': self.suites,
@@ -304,13 +318,6 @@ class CalibManager(object):
         - Delete the result directory
         - If LOCAL -> also delete the simulations
         """
-        try:
-            calib_data = self.read_calib_data()
-        except Exception as ex:
-            logger.exception(ex)
-            logger.info('Calib data cannot be read -> skip')
-            calib_data = None
-
         # Kill
         self.kill()
 

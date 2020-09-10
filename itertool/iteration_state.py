@@ -93,6 +93,11 @@ class IterationState:
     def restore_results(self, iteration):
         """
         Restore summary results from serialized state.
+        Args:
+            iteration: the # of iteration
+
+        Returns:
+
         """
         # Depending on the type of results (lists or dicts), handle differently how we treat the results
         # This should be refactor to take care of both cases at once
@@ -185,7 +190,11 @@ class IterationState:
         Commission an experiment of simulations constructed from a list of combinations of
         random seeds, calibration sites, and the next sample points.
         Cache the relevant experiment and simulation information to the IterationState.
+        Args:
+            next_params: the next sample
+        Returns: None
         """
+
         from idmtools.entities.templated_simulation import TemplatedSimulations
         from idmtools.entities.experiment import Experiment
 
@@ -200,11 +209,8 @@ class IterationState:
         experiment.simulations = ts
         experiment.parent_id = self.suite_id
 
+        # run experiment
         experiment.run()
-
-        # self.platform.run_items(experiment)
-        # self.platform.wait_till_done(experiment)
-        # experiment.run(wait_until_done=True)
 
         self.simulations = experiment.to_dict()['simulations']
         self.experiment_id = experiment.uid
