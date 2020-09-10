@@ -3,8 +3,8 @@ import os
 import time
 import pandas as pd
 from datetime import datetime
-from logging import getLogger, DEBUG
-from idmtools.core.logging import VERBOSE, SUCCESS
+from logging import getLogger
+from idmtools.core.logging import VERBOSE
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
@@ -14,6 +14,7 @@ from itertool.utilities.Display import verbose_timedelta
 
 def param_update(simulation, param, value):
     return simulation.task.set_parameter(param, value)
+
 
 logger = getLogger("Calibration")
 # logger = getLogger(__name__)
