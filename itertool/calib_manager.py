@@ -71,7 +71,7 @@ class CalibManager(object):
         # Generate the suite ID if not present
         if not self.suites:
             from idmtools.entities import Suite
-            suite = Suite(name="test")
+            suite = Suite(name=self.name)
             suites = self.platform.create_items(suite)
             suite_id = suites[0][1]
             self.suites.append({'id': suite_id})
