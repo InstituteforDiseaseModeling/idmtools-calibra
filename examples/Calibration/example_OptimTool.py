@@ -164,8 +164,6 @@ if num_params == 0:
     exit()
 
 r = OptimTool.get_r(num_params, volume_fraction)
-# it used to be r=(volume_fraction/V_n)^(1/n), which can be greater than 1 for large n(num_params > 18)
-# now r = (volume_fraction * V_n)^(1/n)
 
 
 optimtool = OptimTool(params,
@@ -176,14 +174,13 @@ optimtool = OptimTool(params,
                       samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-# platform = Platform('COMPS2')
-calib_manager = CalibManager(name='Optimtool_test',  # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_test',      # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=3,  # <-- Iterations
+                             max_iterations=3,          # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
@@ -194,5 +191,5 @@ if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
     platform = Platform('COMPS2')
     cm = run_calib_args["calib_manager"]
-    cm.platform = platform  # avoid multiple INI Section printout
+    cm.platform = platform
     cm.run_calibration()
