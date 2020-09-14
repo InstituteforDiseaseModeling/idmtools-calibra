@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 
 import numpy as np
-from malaria.analyzers.Helpers import season_channel_age_density_json_to_pandas
+from malaria.analyzers.helpers import season_channel_age_density_json_to_pandas
 from malaria.study_sites.site_setup_functions import \
     config_setup_fn, survey_report_fn, summary_report_fn, add_treatment_fn, site_input_eir_fn
 

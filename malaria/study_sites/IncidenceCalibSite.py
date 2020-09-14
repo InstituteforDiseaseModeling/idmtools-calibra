@@ -2,8 +2,8 @@ import logging
 from abc import ABCMeta
 from itertool.calib_site import CalibSite
 
-from malaria.analyzers.ChannelByAgeCohortAnalyzer import IncidenceByAgeCohortAnalyzer
-from malaria.analyzers.Helpers import channel_age_json_to_pandas
+from malaria.analyzers.channel_by_age_cohort_analyzer import IncidenceByAgeCohortAnalyzer
+from malaria.analyzers.helpers import channel_age_json_to_pandas
 from malaria.study_sites.site_setup_functions import config_setup_fn, summary_report_fn, site_input_eir_fn
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from abc import ABCMeta
 from itertool.calib_site import CalibSite
 from malaria.study_sites.site_setup_functions import \
     vector_stats_report_fn
-from malaria.analyzers.ChannelBySeasonSpatialCohortAnalyzer import ChannelBySeasonSpatialCohortAnalyzer
+from malaria.analyzers.channel_by_season_spatial_cohort_analyzer import ChannelBySeasonSpatialCohortAnalyzer
 
 logger = logging.getLogger(__name__)
 
