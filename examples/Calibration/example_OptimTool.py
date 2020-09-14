@@ -174,7 +174,7 @@ optimtool = OptimTool(params,
                       samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_test',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
@@ -190,6 +190,5 @@ run_calib_args = {
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
     platform = Platform('COMPS2')
-    cm = run_calib_args["calib_manager"]
-    cm.platform = platform
-    cm.run_calibration()
+    calib_manager.platform = platform
+    calib_manager.run_calibration()
