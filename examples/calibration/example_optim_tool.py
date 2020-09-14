@@ -171,16 +171,16 @@ optimtool = OptimTool(params,
                       mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
                       sigma_r=r / 10.,          # <-- stdev of radius
                       center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=3   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration_7',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=2,          # <-- Iterations
+                             max_iterations=3,          # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
