@@ -213,9 +213,9 @@ class IterationState:
         self.experiment_id = experiment.uid
 
         # collect simulations tags
-        from COMPS.Data import Experiment
+        from COMPS.Data import Experiment as COMPS_Experiment
         from COMPS.Data import QueryCriteria
-        comps_exp = Experiment.get(experiment.uid)
+        comps_exp = COMPS_Experiment.get(experiment.uid)
         comps_sims = comps_exp.get_simulations(query_criteria=QueryCriteria().select(['id']).select_children(['tags']))
 
         sim_tags = {}
@@ -295,16 +295,16 @@ class IterationState:
             logger.info('Time since iteration started: %s' % verbose_timedelta(iteration_time_elapsed))
             logger.info('Time since calibration started: %s\n' % verbose_timedelta(calibration_time_elapsed))
 
+            # If Calibration has been canceled -> exit
+            if experiment.any_failed and not experiment.done:
+                # Kill the remaining simulations
+                print("\nOne or more simulations failed. Calibration cannot continue. Exiting...")
+                self.kill()
+                exit()
+
             # Test if we are all done
             if experiment.done:
                 break
-
-            # If Calibration has been canceled -> exit
-            if experiment.any_failed:
-                # Kill the remaining simulations
-                print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
-                self.kill()
-                exit()
 
             time.sleep(sleep_time)
 
@@ -331,7 +331,8 @@ class IterationState:
         self.wait_for_finished()
 
         # Print confirmation
-        logger.info("Calibration %s successfully cancelled!" % self.name)
+        logger.info("Calibration %s successfully cancelled!" % self.calibration_name)
+        print("Calibration %s successfully cancelled!" % self.calibration_name)
 
     @property
     def iteration_directory(self):
