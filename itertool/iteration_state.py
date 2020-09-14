@@ -4,7 +4,6 @@ import time
 import pandas as pd
 from datetime import datetime
 from logging import getLogger
-from idmtools.core.logging import VERBOSE
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
@@ -17,8 +16,6 @@ def param_update(simulation, param, value):
 
 
 logger = getLogger("Calibration")
-# logger = getLogger(__name__)
-user_logger = getLogger('user')
 
 
 class IterationState:
@@ -46,7 +43,6 @@ class IterationState:
         self.next_point_algo = None
         self.analyzer_list = []
         self.site_analyzer_names = {}
-        self.config_builder = None
         self.exp_builder_func = None
         self.map_sample_to_model_input_fn = None
         self.sim_runs_per_param_set = None
@@ -262,31 +258,45 @@ class IterationState:
         # Update the summary table and all the results
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
         logger.info(self.summary_table)
-        user_logger.log(VERBOSE, self.summary_table)
+        print(self.summary_table)
 
-    def wait_for_finished(self, sleep_time=30):
+    def wait_for_finished(self, init_sleep=1.0, sleep_time=30):
         from idmtools.core import ItemType
         logger.debug('Waiting for iteration %s simulations to complete' % self.iteration)
 
-        # Output time info
-        current_time = datetime.now()
-
         experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT)
-        self.platform.wait_till_done(experiment)
-        self.platform.refresh_status(experiment)
+        while True:
+            time.sleep(init_sleep)
+            self.platform.refresh_status(experiment)
 
-        # If Calibration has been canceled -> exit
-        if experiment.any_failed:
-            # Kill the remaining simulations
-            print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
-            self.kill()
-            exit()
+            # Output time info
+            current_time = datetime.now()
+            iteration_time_elapsed = current_time - self.iteration_start
+            calibration_time_elapsed = current_time - self.calibration_start
 
-        time.sleep(sleep_time)
+            logger.info('\n\nCalibration: %s' % self.calibration_name)
+            logger.info('Calibration started: %s' % self.calibration_start)
+            logger.info('Current iteration: Iteration %s' % self.iteration)
+            logger.info('Current Iteration Started: %s' % self.iteration_start)
+            logger.info('Time since iteration started: %s' % verbose_timedelta(iteration_time_elapsed))
+            logger.info('Time since calibration started: %s\n' % verbose_timedelta(calibration_time_elapsed))
+
+            # Test if we are all done
+            if experiment.done:
+                break
+
+            # If Calibration has been canceled -> exit
+            if experiment.any_failed:
+                # Kill the remaining simulations
+                print("\nOne or more simulations failed/cancelled. Calibration cannot continue. Exiting...")
+                self.kill()
+                exit()
+
+            time.sleep(sleep_time)
 
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
-        user_logger.log(VERBOSE, "Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
+        logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
 
     def kill(self):
         def experiment_is_running(e):
