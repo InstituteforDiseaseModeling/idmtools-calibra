@@ -177,7 +177,7 @@ class site_input_eir_fn:
         self.set_site_geography = set_site_geography
 
     def __call__(self, simulation):
-        from malaria.site.input_EIR_by_site import configure_site_EIR
+        from malaria.site.input_eir_by_site import configure_site_EIR
         return configure_site_EIR(simulation, site=self.site, birth_cohort=self.birth_cohort, set_site_geography=False)
 
 class input_eir_fn:
