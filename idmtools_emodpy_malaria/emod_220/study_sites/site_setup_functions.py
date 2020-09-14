@@ -49,7 +49,7 @@ class summary_report_fn:
         self.ip_filter = "" if not ipfilter else ipfilter
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_summary_report
+        from malaria.reports.malaria_report import add_summary_report
         return add_summary_report(cb, start=self.start, interval=self.interval, nreports=self.nreports,
                                   description=self.description, age_bins=self.age_bins,
                                   parasitemia_bins=self.parasitemia_bins, infection_bins=self.infection_bins,
@@ -76,7 +76,7 @@ class survey_report_fn:
         self.reporting_interval = reporting_interval or self.interval
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_survey_report
+        from malaria.reports.malaria_report import add_survey_report
         return add_survey_report(cb, survey_days=self.survey_days, reporting_interval=self.reporting_interval,
                                  nreports=self.nreports)
 
@@ -89,7 +89,7 @@ class patient_report_fn:
         self.reporting_interval = reporting_interval or self.interval
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_patient_report
+        from malaria.reports.malaria_report import add_patient_report
         return add_patient_report(cb)
 
 
@@ -110,7 +110,7 @@ class filtered_report_fn:
         self.description = description
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_filtered_report
+        from malaria.reports.malaria_report import add_filtered_report
         return add_filtered_report(cb, start=self.start, end=self.end, nodes=self.nodes, description=self.description)
 
 
@@ -123,7 +123,7 @@ class filtered_spatial_report_fn:
         self.description = description
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_filtered_spatial_report
+        from malaria.reports.malaria_report import add_filtered_spatial_report
         return add_filtered_spatial_report(cb, start=self.start, end=self.end, channels=self.channels,
                                            nodes=self.nodes, description=self.description)
 
@@ -137,7 +137,7 @@ class event_counter_report_fn:
         self.description = description
 
     def __call__(self, cb):
-        from malaria.reports.MalariaReport import add_event_counter_report
+        from malaria.reports.malaria_report import add_event_counter_report
         return add_event_counter_report(cb, self.channels, start=self.start, duration=self.duration,
                                         nodes=self.nodes, description=self.description)
 

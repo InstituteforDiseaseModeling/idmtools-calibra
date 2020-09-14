@@ -1,11 +1,11 @@
 import platform
 import getpass
-from . import Distro
+from . import distro
 from distutils import spawn
 
 
 def get_linux_distribution():
-    name = Distro.name().lower()
+    name = distro.name().lower()
 
     if 'centos' in name:
         return 'CentOS'

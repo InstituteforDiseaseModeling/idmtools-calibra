@@ -1,6 +1,6 @@
 import json
 from idmtools.entities import IAnalyzer
-from itertool.utilities.Encoding import GeneralEncoder
+from itertool.utilities.encoding import GeneralEncoder
 
 
 class BaseCalibrationAnalyzer(IAnalyzer):

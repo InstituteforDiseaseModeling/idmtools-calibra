@@ -9,9 +9,9 @@ from logging import getLogger
 from idmtools.utils.json import IDMJSONEncoder
 from itertool.iteration_state import IterationState
 from itertool.utils import StatusPoint
-from itertool.utilities.ModBuilder import ModFn
+from itertool.utilities.mod_fn import ModFn
 from itertool.utilities.helper import validate_exp_name
-from itertool.utilities.Display import verbose_timedelta
+from itertool.utilities.display import verbose_timedelta
 
 logger = getLogger(__name__)
 

@@ -7,8 +7,8 @@ from logging import getLogger
 from idmtools.analysis.analyze_manager import AnalyzeManager
 from itertool.parameter_set import ParameterSet
 from itertool.utils import StatusPoint
-from itertool.utilities.Encoding import NumpyEncoder, json_numpy_obj_hook
-from itertool.utilities.Display import verbose_timedelta
+from itertool.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
+from itertool.utilities.display import verbose_timedelta
 
 
 def param_update(simulation, param, value):
