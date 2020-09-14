@@ -19,8 +19,7 @@ def add_health_seeking(simulation,
     the node.
     
     Args:
-        config_builder:  The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` 
-            object for building, modifying, and writing campaign configuration files.
+        simulation:  idmtools Simulation object.
         start_day: Start day of intervention.
         targets: List of dictionaries defining the trigger event and coverage for and 
         properties of individuals to target with the intervention. Default is ``[{
@@ -164,8 +163,7 @@ def add_health_seeking_by_chw(simulation,
     to the drug distribution. Person uses chw, but they do not get the drugs chw distributes to them.
 
     Args:
-        config_builder: The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` 
-        object for building, modifying, and writing campaign configuration files.
+        simulation: idmtools Simulation object.
         start_day: Start day of intervention.
         targets: List of dictionaries defining the trigger event and coverage for and 
         properties of individuals to target with the intervention. Default is ``[{

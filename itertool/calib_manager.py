@@ -63,7 +63,7 @@ class CalibManager(object):
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
-        return cls(config_builder=None, map_sample_to_model_input_fn=None, sites=None, next_point=None,
+        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None,
                    name=calibration_directory)
 
     @property
@@ -363,7 +363,7 @@ class CalibManager(object):
         kwargs = {
             'exp_builder_func': self.exp_builder_func,
             'next_point_algo': self.next_point,
-            'config_builder': self.config_builder,
+            'task': self.task,
             'analyzer_list': self.analyzer_list,
             'plotters': self.plotters,
             'all_results': self.all_results,
