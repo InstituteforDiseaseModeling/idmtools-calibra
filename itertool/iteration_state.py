@@ -308,6 +308,11 @@ class IterationState:
 
             time.sleep(sleep_time)
 
+        # exit if it is failed
+        if experiment.done and not experiment.succeeded:
+            print("\nexperiment failed")
+            exit()
+
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
