@@ -8,8 +8,10 @@ def convert_filepaths(params):
     Make sure to add the geography folder in front of the paths.
     For example, if the geography is Namawala, we want the climate/demographics files to be Namawala\\file.json
 
-    :param params: The config parameters
-    :return: Nothing
+    Args:
+        params: The config parameters
+
+    Returns: None
 
     """
     g = params.pop('Geography', None)
@@ -31,8 +33,10 @@ def get_converted_paths_for_geography(geography):
     Simply copy the geography specific parameters and send it to the :any:'convert_filepaths' function to get the correct paths.
     Then return the updated parameters.
 
-    :param geography: The selected geography
-    :return: parameters with the correct path
+    Args:
+        geography: The selected geography
+
+    Returns: parameters with the correct path
 
     """
     try:
@@ -50,10 +54,12 @@ def get_geography_parameter(geography, param):
     Return a particular parameter for a given geography.
     This function will return the parameter value with the updated path and can accommodate geography of the form:
     ``Sinazongwe.static``. The ``.static`` will be removed.
+    Args:
+        geography: The desired geography
+        param: The parameter we want to retrieve
 
-    :param geography: The desired geography
-    :param param: The parameter we want to retrieve
-    :return: The value of the parameter for the given geography
+    Returns: The value of the parameter for the given geography
+
     """
     geography = geography.split('.')[0]  # e.g. Sinazongwe.static
     params = get_converted_paths_for_geography(geography)
@@ -67,12 +73,14 @@ def set_geography(simulation, geography, static=False, pop_scale=1):
     with the population scale parameter passed.
 
     .. note:: The population scale will act on the ``x_Birth`` configuration parameter if the ``Birth_Rate_dependence`` is set to a ``FIXED_BIRTH_DATE``. It will also act on the ``Base_Population_Scale_Factor``.
+    Args:
+        simulation: idmtools Simulation object.
+        geography: The selected geography
+        static: If True, will create a static demographics. if False, will use the ``pop_scale``
+        pop_scale: Used if the demographics is not static and will
 
-    :param cb: The :py:class:`DTKConfigBuilder` containing the current configuration
-    :param geography: The selected geography
-    :param static: If True, will create a static demographics. if False, will use the ``pop_scale``
-    :param pop_scale: Used if the demographics is not static and will
-    :return: Nothing
+    Returns: None
+
     """
     params = get_converted_paths_for_geography(geography)
     #logging.debug('Geography parameters: %s' % params)
