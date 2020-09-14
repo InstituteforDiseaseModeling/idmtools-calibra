@@ -1,6 +1,6 @@
 import logging
 
-from malaria.study_sites.IncidenceCalibSite import IncidenceCalibSite
+from malaria.study_sites.incidence_calib_site import IncidenceCalibSite
 from malaria.study_sites.site_setup_functions import config_setup_fn, summary_report_fn, site_input_eir_fn, \
     add_treatment_fn
 

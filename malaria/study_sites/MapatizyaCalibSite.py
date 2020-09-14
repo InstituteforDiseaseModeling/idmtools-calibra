@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 from calibtool.study_sites.site_setup_functions import *
-from malaria.study_sites.HouseholdCalibSite import HouseholdCalibSite
+from malaria.study_sites.household_calib_site import HouseholdCalibSite
 
 logger = logging.getLogger(__name__)
 
