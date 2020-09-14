@@ -1,5 +1,5 @@
 import sys
-from itertool.utilities.reports.CustomReport import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
+from itertool.utilities.reports.custom_report import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
     BaseMalariaTransmissionReport
 
 

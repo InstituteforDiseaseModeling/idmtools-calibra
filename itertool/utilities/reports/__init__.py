@@ -1,2 +1,2 @@
-from .CustomReport import *
-from .VectorReport import *
+from .custom_report import *
+from .vector_report import *

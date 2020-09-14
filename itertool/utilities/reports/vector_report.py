@@ -1,5 +1,5 @@
-from .CustomReport import BaseReport
-from .CustomReport import BaseVectorStatsReport
+from .custom_report import BaseReport
+from .custom_report import BaseVectorStatsReport
 
 
 def add_habitat_report(cb):

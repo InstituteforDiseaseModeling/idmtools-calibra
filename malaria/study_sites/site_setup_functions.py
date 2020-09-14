@@ -8,7 +8,7 @@ from itertool.interventions.irs import add_node_IRS, add_IRS
 from itertool.interventions.outbreakindividual import recurring_outbreak
 from itertool.interventions.migrate_to import add_migration_event
 from malaria.interventions.health_seeking import add_health_seeking
-from itertool.utilities.reports.CustomReport import BaseReport, BaseVectorStatsReport
+from itertool.utilities.reports.custom_report import BaseReport, BaseVectorStatsReport
 
 import json
 import numpy as np
