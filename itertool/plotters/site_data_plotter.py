@@ -64,7 +64,7 @@ class SiteDataPlotter(BasePlotter):
             raise e
 
         try:
-            self.write_LL_csv(self.iteration_state.exp_manager.experiment)
+            self.write_LL_csv()
         except:
             logger.info("Log likelihood CSV could not be created. Skipping...")
 
@@ -186,12 +186,12 @@ class SiteDataPlotter(BasePlotter):
             except OSError:
                 logger.error("Failed to delete %s" % plot_path)
 
-    def write_LL_csv(self, experiment):
+    def write_LL_csv(self):
         """
         Write the LL_summary.csv with what is in the CalibManager
         """
         # Data needed for the LL_CSV
-        location = self.iteration_state.exp_manager.experiment.location
+        # location = self.iteration_state.exp_manager.experiment.location
         iteration_state = self.iteration_state
         iteration = self.iteration_state.iteration
         suite_id = iteration_state.suite_id
@@ -215,10 +215,17 @@ class SiteDataPlotter(BasePlotter):
         # TODO: merge in parameter values also from siminfo_df (sample points and simulation tags need not be the same)
 
         # Retrieve the mapping between simID and output file path
-        if location == "HPC":
+        from idmtools_platform_comps.comps_platform import COMPSPlatform
+        if isinstance(self.iteration_state.platform, COMPSPlatform):
             sims_paths = CompsDTKOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
         else:
-            sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
+            # sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
+            warning_note = \
+                """
+                /!\\ WARNING /!\\ currently write_LL_csv only supports COMPSPlatform...                  
+                """
+            print(warning_note)
+            return
 
         # Transform the ids in actual paths
         def find_path(el):
