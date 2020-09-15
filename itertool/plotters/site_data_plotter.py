@@ -11,7 +11,7 @@ import seaborn as sns
 from itertool.iteration_state import IterationState
 from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
-from itertool.output.output_parser import CompsDTKOutputParser
+from itertool.output.output_parser import CompsOutputParser
 
 sns.set_style('white', {'axes.linewidth': 0.5})
 
@@ -217,7 +217,7 @@ class SiteDataPlotter(BasePlotter):
         # Retrieve the mapping between simID and output file path
         from idmtools_platform_comps.comps_platform import COMPSPlatform
         if isinstance(self.iteration_state.platform, COMPSPlatform):
-            sims_paths = CompsDTKOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
+            sims_paths = CompsOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
         else:
             # sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
             warning_note = \
