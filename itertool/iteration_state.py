@@ -211,20 +211,8 @@ class IterationState:
 
         # store experiment id
         self.experiment_id = experiment.uid
-
-        # collect simulations tags
-        from COMPS.Data import Experiment as COMPS_Experiment
-        from COMPS.Data import QueryCriteria
-        comps_exp = COMPS_Experiment.get(experiment.uid)
-        comps_sims = comps_exp.get_simulations(query_criteria=QueryCriteria().select(['id']).select_children(['tags']))
-
-        sim_tags = {}
-        for sim in comps_sims:
-            sim_tags[str(sim.id)] = sim.tags
-        # print(sim_tags)
-
         # save simulations' tags
-        self.simulations = sim_tags
+        self.simulations = {sim.id: sim.tags for sim in experiment.simulations}
         logger.debug('Commissioned new simulations for experiment id: %s' % self.experiment_id)
         self.save()
 

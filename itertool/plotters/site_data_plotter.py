@@ -210,7 +210,7 @@ class SiteDataPlotter(BasePlotter):
 
         # Group simIDs by sample point and merge back into results
         grouped_simids_df = siminfo_df.groupby(['iteration', 'sample']).simid.agg(lambda x: tuple(x))
-        results_df = results_df.join(grouped_simids_df, how='right')  # right: only this iteration with new sim info
+        join_results_df = results_df.join(grouped_simids_df, how='right')  # right: only this iteration with new sim info
 
         # TODO: merge in parameter values also from siminfo_df (sample points and simulation tags need not be the same)
 
@@ -237,12 +237,14 @@ class SiteDataPlotter(BasePlotter):
                 pass  # [TODO]: fix issue later.
             return ",".join(paths)
 
-        results_df['outputs'] = results_df['simid'].apply(find_path)
-        del results_df['simid']
+        join_results_df['outputs'] = join_results_df['simid'].apply(find_path)
+        del join_results_df['simid']
 
         # Concatenate with any existing data from previous iterations and dump to file
         csv_path = os.path.join(self.directory, 'LL_all.csv')
         if os.path.exists(csv_path):
             current = pd.read_csv(csv_path, index_col=['iteration', 'sample'])
-            results_df = pd.concat([current, results_df])
-        results_df.sort_values(by='total', ascending=False).to_csv(csv_path)
+            final_results_df = pd.concat([current, join_results_df])
+        else:
+            final_results_df = join_results_df
+        final_results_df.sort_values(by='total', ascending=False).to_csv(csv_path)
