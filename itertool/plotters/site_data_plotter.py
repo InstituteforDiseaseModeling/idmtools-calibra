@@ -11,7 +11,7 @@ import seaborn as sns
 from itertool.iteration_state import IterationState
 from itertool.plotters.base_plotter import BasePlotter
 from itertool.utils import StatusPoint
-from simtools.OutputParser import CompsDTKOutputParser
+from itertool.output.output_parser import CompsOutputParser
 
 sns.set_style('white', {'axes.linewidth': 0.5})
 
@@ -64,7 +64,7 @@ class SiteDataPlotter(BasePlotter):
             raise e
 
         try:
-            self.write_LL_csv(self.iteration_state.exp_manager.experiment)
+            self.write_LL_csv()
         except:
             logger.info("Log likelihood CSV could not be created. Skipping...")
 
@@ -186,12 +186,12 @@ class SiteDataPlotter(BasePlotter):
             except OSError:
                 logger.error("Failed to delete %s" % plot_path)
 
-    def write_LL_csv(self, experiment):
+    def write_LL_csv(self):
         """
         Write the LL_summary.csv with what is in the CalibManager
         """
         # Data needed for the LL_CSV
-        location = self.iteration_state.exp_manager.experiment.location
+        # location = self.iteration_state.exp_manager.experiment.location
         iteration_state = self.iteration_state
         iteration = self.iteration_state.iteration
         suite_id = iteration_state.suite_id
@@ -210,15 +210,22 @@ class SiteDataPlotter(BasePlotter):
 
         # Group simIDs by sample point and merge back into results
         grouped_simids_df = siminfo_df.groupby(['iteration', 'sample']).simid.agg(lambda x: tuple(x))
-        results_df = results_df.join(grouped_simids_df, how='right')  # right: only this iteration with new sim info
+        join_results_df = results_df.join(grouped_simids_df, how='right')  # right: only this iteration with new sim info
 
         # TODO: merge in parameter values also from siminfo_df (sample points and simulation tags need not be the same)
 
         # Retrieve the mapping between simID and output file path
-        if location == "HPC":
-            sims_paths = CompsDTKOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
+        from idmtools_platform_comps.comps_platform import COMPSPlatform
+        if isinstance(self.iteration_state.platform, COMPSPlatform):
+            sims_paths = CompsOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
         else:
-            sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
+            # sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
+            warning_note = \
+                """
+                /!\\ WARNING /!\\ currently write_LL_csv only supports COMPSPlatform...                  
+                """
+            print(warning_note)
+            return
 
         # Transform the ids in actual paths
         def find_path(el):
@@ -230,12 +237,14 @@ class SiteDataPlotter(BasePlotter):
                 pass  # [TODO]: fix issue later.
             return ",".join(paths)
 
-        results_df['outputs'] = results_df['simid'].apply(find_path)
-        del results_df['simid']
+        join_results_df['outputs'] = join_results_df['simid'].apply(find_path)
+        del join_results_df['simid']
 
         # Concatenate with any existing data from previous iterations and dump to file
         csv_path = os.path.join(self.directory, 'LL_all.csv')
         if os.path.exists(csv_path):
             current = pd.read_csv(csv_path, index_col=['iteration', 'sample'])
-            results_df = pd.concat([current, results_df])
-        results_df.sort_values(by='total', ascending=False).to_csv(csv_path)
+            final_results_df = pd.concat([current, join_results_df])
+        else:
+            final_results_df = join_results_df
+        final_results_df.sort_values(by='total', ascending=False).to_csv(csv_path)

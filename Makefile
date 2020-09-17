@@ -40,7 +40,7 @@ clean-all:  ## Deleting package info hides plugins so we only want to do that fo
 	flake8 --ignore=E501,W291 $(PACKAGE_NAME) tests
 
 lint: ## check style with flake8
-	flake8 --ignore=E501,W291 --exclude="emodpy/campaign/**" $(PACKAGE_NAME) tests
+	flake8 --ignore=E501,W291 --exclude="itertool/interventions/**, itertool/utilities/**, itertool/resamplers/**, examples/**, tests/**" $(PACKAGE_NAME) tests
 
 test: ## Run our tests
 	$(FULL_TEST_CMD)

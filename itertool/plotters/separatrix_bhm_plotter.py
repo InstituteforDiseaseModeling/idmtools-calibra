@@ -3,7 +3,7 @@ import logging
 import os
 import matplotlib
 
-matplotlib.use('Agg', warn=False, force=True)
+matplotlib.use('Agg', force=True)
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import numpy as np

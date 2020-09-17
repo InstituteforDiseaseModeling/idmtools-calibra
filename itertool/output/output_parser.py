@@ -4,10 +4,8 @@ import logging
 import os  # mkdir, path, etc.
 import threading  # for multi-threaded job submission and monitoring
 from io import StringIO, BytesIO
-
 import pandas as pd  # for reading csv files
 from COMPS.Data import QueryCriteria, Suite, Experiment
-
 from idmtools.core import ItemType
 from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.simulation import Simulation
@@ -168,13 +166,13 @@ class SimulationOutputParser(threading.Thread):
         return self.sim_path
 
 
-class CompsDTKOutputParser(SimulationOutputParser):
+class CompsOutputParser(SimulationOutputParser):
     sim_dir_map = None
     asset_service = True
 
     def __init__(self, platform, simulation, analyzers, semaphore=None, parse=True):
         self.platform: IPlatform = platform
-        super(CompsDTKOutputParser, self).__init__(simulation, analyzers, semaphore, parse)
+        super(CompsOutputParser, self).__init__(simulation, analyzers, semaphore, parse)
         self.simulation: Simulation = platform.get_item(self.sim_id, ItemType.SIMULATION)
         self.COMPS_simulation = self.simulation.get_platform_object()
 
@@ -199,7 +197,7 @@ class CompsDTKOutputParser(SimulationOutputParser):
     def load_all_files(self, filenames):
         if not self.asset_service:
             #  we can just open files locally...
-            super(CompsDTKOutputParser, self).load_all_files(filenames)
+            super(CompsOutputParser, self).load_all_files(filenames)
             return
 
         # Separate the path into asset collection and transient files

@@ -15,15 +15,15 @@ class SiteFunctions(object):
         self.setup_functions = setup_functions
         self.verbose = verbose
 
-    def set_calibration_site(self, cb):
+    def set_calibration_site(self, task):
         """
         N.B. The name of this function is chosen to ensure it is applied first
-        by ModBuilder.set_mods and other aspects can be over-ridden as needed 
+        by ModBuilder.set_mods and other aspects can be over-ridden as needed
         by sample-point modifications.
         """
         metadata = {'__site__': self.name}
         for fn in self.setup_functions:
-            md = fn(cb)
+            md = fn(task)
             if self.verbose and md:
                 metadata.update(md)
         return metadata

@@ -71,6 +71,7 @@ class NextPointAlgorithm(metaclass=ABCMeta):
         results_df.index.name = 'sample'
 
         params_df = pd.DataFrame(iteration_state.samples_for_this_iteration)
+        params_df.index.name = 'sample'
 
         df = pd.concat((results_df, params_df), axis=1)
         df['iteration'] = iteration_state.iteration

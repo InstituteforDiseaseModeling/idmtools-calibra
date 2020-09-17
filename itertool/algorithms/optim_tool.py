@@ -190,7 +190,7 @@ class OptimTool(NextPointAlgorithm):
         self.state['Iteration'] = self.state['Iteration'].astype(int)
 
         for param in self.params:
-            user_logger.info(iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic'])
+            user_logger.info((iteration, param['Name'], param['Guess'], param['Min'], param['Max'], param['Dynamic']))
             self.state.loc[len(self.state)] = [iteration, param['Name'], param['Guess'], param['Min'], param['Max'],
                                                param['Dynamic']]
 
@@ -304,7 +304,8 @@ class OptimTool(NextPointAlgorithm):
         new_state = pd.DataFrame({
             'Iteration': [iteration] * self.n_dimensions,
             'Parameter': new_center_df.columns.values,
-            'Center': new_center_df.as_matrix()[0],
+            # 'Center': new_center_df.as_matrix()[0],
+            'Center': new_center_df.to_numpy()[0],
             'Min': [self.Xmin[pname] for pname in new_center_df.columns.values],
             'Max': [self.Xmax[pname] for pname in new_center_df.columns.values],
             'Dynamic': [self.Dynamic[pname] for pname in new_center_df.columns.values]

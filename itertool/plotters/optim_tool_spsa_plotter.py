@@ -97,7 +97,7 @@ class OptimToolSPSAPlotter(BasePlotter):
         # ## STATE EVOLUTION ###
         cw = None if d < 3 else int(np.ceil(np.sqrt(d)))
         g = sns.FacetGrid(self.state, row=None, col='Parameter', hue=None, col_wrap=cw, sharex=False, sharey=False,
-                          size=3, aspect=1, palette=None, row_order=None, col_order=None, hue_order=None, hue_kws=None,
+                          height=3, aspect=1, palette=None, row_order=None, col_order=None, hue_order=None, hue_kws=None,
                           dropna=True, legend_out=True, despine=True, margin_titles=True, xlim=None, ylim=None,
                           subplot_kws=None, gridspec_kws=None)
         g = g.map_dataframe(self.plot_state_evolution)
