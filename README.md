@@ -56,4 +56,8 @@ On Windows, you can use `pymake` instead of `make`
 
 ## Building docs
 
-TODO
+From your virtualenv, install itertool and all dependencies. Then from the docs folder, run ``pip install -r requirements.txt``. You can build the docs from that folder using ``make html``. 
+
+To pick up docstring changes, you must re-run the setup script to include those changes in the itertool installation. Then run ``make clean`` and re-run ``make html``. 
+
+To view the private documentation on Read the Docs, go to https://docs.idmod.org/projects/itertool/en/latest/. Scroll to "Do you have a password? Access here" and use the password "IDM2020itertool".
