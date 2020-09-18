@@ -55,7 +55,7 @@ clean:
 generate-api:
 	-rm modules.rst
 	-rm itertool_index.rst
-	sphinx-apidoc -f -e -o . ../itertool
+	sphinx-apidoc -f -e -M -o . ../itertool
 	mv modules.rst itertool_index.rst
 
 .PHONY: html
