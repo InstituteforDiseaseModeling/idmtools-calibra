@@ -64,7 +64,8 @@ autodoc_mock_imports = ['history_matching',
                         'itertool.output.output_parser',
                         'simtools',
                         'dtk',
-                        'itertool.interventions']
+                        'itertool.interventions',
+                        'itertool.utilities']
 
 
 napoleon_google_docstring = True
