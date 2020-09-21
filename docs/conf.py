@@ -56,7 +56,16 @@ autodoc_default_options = {
 
 autodoc_mock_imports = ['history_matching',
                         'pycuda',
-                        'COMPS']
+                        'COMPS',
+                        'gpc',
+                        'skcuda',
+                        'calibmanager',
+                        'idmtools.utils.json',
+                        'itertool.output.output_parser',
+                        'simtools',
+                        'dtk',
+                        'itertool.interventions',
+                        'itertool.utilities']
 
 
 napoleon_google_docstring = True

@@ -47,7 +47,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf idmtools*.rst modules.rst
+	rm -rf itertool*.rst modules.rst
 
 .PHONY: generate-api
 
@@ -55,7 +55,7 @@ clean:
 generate-api:
 	-rm modules.rst
 	-rm itertool_index.rst
-	sphinx-apidoc -f -e -o . ../itertool
+	sphinx-apidoc -f -e -M -o . ../itertool
 	mv modules.rst itertool_index.rst
 
 .PHONY: html

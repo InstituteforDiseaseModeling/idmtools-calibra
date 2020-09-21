@@ -79,7 +79,7 @@ if "%1" == "generate-api" (
 
     del modules.rst >nul 2>&1
     del itertool_index.rst >nul 2>&1
-    sphinx-apidoc -f -e -o . ../itertool
+    sphinx-apidoc -f -e -M -o . ../itertool
 	REN modules.rst itertool_index.rst
 	goto end
 )
