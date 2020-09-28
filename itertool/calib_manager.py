@@ -159,6 +159,7 @@ class CalibManager(object):
         builder.sweeps.append(fs1)
         builder.sweeps.append(fs2)
         builder.sweeps.append(fs3)
+        builder.count = len(fs1) * len(fs2) * len(fs3)
 
         return builder
 
