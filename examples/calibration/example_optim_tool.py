@@ -1,4 +1,4 @@
-# Execute directly: 'python example_OptimTool.py'
+# Execute directly: 'python example_optim_tool.py'
 import os
 import copy
 from itertool.calib_manager import CalibManager
@@ -20,11 +20,6 @@ INPUT_PATH = os.path.abspath(INPUT_PATH)
 exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
 
 task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
-
-# manually set mode to fix emod_task issue: self.climate.set_task_config(self) changed the mode to off
-task.climate.Climate_Model = ClimateModel.CLIMATE_CONSTANT
-
-task.legacy_exe = True
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
