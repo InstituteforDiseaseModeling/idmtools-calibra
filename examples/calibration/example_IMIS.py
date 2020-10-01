@@ -20,11 +20,6 @@ exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
 
 task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
 
-# manually set mode to fix emod_task issue: self.climate.set_task_config(self) changed the mode to off
-task.climate.Climate_Model = ClimateModel.CLIMATE_CONSTANT
-
-task.legacy_exe = True
-
 sites = [
     DielmoCalibSite()
 ]

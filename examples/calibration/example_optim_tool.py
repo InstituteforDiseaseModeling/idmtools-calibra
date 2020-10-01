@@ -9,7 +9,6 @@ from itertool.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
-from emodpy.emod_file import ClimateModel
 from itertool.utilities.emod_malaria_sim import EMODMalariaSim
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
