@@ -27,14 +27,14 @@ params = {
 }
 
 
-def set_climate_constant(cb, **kwargs):
+def set_climate_constant(simulation, **kwargs):
     """
     Set the climate to constant weather by changing the ``Climate_Model`` parameter to ``CLIMATE_CONSTANT``.
     Also set the extra parameters passed.
 
-    :param cb: The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` object containing the current configuration
+    :param simulation: idmtools Simulation
     :param kwargs: Extra parameters to change in the config file
     :return: Nothing
     """
-    cb.set_param('Climate_Model', 'CLIMATE_CONSTANT')
-    cb.update_params(kwargs, validate=True)
+    simulation.task.set_parameter('Climate_Model', 'CLIMATE_CONSTANT')
+    simulation.task.update_parameter(kwargs, validate=True)

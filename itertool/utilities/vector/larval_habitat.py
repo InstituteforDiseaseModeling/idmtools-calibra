@@ -2,9 +2,9 @@ import copy
 import datetime
 from collections import namedtuple
 
-from dtk.tools.demographics.Node import lat_lon_from_nodeid
+from itertool.utilities.demographics.node import lat_lon_from_nodeid
 
-from simtools.Utilities.LocalOS import LocalOS
+from itertool.utilities.local_os import LocalOS
 
 # --------------------------------------------------------------
 # Larval habitat parameters
@@ -39,6 +39,7 @@ notre_dame_params.update({
 NodesMultipliers = namedtuple('NodesMultipliers', ['nodes', 'multipliers'])
 
 
+# [TODO]: zdu note
 def set_habitat_multipliers(cb, demog_name,
                             NodesMultipliers_list=[NodesMultipliers(
                                 nodes=[326436567],
@@ -67,4 +68,5 @@ def set_habitat_multipliers(cb, demog_name,
             nodes.append({'NodeID': nodeid,
                           'NodeAttributes': {'LarvalHabitatMultiplier': nm.multipliers}})
 
+    # [TODO]: zdu note
     cb.add_demog_overlay(demog_name, {'Nodes': nodes, 'Metadata': metadata})
