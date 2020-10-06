@@ -1,12 +1,13 @@
-# Execute directly: 'python example_OptimTool.py'
+# Execute directly: 'python example_optim_tool_2.py'
 import os
 import copy
-import shutil
 from itertool.calib_manager import CalibManager
 from itertool.algorithms.optim_tool import OptimTool
 from itertool.plotters.likelihood_plotter import LikelihoodPlotter
 from itertool.plotters.optim_tool_plotter import OptimToolPlotter
 from itertool.plotters.site_data_plotter import SiteDataPlotter
+from itertool.utilities.vector import params as vector_params
+from malaria import params as malaria_params
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
@@ -18,62 +19,27 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
+# generate default config from Eradication.exe
+exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+                                                         EradicationBambooBuilds.CI_MALARIA)
 
-# def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_GENERIC):
-#     """
-#     Check and down;oad Eradication.exe from bamboo, generate schema and default config file
-#     Args:
-#         local_dir: local folder to contain Eradication.exe
-#         plan: enum EradicationBambooBuilds
-#
-#     Returns: exe_path, config_path
-#
-#     """
-#     exe_path = os.path.join(local_dir, "Eradication.exe")
-#     if not os.path.exists(exe_path):
-#         eradication_path_bamboo = download_latest_bamboo(
-#             plan=plan,
-#             scheduled_builds_only=False
-#         )
-#         # print(eradication_path_bamboo)
-#         shutil.move(eradication_path_bamboo, exe_path)
-#
-#     schema_path = os.path.join(local_dir, f"{plan.name}_schema.json")
-#     config_path = os.path.join(local_dir, f"{plan.name}_config.json")
-#
-#     # generate schema
-#     gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
-#     # generate default config from schema
-#     dfs.write_default_from_schema(schema_path)
-#     # use our file name
-#     shutil.move("default_config.json", config_path)
-#
-#     return exe_path, config_path
-
-
-exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"), EradicationBambooBuilds.CI_MALARIA)
-print(exe_path)
-print(config_path)
 demographics_path = os.path.join(INPUT_PATH, "calibration", "birth_cohort_demographics.compiled.json")
 
+# create task
 task = EMODTask.from_files(
     eradication_path=exe_path,
-    # config_path=malaria_config_file,    # good
     config_path=config_path,
-    # campaign_path=camp_path,
     demographics_paths=demographics_path
 )
 
+# select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
-# task.campaign = EMODMalariaSim().campaign()
 
 # cleanup config file
 task.config.pop("schema")
 task.config.pop("Serialized_Population_Filenames")
 
 # update related parameters
-from malaria import params as malaria_params  # must have the malaria disease package installed!
-from itertool.utilities.vector import params as vector_params
 task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
 task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
 
@@ -227,20 +193,23 @@ if num_params == 0:
 r = OptimTool.get_r(num_params, volume_fraction)
 
 optimtool = OptimTool(params,
-                      constrain_sample,         # <-- WILL NOT BE SAVED IN ITERATION STATE
-                      mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
-                      sigma_r=r / 10.,          # <-- stdev of radius
-                      center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
+                      mu_r=r,
+                      # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
+                      sigma_r=r / 10.,  # <-- stdev of radius
+                      center_repeats=2,
+                      # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
+                      samples_per_iteration=9
+                      # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_Calibration',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=3,          # <-- Iterations
+                             max_iterations=3,  # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
