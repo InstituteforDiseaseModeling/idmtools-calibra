@@ -10,29 +10,82 @@ from itertool.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
-from emodpy.emod_file import ClimateModel
-from itertool.utilities.emod_malaria_sim import EMODMalariaSim
-
-from emodpy.utils import download_latest_bamboo, download_latest_schema, EradicationBambooBuilds
+from emodpy.utils import EradicationBambooBuilds
+from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+from itertool.utilities.helper import generate_default_config_from_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Test latest bamboo Eradication.exe
-exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
-if not os.path.exists(exe_path):
-    eradication_path_bamboo = download_latest_bamboo(
-        plan=EradicationBambooBuilds.CI_MALARIA,
-        scheduled_builds_only=False
-    )
-    # print(eradication_path_bamboo)
-    shutil.move(eradication_path_bamboo, exe_path)
 
-task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
+# def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_GENERIC):
+#     """
+#     Check and down;oad Eradication.exe from bamboo, generate schema and default config file
+#     Args:
+#         local_dir: local folder to contain Eradication.exe
+#         plan: enum EradicationBambooBuilds
+#
+#     Returns: exe_path, config_path
+#
+#     """
+#     exe_path = os.path.join(local_dir, "Eradication.exe")
+#     if not os.path.exists(exe_path):
+#         eradication_path_bamboo = download_latest_bamboo(
+#             plan=plan,
+#             scheduled_builds_only=False
+#         )
+#         # print(eradication_path_bamboo)
+#         shutil.move(eradication_path_bamboo, exe_path)
+#
+#     schema_path = os.path.join(local_dir, f"{plan.name}_schema.json")
+#     config_path = os.path.join(local_dir, f"{plan.name}_config.json")
+#
+#     # generate schema
+#     gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
+#     # generate default config from schema
+#     dfs.write_default_from_schema(schema_path)
+#     # use our file name
+#     shutil.move("default_config.json", config_path)
+#
+#     return exe_path, config_path
 
-# manually set mode to fix emod_task issue: self.climate.set_task_config(self) changed the mode to off
-task.climate.Climate_Model = ClimateModel.CLIMATE_CONSTANT   # the latest EMODTask commented out this line, so we don't need to set the vvalue
+
+exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"), EradicationBambooBuilds.CI_MALARIA)
+print(exe_path)
+print(config_path)
+demographics_path = os.path.join(INPUT_PATH, "calibration", "birth_cohort_demographics.compiled.json")
+
+task = EMODTask.from_files(
+    eradication_path=exe_path,
+    # config_path=malaria_config_file,    # good
+    config_path=config_path,
+    # campaign_path=camp_path,
+    demographics_paths=demographics_path
+)
+
+task.campaign = EMODEmptyCampaign.campaign()
+# task.campaign = EMODMalariaSim().campaign()
+
+# cleanup config file
+task.config.pop("schema")
+task.config.pop("Serialized_Population_Filenames")
+
+# update related parameters
+from malaria import params as malaria_params  # must have the malaria disease package installed!
+from itertool.utilities.vector import params as vector_params
+task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
+task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
+
+# make sure we have the right type
+task.set_parameter("Simulation_Type", "MALARIA_SIM")  # default is GENERIC_SIM
+task.set_parameter("Incubation_Period_Distribution", "CONSTANT_DISTRIBUTION")  # default is NOT_INITIALIZED
+task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")  # default is CLIMATE_UPDATE_YEAR
+
+# update required parameters
+task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])  # default has []
+task.set_parameter("Insecticides", [])  # in schema without default value; not in default config
+task.set_parameter("Load_Balance_Filename", "")
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -173,22 +226,21 @@ if num_params == 0:
 
 r = OptimTool.get_r(num_params, volume_fraction)
 
-
 optimtool = OptimTool(params,
                       constrain_sample,         # <-- WILL NOT BE SAVED IN ITERATION STATE
                       mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
                       sigma_r=r / 10.,          # <-- stdev of radius
                       center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=3   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration_demo_3',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=2,          # <-- Iterations
+                             max_iterations=3,          # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
@@ -197,6 +249,7 @@ run_calib_args = {
 
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
+
     platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()
