@@ -1,4 +1,4 @@
-# Execute directly: 'python example_optim_tool.py'
+# Execute directly: 'python example_optim_tool_simple.py'
 import os
 import copy
 from itertool.calib_manager import CalibManager
@@ -168,7 +168,7 @@ optimtool = OptimTool(params,
                       samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_simple',      # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
