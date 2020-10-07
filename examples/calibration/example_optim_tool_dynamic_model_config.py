@@ -13,45 +13,44 @@ from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-from itertool.utilities.helper import generate_default_config_from_exe
+from itertool.utilities.helper import generate_model_config_from_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# generate default config from Eradication.exe
-exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
-                                                         EradicationBambooBuilds.CI_MALARIA)
+# Generate malaria model config from Eradication.exe
+exe_path, config_path = generate_model_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+                                                       EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM")
 
 demographics_path = os.path.join(INPUT_PATH, "calibration", "birth_cohort_demographics.compiled.json")
 
-# create task
+# Create task
 task = EMODTask.from_files(
     eradication_path=exe_path,
     config_path=config_path,
     demographics_paths=demographics_path
 )
 
-# select a campaign
+# Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
-
-# cleanup config file
-task.config.pop("schema")
-task.config.pop("Serialized_Population_Filenames")
 
 # update related parameters
 task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
-task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
+task.update_parameters(malaria_params.params)  # "Maternal_Antibody_Protection" is required
 
-# make sure we have the right type
-task.set_parameter("Simulation_Type", "MALARIA_SIM")  # default is GENERIC_SIM
-task.set_parameter("Incubation_Period_Distribution", "CONSTANT_DISTRIBUTION")  # default is NOT_INITIALIZED
-task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")  # default is CLIMATE_UPDATE_YEAR
+# Update
+task.set_parameter("Incubation_Period_Distribution", "CONSTANT_DISTRIBUTION")  # value FIXED_DURATION not supported
 
-# update required parameters
-task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])  # default has []
-task.set_parameter("Insecticides", [])  # in schema without default value; not in default config
-task.set_parameter("Load_Balance_Filename", "")
+# Update required parameters missing from malaria_config.json
+task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")
+task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])
+task.set_parameter("Custom_Coordinator_Events", [])
+task.set_parameter("Custom_Node_Events", [])
+task.set_parameter("Enable_Climate_Stochasticity", 0)
+task.set_parameter("Enable_Demographics_Risk", 0)
+task.set_parameter("Incubation_Period_Constant", 25)
+task.set_parameter("Insecticides", [])  #
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -203,7 +202,7 @@ optimtool = OptimTool(params,
                       # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration',  # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_model_config',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
