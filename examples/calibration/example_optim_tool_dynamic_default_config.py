@@ -19,36 +19,36 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# generate default config from Eradication.exe
+# Generate default config from Eradication.exe
 exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
                                                          EradicationBambooBuilds.CI_MALARIA)
 
 demographics_path = os.path.join(INPUT_PATH, "calibration", "birth_cohort_demographics.compiled.json")
 
-# create task
+# Create task
 task = EMODTask.from_files(
     eradication_path=exe_path,
     config_path=config_path,
     demographics_paths=demographics_path
 )
 
-# select a campaign
+# Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
 # cleanup config file
 task.config.pop("schema")
 task.config.pop("Serialized_Population_Filenames")
 
-# update related parameters
+# Update related parameters
 task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
 task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
 
-# make sure we have the right type
+# Make sure we have the right type
 task.set_parameter("Simulation_Type", "MALARIA_SIM")  # default is GENERIC_SIM
 task.set_parameter("Incubation_Period_Distribution", "CONSTANT_DISTRIBUTION")  # default is NOT_INITIALIZED
 task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")  # default is CLIMATE_UPDATE_YEAR
 
-# update required parameters
+# Update required parameters
 task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])  # default has []
 task.set_parameter("Insecticides", [])  # in schema without default value; not in default config
 task.set_parameter("Load_Balance_Filename", "")
@@ -203,7 +203,7 @@ optimtool = OptimTool(params,
                       # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration',  # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_default_config',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
