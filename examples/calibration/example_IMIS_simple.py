@@ -1,4 +1,4 @@
-# Execute directly: 'python example_IMIS.py'
+# Execute directly: 'python example_IMIS_simple.py'
 
 import os
 from itertool.calib_manager import CalibManager
@@ -8,7 +8,6 @@ from itertool.plotters.likelihood_plotter import LikelihoodPlotter
 from itertool.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from emodpy.emod_task import EMODTask
-from emodpy.emod_file import ClimateModel
 from itertool.utilities.emod_malaria_sim import EMODMalariaSim
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)

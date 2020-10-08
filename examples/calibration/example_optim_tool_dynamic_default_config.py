@@ -1,4 +1,4 @@
-# Execute directly: 'python example_optim_tool_2.py'
+# Execute directly: 'python example_optim_tool_dynamic_default_config.py'
 import os
 import copy
 from itertool.calib_manager import CalibManager
