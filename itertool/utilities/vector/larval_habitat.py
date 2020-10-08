@@ -1,10 +1,8 @@
-import copy
 import datetime
 from collections import namedtuple
-
+from idmtools.utils.local_os import LocalOS
 from itertool.utilities.demographics.node import lat_lon_from_nodeid
 
-from itertool.utilities.local_os import LocalOS
 
 # --------------------------------------------------------------
 # Larval habitat parameters
