@@ -1,3 +1,4 @@
+# Example calibration using OtimTool algorithm.
 # Execute directly: 'python example_optim_tool_simple.py'
 import os
 import copy

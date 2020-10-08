@@ -1,3 +1,4 @@
+# Example calibration using OtimTool algorithm with bamboo Eradication EXE and dynamically created default config.
 # Execute directly: 'python example_optim_tool_dynamic_default_config.py'
 import os
 import copy

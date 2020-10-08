@@ -1,3 +1,4 @@
+# Example calibration using IMIS (Incremental Mixture Importance Sampling) algorithm.
 # Execute directly: 'python example_IMIS_simple.py'
 
 import os
