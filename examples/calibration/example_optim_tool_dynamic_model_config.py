@@ -23,7 +23,7 @@ INPUT_PATH = os.path.abspath(INPUT_PATH)
 exe_path, config_path = generate_model_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
                                                        EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM")
 
-demographics_path = os.path.join(INPUT_PATH, "calibration", "birth_cohort_demographics.compiled.json")
+demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
 
 # Create task
 task = EMODTask.from_files(
