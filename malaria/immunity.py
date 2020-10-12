@@ -1,9 +1,9 @@
 # This comment is only a test, still
 import os
 
-from simtools.SetupParser import SetupParser
-from dtk.utils.parsers.JSON import json2dict
-from dtk.vector.study_sites import StudySite, set_habitat_scale
+# from simtools.SetupParser import SetupParser
+from itertool.utilities.parsers.JSON import json2dict
+from itertool.utilities.vector.study_sites import StudySite, set_habitat_scale
 
 params = {
     "Antibody_CSP_Decay_Days": 90,

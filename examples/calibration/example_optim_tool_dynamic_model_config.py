@@ -1,4 +1,5 @@
-# Execute directly: 'python example_OptimTool.py'
+# Example calibration using OtimTool algorithm with bamboo Eradication EXE and dynamically created malaria config
+# Execute directly: 'python example_optim_tool_dynamic_model_config.py'
 import os
 import copy
 from itertool.calib_manager import CalibManager
@@ -6,25 +7,51 @@ from itertool.algorithms.optim_tool import OptimTool
 from itertool.plotters.likelihood_plotter import LikelihoodPlotter
 from itertool.plotters.optim_tool_plotter import OptimToolPlotter
 from itertool.plotters.site_data_plotter import SiteDataPlotter
+from itertool.utilities.vector import params as vector_params
+from malaria import params as malaria_params
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
-from emodpy.emod_file import ClimateModel
-from itertool.utilities.emod_malaria_sim import EMODMalariaSim
+from emodpy.utils import EradicationBambooBuilds
+from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+from itertool.utilities.helper import generate_model_config_from_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Test latest bamboo Eradication.exe
-exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
+# Generate malaria model config from Eradication.exe
+exe_path, config_path = generate_model_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+                                                       EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM")
 
-task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
+demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
 
-# manually set mode to fix emod_task issue: self.climate.set_task_config(self) changed the mode to off
-task.climate.Climate_Model = ClimateModel.CLIMATE_CONSTANT
+# Create task
+task = EMODTask.from_files(
+    eradication_path=exe_path,
+    config_path=config_path,
+    demographics_paths=demographics_path
+)
 
-task.legacy_exe = True
+# Select a campaign
+task.campaign = EMODEmptyCampaign.campaign()
+
+# update related parameters
+task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
+task.update_parameters(malaria_params.params)  # "Maternal_Antibody_Protection" is required
+
+# Update
+task.set_parameter("Incubation_Period_Distribution", "CONSTANT_DISTRIBUTION")  # value FIXED_DURATION not supported
+
+# Update required parameters missing from malaria_config.json
+task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")
+task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])
+task.set_parameter("Custom_Coordinator_Events", [])
+task.set_parameter("Custom_Node_Events", [])
+task.set_parameter("Enable_Climate_Stochasticity", 0)
+task.set_parameter("Enable_Demographics_Risk", 0)
+task.set_parameter("Incubation_Period_Constant", 25)
+task.set_parameter("Insecticides", [])  #
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -165,22 +192,24 @@ if num_params == 0:
 
 r = OptimTool.get_r(num_params, volume_fraction)
 
-
 optimtool = OptimTool(params,
-                      constrain_sample,         # <-- WILL NOT BE SAVED IN ITERATION STATE
-                      mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
-                      sigma_r=r / 10.,          # <-- stdev of radius
-                      center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
+                      mu_r=r,
+                      # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
+                      sigma_r=r / 10.,  # <-- stdev of radius
+                      center_repeats=2,
+                      # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
+                      samples_per_iteration=9
+                      # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_Calibration',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_model_config',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=3,          # <-- Iterations
+                             max_iterations=3,  # <-- Iterations
                              plotters=plotters)
 
 run_calib_args = {
@@ -189,6 +218,7 @@ run_calib_args = {
 
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
+
     platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()

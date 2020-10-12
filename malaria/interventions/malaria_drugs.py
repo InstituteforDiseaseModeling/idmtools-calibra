@@ -1,7 +1,7 @@
-from dtk.utils.Campaign.CampaignClass import *
+# from dtk.utils.Campaign.CampaignClass import *
 
 
-def drug_configs_from_code(cb, drug_code: str = None):
+def drug_configs_from_code(simulation, drug_code: str = None):
     """
         Add a drug config to the simulation configuration based on its code and add the corresponding AntimalarialDrug
         intervention to the return dictionary. The drug_code needs to be one identified in the ``drug_cfg`` dictionary.
@@ -39,12 +39,12 @@ def drug_configs_from_code(cb, drug_code: str = None):
                         "\"Vehicle\": Vehicle.\n")
     drug_array = drug_cfg[drug_code]
 
-    cb.set_param("PKPD_Model", "CONCENTRATION_VERSUS_TIME")
+    simulation.task.set_parameter("PKPD_Model", "CONCENTRATION_VERSUS_TIME")
 
     drug_configs = []
     for drug in drug_array:
-        cb.config["parameters"]["Malaria_Drug_Params"][drug] = drug_params[drug]
-        drug_intervention = AntimalarialDrug(Drug_Type=drug, Cost_To_Consumer=1.5)
+        simulation.task.config["parameters"]["Malaria_Drug_Params"][drug] = drug_params[drug]
+        drug_intervention = {"Drug_Type": drug, "Cost_To_Consumer": 1.5, "class": "AntimalarialDrug"}
         drug_configs.append(drug_intervention)
     return drug_configs
 
