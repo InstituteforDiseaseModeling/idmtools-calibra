@@ -16,7 +16,29 @@ def validate_exp_name(exp_name):
         return True
 
 
-def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_GENERIC):
+def download_bamboo_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA):
+    """
+    Check and down;oad Eradication.exe from bamboo, generate schema and default config file
+    Args:
+        local_dir: local folder to contain Eradication.exe
+        plan: enum EradicationBambooBuilds
+
+    Returns: exe_path
+
+    """
+    exe_path = os.path.join(local_dir, "Eradication.exe")
+    if not os.path.exists(exe_path):
+        eradication_path_bamboo = download_latest_bamboo(
+            plan=plan,
+            scheduled_builds_only=False
+        )
+        # print(eradication_path_bamboo)
+        shutil.move(eradication_path_bamboo, exe_path)
+
+    return exe_path
+
+
+def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA):
     """
     Check and down;oad Eradication.exe from bamboo, generate schema and default config file
     Args:
@@ -50,7 +72,7 @@ def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_
     return exe_path, config_path
 
 
-def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_GENERIC, model="MALARIA_SIM"):
+def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM"):
     """
     Check and down;oad Eradication.exe from bamboo, generate schema and default config file
     Args:

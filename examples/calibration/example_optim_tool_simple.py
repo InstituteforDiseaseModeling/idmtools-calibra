@@ -11,15 +11,17 @@ from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
 from itertool.utilities.emod_malaria_sim import EMODMalariaSim
+from itertool.utilities.helper import download_bamboo_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
-INPUT_PATH = os.path.join('..', 'inputs')
+INPUT_PATH = os.path.join('..', 'inputs', 'bamboo')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Test latest bamboo Eradication.exe
-exe_path = os.path.join(INPUT_PATH, "bamboo", "Eradication.exe")
+# Test latest bamboo Eradication.exe (it won't download if exists already)
+exe_path = download_bamboo_exe(INPUT_PATH)
 
-task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path)
+task = EMODTask.from_default(default=EMODMalariaSim(), eradication_path=exe_path, ep4_custom_cb=None)
+task.use_embedded_python = False    # fix from_default issue
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
