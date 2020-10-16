@@ -63,13 +63,16 @@ def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_
     config_path = os.path.join(local_dir, f"{plan.name}_config.json")
 
     # generate schema
-    gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
-    # generate default config from schema
-    dfs.write_default_from_schema(schema_path)
-    # use our file name
-    shutil.move("default_config.json", config_path)
+    if not os.path.exists(schema_path):
+        gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
 
-    return exe_path, config_path
+    if not os.path.exists(config_path):
+        # generate default config from schema
+        dfs.write_default_from_schema(schema_path)
+        # use our file name
+        shutil.move("default_config.json", config_path)
+
+    return exe_path, schema_path, config_path
 
 
 def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM"):
@@ -98,8 +101,11 @@ def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MA
     config_path = os.path.join(local_dir, f"{plan.name}_config.json")
 
     # generate schema
-    gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
-    # use our file name
-    fs.SchemaConfigBuilder(schema_name=schema_path, config_out=config_path, model=model)
+    if not os.path.exists(schema_path):
+        gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
 
-    return exe_path, config_path
+    # use our file name
+    if not os.path.exists(config_path):
+        fs.SchemaConfigBuilder(schema_name=schema_path, config_out=config_path, model=model)
+
+    return exe_path, schema_path, config_path
