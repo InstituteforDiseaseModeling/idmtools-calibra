@@ -21,7 +21,7 @@ INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
 # Generate default config from Eradication.exe
-exe_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
                                                          EradicationBambooBuilds.CI_MALARIA)
 
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
@@ -36,10 +36,6 @@ task = EMODTask.from_files(
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
-# cleanup config file
-task.config.pop("schema")
-task.config.pop("Serialized_Population_Filenames")
-
 # Update related parameters
 task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
 task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
@@ -53,6 +49,12 @@ task.set_parameter("Climate_Update_Resolution", "CLIMATE_UPDATE_DAY")  # default
 task.set_parameter("Custom_Individual_Events", ["Received_Treatment"])  # default has []
 task.set_parameter("Insecticides", [])  # in schema without default value; not in default config
 task.set_parameter("Load_Balance_Filename", "")
+
+task.set_parameter("Custom_Coordinator_Events", [])
+task.set_parameter("Custom_Node_Events", [])
+task.set_parameter("Enable_Climate_Stochasticity", 0)
+task.set_parameter("Enable_Demographics_Risk", 0)
+task.set_parameter("Incubation_Period_Constant", 25)
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]

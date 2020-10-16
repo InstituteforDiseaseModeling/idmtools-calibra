@@ -21,7 +21,7 @@ INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
 # Generate malaria model config from Eradication.exe
-exe_path, config_path = generate_model_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+exe_path, schema_path, config_path = generate_model_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
                                                        EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM")
 
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
