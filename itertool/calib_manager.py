@@ -288,7 +288,7 @@ class CalibManager(object):
     def kill(self):
         from idmtools.core import ItemType
 
-        calib_data = self.read_calib_data()
+        calib_data = self.read_calib_data(force=True)
         if not calib_data:
             return
 
