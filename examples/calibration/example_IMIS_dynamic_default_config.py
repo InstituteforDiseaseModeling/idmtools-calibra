@@ -39,6 +39,9 @@ task = EMODTask.from_files(
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
+# rRemove parameter
+task.config.pop("Serialized_Population_Filenames")
+
 # Update related parameters
 task.update_parameters(vector_params.params)  # "Vector_Species_Params" is required
 task.update_parameters(malaria_params.params)  # 'Maternal_Antibody_Protection' is required
