@@ -36,7 +36,7 @@ task = EMODTask.from_files(
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
-# rRemove parameter
+# Remove parameter
 task.config.pop("Serialized_Population_Filenames")
 
 # Update related parameters
