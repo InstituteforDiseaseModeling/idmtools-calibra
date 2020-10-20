@@ -49,7 +49,7 @@ class DielmoCalibSite(IncidenceCalibSite):
                      add_treatment_fn(start=0, drug=['Artemether'],
                                       targets=[{'trigger': 'NewClinicalCase',
                                                 'coverage': 1, 'seek': 0.5, 'rate': 0.3}]),
-                     update_params({'Demographics_Filenames': ['Calibration\\birth_cohort_demographics.compiled.json']})
+                     update_params({'Demographics_Filenames': ['birth_cohort_demographics.compiled.json']})
                      ]
 
         return setup_fns

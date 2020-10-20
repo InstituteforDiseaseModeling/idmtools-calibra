@@ -1,6 +1,6 @@
 import logging
 import math
-
+import time
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -214,7 +214,17 @@ class OptimTool(NextPointAlgorithm):
 
         mod = sm.OLS(latest_results, sm.add_constant(latest_dynamic_samples))
 
-        mod_fit = mod.fit()
+        retry = 0
+        while retry < 5:
+            try:
+                mod_fit = mod.fit()
+                break
+            except Exception as ex:
+                time.sleep(0.5)
+                retry += 1
+                if retry >= 5:
+                    raise ex
+
         # user_logger.info(mod_fit.summary())
 
         # Regression parameters for plotting / analysis
@@ -447,5 +457,6 @@ class OptimTool(NextPointAlgorithm):
     @staticmethod
     def get_r(num_params, volume_fraction):
         r = math.exp(
-            1 / float(num_params) * (math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
+            1 / float(num_params) * (
+                    math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
         return r

@@ -5,7 +5,7 @@ from emodpy.emod_campaign import EMODCampaign
 
 class EMODMalariaSim(IEMODDefault):
     @staticmethod
-    def config() -> Dict:
+    def config(erad_path=None) -> Dict:
         return {
             "Config_Name": "",
             "Campaign_Filename": "campaign.json",
