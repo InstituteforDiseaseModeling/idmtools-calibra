@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta
-from itertool.calib_site import CalibSite
+from idmtools_calibra.calib_site import CalibSite
 from malaria.study_sites.site_setup_functions import \
     config_setup_fn, vector_stats_report_fn
 

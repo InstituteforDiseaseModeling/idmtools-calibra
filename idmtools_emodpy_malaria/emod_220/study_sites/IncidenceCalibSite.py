@@ -4,7 +4,7 @@ from abc import ABCMeta
 from idmtools_emodpy_malaria.analyzers.channel_by_age_cohort_analyzer import IncidenceByAgeCohortAnalyzer
 from idmtools_emodpy_malaria.analyzers.helpers import channel_age_json_to_pandas
 from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import config_setup_fn, summary_report_fn, site_input_eir_fn
-from itertool.calib_site import CalibSite
+from idmtools_calibra.calib_site import CalibSite
 
 logger = logging.getLogger(__name__)
 

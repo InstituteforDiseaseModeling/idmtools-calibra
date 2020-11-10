@@ -61,11 +61,11 @@ autodoc_mock_imports = ['history_matching',
                         'skcuda',
                         'calibmanager',
                         'idmtools.utils.json',
-                        'itertool.output.output_parser',
+                        'idmtools_calibra.output.output_parser',
                         'simtools',
                         'dtk',
-                        'itertool.interventions',
-                        'itertool.utilities']
+                        'idmtools_calibra.interventions',
+                        'idmtools_calibra.utilities']
 
 
 napoleon_google_docstring = True
@@ -98,7 +98,7 @@ author = u'Institute for Disease Modeling'
 #
 # The short X.Y version.
 import itertool
-version = itertool.__version__
+version = idmtools_calibra.__version__
 # The full version, including alpha/beta/rc tags.
 # release = u'1.0'
 

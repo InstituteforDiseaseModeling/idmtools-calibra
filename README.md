@@ -33,7 +33,7 @@ When setting up your environment for the first time, you can use the following i
 ## First Time Setup
 1) Clone the repository:
    ```bash
-   > git clone https://github.com/InstituteforDiseaseModeling/itertool.git
+   > git clone https://github.com/InstituteforDiseaseModeling/idmtools_calibra.git
    ```
 2) Create a virtualenv. On Windows, please use venv to create the environment
    `python -m venv itertool`

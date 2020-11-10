@@ -3,21 +3,21 @@
 
 import os
 import copy
-from itertool.calib_manager import CalibManager
-from itertool.prior import MultiVariatePrior
-from itertool.algorithms.imis import IMIS
-from itertool.algorithms.optim_tool import OptimTool
-from itertool.plotters.likelihood_plotter import LikelihoodPlotter
-from itertool.plotters.optim_tool_plotter import OptimToolPlotter
-from itertool.plotters.site_data_plotter import SiteDataPlotter
-from itertool.utilities.vector import params as vector_params
+from idmtools_calibra.calib_manager import CalibManager
+from idmtools_calibra.prior import MultiVariatePrior
+from idmtools_calibra.algorithms.imis import IMIS
+from idmtools_calibra.algorithms.optim_tool import OptimTool
+from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
+from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
+from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
+from idmtools_calibra.utilities.vector import params as vector_params
 from malaria import params as malaria_params
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-from itertool.utilities.helper import generate_default_config_from_exe
+from idmtools_calibra.utilities.helper import generate_default_config_from_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')

@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 
 from idmtools_emodpy_malaria.emod_220.study_sites.DensityCalibSite import DensityCalibSite
-from itertool.analyzers.helpers import season_channel_age_density_json_to_pandas
+from idmtools_calibra.analyzers.helpers import season_channel_age_density_json_to_pandas
 
 logger = logging.getLogger(__name__)
 

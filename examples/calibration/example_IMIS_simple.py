@@ -2,14 +2,14 @@
 # Execute directly: 'python example_IMIS_simple.py'
 
 import os
-from itertool.calib_manager import CalibManager
-from itertool.prior import MultiVariatePrior
-from itertool.algorithms.imis import IMIS
-from itertool.plotters.likelihood_plotter import LikelihoodPlotter
-from itertool.plotters.site_data_plotter import SiteDataPlotter
+from idmtools_calibra.calib_manager import CalibManager
+from idmtools_calibra.prior import MultiVariatePrior
+from idmtools_calibra.algorithms.imis import IMIS
+from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
+from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from emodpy.emod_task import EMODTask
-from itertool.utilities.helper import download_bamboo_exe
+from idmtools_calibra.utilities.helper import download_bamboo_exe
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')

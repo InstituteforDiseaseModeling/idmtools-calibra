@@ -6,8 +6,8 @@ import pandas as pd
 from scipy.stats import binom
 
 from idmtools_emodpy_malaria.analyzers.helpers import convert_to_counts, age_from_birth_cohort, aggregate_on_index, convert_annualized
-from itertool.analyzers.malaria_summary import summary_channel_to_pandas
-from itertool.ll_calculators import beta_binomial_pandas, gamma_poisson_pandas
+from idmtools_calibra.analyzers.malaria_summary import summary_channel_to_pandas
+from idmtools_calibra.ll_calculators import beta_binomial_pandas, gamma_poisson_pandas
 
 logger = logging.getLogger(__name__)
 

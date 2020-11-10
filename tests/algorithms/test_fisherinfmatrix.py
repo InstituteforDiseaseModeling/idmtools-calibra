@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib as plt
 from matplotlib.patches import Ellipse
 
-from itertool.algorithms.FisherInfMatrix import FisherInfMatrix, trunc_gauss
+from idmtools_calibra.algorithms.FisherInfMatrix import FisherInfMatrix, trunc_gauss
 
 
 def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
