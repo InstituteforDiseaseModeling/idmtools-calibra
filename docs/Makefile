@@ -54,9 +54,9 @@ clean:
 # Generates the API doc
 generate-api:
 	-rm modules.rst
-	-rm itertool_index.rst
-	sphinx-apidoc -f -e -M -o . ../itertool
-	mv modules.rst itertool_index.rst
+	-rm idmtools_calibra_index.rst
+	sphinx-apidoc -f -e -M -o . ../idmtools_calibra
+	mv modules.rst idmtools_calibra_index.rst
 
 .PHONY: html
 html: 

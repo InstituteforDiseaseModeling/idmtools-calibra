@@ -97,7 +97,7 @@ author = u'Institute for Disease Modeling'
 # built documents.
 #
 # The short X.Y version.
-import itertool
+import idmtools_calibra
 version = idmtools_calibra.__version__
 # The full version, including alpha/beta/rc tags.
 # release = u'1.0'

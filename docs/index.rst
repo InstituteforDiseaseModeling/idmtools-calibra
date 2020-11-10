@@ -14,5 +14,5 @@ Welcome to |itertool|
 
    installation
    overview
-   itertool_index
+   idmtools_calibra_index
    glossary

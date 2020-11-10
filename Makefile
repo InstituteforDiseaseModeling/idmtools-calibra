@@ -108,3 +108,17 @@ dev-watch: ## Run lint on any python code changes
 
 changelog: ## Generate partial changelog
 	$(PDS)changelog.py
+
+generate-stubs: ## Generate python interfaces. Useful to identify what the next version should be by comparing to previous runs
+	$(PDS)make_stub_files.py  -c ./.dev_scripts/stub.cfg
+	$(PDS)process_interfaces.py
+
+build-docs: ## build docs
+	$(PDR) -wd 'docs' -ex 'make html'
+
+build-docs-server: build-docs ## builds docs and launch a webserver and watches for changes to documentation
+	$(PDS)serve_docs.py
+
+docs: build-docs  ## build docs
+
+docs-server: build-docs-server ## builds docs and launch a webserver and watches for changes to documentation
