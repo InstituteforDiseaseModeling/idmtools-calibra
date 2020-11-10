@@ -1,12 +1,7 @@
 -i https://packages.idmod.org/api/pypi/pypi-production/simple
-diskcache~=4.1.0
 fasteners~=0.15
 geopy~=2.0.0
 idmtools~=1.6.0
-matplotlib~=3.2.2
-numpy~=1.16.4
-pandas==1.1.0
-requests~=2.24
 scipy~=1.5.1
 seaborn~=0.10.1
 sklearn~=0.0

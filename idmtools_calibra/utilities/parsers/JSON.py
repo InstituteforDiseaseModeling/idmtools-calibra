@@ -24,7 +24,7 @@ def strip(pieces):
     sub_pieces = pieces.split('"')
     for i, sub_piece in enumerate(sub_pieces):
         if not i % 2:
-            sub_pieces[i] = re.sub("\s+", "", sub_piece)
+            sub_pieces[i] = re.sub(r"\s+", "", sub_piece)
     return '"'.join(sub_pieces)
 
 
@@ -110,9 +110,9 @@ def json2dict(json_file, as_is=True, func=None):
         else:
             data_dict = {}
             for i, data in enumerate(parse(input_data)):
-                if not func is None:
+                if func is not None:
                     data, do_break = func(data)
-                    if not data is None:
+                    if data is not None:
                         data_dict[i] = data
                     if do_break:
                         break

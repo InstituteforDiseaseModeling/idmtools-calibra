@@ -1,5 +1,5 @@
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.utils.Campaign.CampaignEnum import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignEnum import *
 
 
 def change_biting_risk(cb, start_day=0,
@@ -82,7 +82,6 @@ def change_biting_risk(cb, start_day=0,
     else:
         nodeset_config = NodeSetNodeList(Node_List=nodeIDs)
 
-
     risk_config = BitingRisk(**risk_config)
 
     risk_event = CampaignEvent(Start_Day=start_day,
@@ -98,10 +97,9 @@ def change_biting_risk(cb, start_day=0,
                                )
 
     if target_group != 'Everyone':
-        risk_event.Event_Coordinator_Config.Target_Demographic = StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.ExplicitAgeRanges # Otherwise default is Everyone
+        risk_event.Event_Coordinator_Config.Target_Demographic = StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.ExplicitAgeRanges  # Otherwise default is Everyone
         risk_event.Event_Coordinator_Config.Target_Age_Min = target_group['agemin']
         risk_event.Event_Coordinator_Config.Target_Age_Max = target_group['agemax']
-
 
     if trigger:
 

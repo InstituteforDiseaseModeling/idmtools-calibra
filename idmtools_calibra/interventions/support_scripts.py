@@ -1,6 +1,4 @@
-
 def validate_distribution_dictionary(parameter: str = None, distribution_dictionary: dict = None):
-
     """
         Validates that the distribution dictionary passed in contains all the parameters needed to define a valid
         distribution
@@ -38,6 +36,5 @@ def validate_distribution_dictionary(parameter: str = None, distribution_diction
 
     if not validated:
         error = f"Please verify that the distribution dictionary for {parameter} has all parameters " \
-            f"present needed to define a distribution.\n"
+                f"present needed to define a distribution.\n"
         raise ValueError(error)
-

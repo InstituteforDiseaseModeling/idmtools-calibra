@@ -1,7 +1,6 @@
 import copy
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
-
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
 
 # Ivermectin parameters
 ivermectin_cfg = Ivermectin(
@@ -16,7 +15,7 @@ ivermectin_cfg = Ivermectin(
 receiving_IV_event = BroadcastEvent(Broadcast_Event="Received_Ivermectin")
 
 
-def ivermectin_config_by_duration(box_duration='WEEK', initial_effect: float=0.95):
+def ivermectin_config_by_duration(box_duration='WEEK', initial_effect: float = 0.95):
     """
     Provide the duration of ivermectin efficacy and return the correct
     **Killing_Config** dictionary using the **WaningEffectBox** class.
@@ -55,11 +54,11 @@ def ivermectin_config_by_duration(box_duration='WEEK', initial_effect: float=0.9
     return cfg
 
 
-def add_ivermectin(config_builder, box_duration: any="WEEK", initial_effect: float=0.95, coverage: float=1.0,
-                   start_days: list=None, trigger_condition_list: list=None, triggered_campaign_delay: int=0,
-                   listening_duration: int=-1, nodeIDs: list=None, target_group: any="Everyone",
-                   target_residents_only: bool=1, node_property_restrictions: list=None,
-                   ind_property_restrictions: list=None, check_eligibility_at_trigger: bool=False):
+def add_ivermectin(config_builder, box_duration: any = "WEEK", initial_effect: float = 0.95, coverage: float = 1.0,
+                   start_days: list = None, trigger_condition_list: list = None, triggered_campaign_delay: int = 0,
+                   listening_duration: int = -1, nodeIDs: list = None, target_group: any = "Everyone",
+                   target_residents_only: bool = 1, node_property_restrictions: list = None,
+                   ind_property_restrictions: list = None, check_eligibility_at_trigger: bool = False):
     """
     Add an ivermectin intervention to the campaign using the **Ivermectin**
     class.
@@ -174,43 +173,43 @@ def add_ivermectin(config_builder, box_duration: any="WEEK", initial_effect: flo
                 target_group = "ExplicitAgeRanges"
         except KeyError:
             raise KeyError("Unknown target_group parameter. Please pass in 'Everyone' or a dictionary of "
-                             "{'agemin' : x, 'agemax' : y, 'gender': 'Female'} to target  to individuals between x and "
-                             "y years of age, and (optional) gender.\n")
+                           "{'agemin' : x, 'agemax' : y, 'gender': 'Female'} to target  to individuals between x and "
+                           "y years of age, and (optional) gender.\n")
 
     if trigger_condition_list:
         ivm_event = CampaignEvent(
-                    Start_Day=start_days[0],
-                    Nodeset_Config=node_cfg,
-                    Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                        Intervention_Config=NodeLevelHealthTriggeredIV(
-                            Trigger_Condition_List=trigger_condition_list,
-                            Target_Residents_Only=target_residents_only,
-                            Property_Restrictions_Within_Node=[],
-                            Node_Property_Restrictions=[],
-                            Duration=listening_duration,
-                            Demographic_Coverage=coverage,
-                            Target_Demographic=target_group,
-                            Target_Age_Min=age_min,
-                            Target_Age_Max=age_max,
-                            Target_Gender=gender,
-                            Actual_IndividualIntervention_Config=intervention_cfg)
-                    )
+            Start_Day=start_days[0],
+            Nodeset_Config=node_cfg,
+            Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
+                Intervention_Config=NodeLevelHealthTriggeredIV(
+                    Trigger_Condition_List=trigger_condition_list,
+                    Target_Residents_Only=target_residents_only,
+                    Property_Restrictions_Within_Node=[],
+                    Node_Property_Restrictions=[],
+                    Duration=listening_duration,
+                    Demographic_Coverage=coverage,
+                    Target_Demographic=target_group,
+                    Target_Age_Min=age_min,
+                    Target_Age_Max=age_max,
+                    Target_Gender=gender,
+                    Actual_IndividualIntervention_Config=intervention_cfg)
+            )
         )
         config_builder.add_event(ivm_event)
     else:
         for start_day in start_days:
-                ivm_event = CampaignEvent(
-                    Start_Day=start_day,
-                    Nodeset_Config=node_cfg,
-                    Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                        Target_Residents_Only=target_residents_only,
-                        Demographic_Coverage=coverage,
-                        Property_Restrictions_Within_Node=ind_property_restrictions,
-                        Node_Property_Restrictions=node_property_restrictions,
-                        Target_Demographic=target_group,
-                        Target_Age_Min=age_min,
-                        Target_Age_Max=age_max,
-                        Target_Gender=gender,
-                        Intervention_Config=intervention_cfg)
-                )
-                config_builder.add_event(ivm_event)
+            ivm_event = CampaignEvent(
+                Start_Day=start_day,
+                Nodeset_Config=node_cfg,
+                Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
+                    Target_Residents_Only=target_residents_only,
+                    Demographic_Coverage=coverage,
+                    Property_Restrictions_Within_Node=ind_property_restrictions,
+                    Node_Property_Restrictions=node_property_restrictions,
+                    Target_Demographic=target_group,
+                    Target_Age_Min=age_min,
+                    Target_Age_Max=age_max,
+                    Target_Gender=gender,
+                    Intervention_Config=intervention_cfg)
+            )
+            config_builder.add_event(ivm_event)

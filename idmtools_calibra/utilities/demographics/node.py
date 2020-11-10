@@ -34,7 +34,6 @@ class Node:
     def __repr__(self):
         return f"{self.name} - ({self.lat},{self.lon})"
 
-
     def to_dict(self):
         d = {'Latitude': float(self.lat),
              'Longitude': float(self.lon),
@@ -44,7 +43,6 @@ class Node:
 
         d.update(self.extra_attributes)
         return d
-
 
     def to_tuple(self):
         return self.lat, self.lon, self.pop

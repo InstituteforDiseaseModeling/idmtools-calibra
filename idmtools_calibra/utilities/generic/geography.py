@@ -15,9 +15,11 @@ def convert_filepaths(params):
 
     """
     g = params.pop('Geography', None)
-    if not g: return
+    if not g:
+        return
     for k, v in params.items():
-        if not v: continue
+        if not v:
+            continue
         if k == 'Demographics_Filenames':
             params[k] = [os.path.join(g, fn) for fn in v] if isinstance(v, list) else os.path.join(g, v)
         elif k == 'Campaign_Filename':
@@ -83,7 +85,7 @@ def set_geography(simulation, geography, static=False, pop_scale=1):
 
     """
     params = get_converted_paths_for_geography(geography)
-    #logging.debug('Geography parameters: %s' % params)
+    # logging.debug('Geography parameters: %s' % params)
     simulation.task.update_parameters(params)
     if static:
         set_static_demographics(simulation, use_existing=True)
@@ -125,10 +127,9 @@ geographies = {
                  "Enable_Demographics_Other": 0  # no 'AbovePoverty' etc. in these files
                  },
 
-
     # vector
     "Solomon_Islands": {"Geography": "Solomon_Islands/Honiara",
-                        "Node_Grid_Size": 0.009,  ##
+                        "Node_Grid_Size": 0.009,
                         "Air_Temperature_Filename": "Honiara_temperature_daily10y.bin",
                         "Demographics_Filenames": ["Honiara_single_node_demographics.compiled.json"],
                         "Land_Temperature_Filename": "Honiara_temperature_daily10y.bin",
@@ -139,7 +140,7 @@ geographies = {
 
     # vector
     "Solomon_Islands_2Node": {"Geography": "Solomon_Islands/Honiara _Haleta",
-                              "Node_Grid_Size": 0.009,  ##
+                              "Node_Grid_Size": 0.009,
                               "Air_Temperature_Filename": "Honiara_Haleta_temperature_daily10y.bin",
                               "Demographics_Filenames": ["Honiara_Haleta_two_node_demographics.compiled.json"],
                               "Enable_Local_Migration": 1,
@@ -236,8 +237,8 @@ geographies = {
                   "logLevel_LarvalHabitatMultiplier": "WARNING",
                   "logLevel_BroadcastEventToOtherNodes": 'WARNING',
 
-                  "Allow_NodeID_Zero" : 1,
-                  "Enable_Default_Reporting": 0, # turn off inset chart
+                  "Allow_NodeID_Zero": 1,
+                  "Enable_Default_Reporting": 0,  # turn off inset chart
                   "Disable_IP_Whitelist": 1,
                   "Disable_NP_Whitelist": 1,
 

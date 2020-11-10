@@ -14,13 +14,13 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.int64):
             return int(obj)  # because JSON doesn't know what to do with np.int64 (on Windows)
         elif isinstance(obj, np.int32):
-            return int(obj) # because JSON doesn't know what to do with np.int32 (on Windows)
+            return int(obj)  # because JSON doesn't know what to do with np.int32 (on Windows)
         elif isinstance(obj, np.ndarray):
             if obj.flags['C_CONTIGUOUS']:
                 obj_data = obj.data
             else:
                 cont_obj = np.ascontiguousarray(obj)
-                assert(cont_obj.flags['C_CONTIGUOUS'])
+                assert (cont_obj.flags['C_CONTIGUOUS'])
                 obj_data = cont_obj.data
             data_b64 = base64.b64encode(obj_data).decode('utf-8')
             return dict(__ndarray__=data_b64,
@@ -81,4 +81,3 @@ def cast_number(val):
         return int(val)
     except (ValueError, TypeError):
         return val
-

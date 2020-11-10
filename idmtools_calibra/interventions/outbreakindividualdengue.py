@@ -1,5 +1,5 @@
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.utils.Campaign.CampaignEnum import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignEnum import *
 
 
 # Add dengue outbreak individual event

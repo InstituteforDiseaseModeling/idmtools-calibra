@@ -2,15 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """The setup script for the itertool"""
-import sys
-
 from setuptools import setup, find_packages
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('requirements.txt') as requirements_file:
-    requirements = ["-i" not in line for line in requirements_file.read().split("\n")]
+    requirements = [line for line in requirements_file.read().split("\n") if "-i" not in line]
 
 with open('history_matching_requirements.txt') as requirements_file:
     history_matching_requirements = requirements_file.read().split("\n")

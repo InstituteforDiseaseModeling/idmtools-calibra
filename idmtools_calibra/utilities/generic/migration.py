@@ -1,5 +1,3 @@
-import copy
-
 waypoints_home_params = {
     "Migration_Model": "FIXED_RATE_MIGRATION",
     "Migration_Pattern": "WAYPOINTS_HOME",

@@ -62,7 +62,7 @@ class GPC:
             xc_new = xc + ' (scaled)'
             self.x_cols_scaled.append(xc_new)
             self.training_data[xc + ' (scaled)'] = (self.training_data[xc] - self.param_info.loc[xc, 'Min']) / \
-                (self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
+                                                   (self.param_info.loc[xc, 'Max'] - self.param_info.loc[xc, 'Min'])
 
         self.verbose = verbose
         self.debug = debug

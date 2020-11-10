@@ -1,5 +1,3 @@
-
-
 def add_InputEIR(simulation, monthlyEIRs, age_dependence="SURFACE_AREA_DEPENDENT", start_day=0, nodeIDs=None,
                  ind_property_restrictions=None):
     """

@@ -123,11 +123,11 @@ def add_survey_report(simulation, survey_days, reporting_interval=21,
 
 
 def add_patient_report(simulation):
-    simulation.task.reporters.add_report(BaseReport(type="MalariaPatientJSONReport"))
+    simulation.task.reporters.add_report(BaseReport(report_type="MalariaPatientJSONReport"))
 
 
 def add_habitat_report(simulation):
-    simulation.task.reporter.add_reports(BaseReport(type="VectorHabitatReport"))
+    simulation.task.reporter.add_reports(BaseReport(report_type="VectorHabitatReport"))
 
 
 class FilteredMalariaReport(BaseReport):
@@ -139,7 +139,7 @@ class FilteredMalariaReport(BaseReport):
                  type="ReportMalariaFiltered"):
         if not nodes:
             nodes = []
-        BaseReport.__init__(self, type=type)
+        BaseReport.__init__(self, report_type=type)
         self.start_day = start_day
         self.end_day = end_day
         self.nodes = list(nodes)
@@ -225,5 +225,5 @@ def add_event_counter_report(simulation, event_trigger_list, start=0, duration=1
                                            duration_days=duration,
                                            report_description=description,
                                            nodeset_config=nodes,
-                                           type='ReportEventCounter')
+                                           report_type='ReportEventCounter')
     simulation.task.reporters.add_reports(event_counter_report)

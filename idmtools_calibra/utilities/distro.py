@@ -37,7 +37,6 @@ import logging
 import argparse
 import subprocess
 
-
 _UNIXCONFDIR = os.environ.get('UNIXCONFDIR', '/etc')
 _OS_RELEASE_BASENAME = 'os-release'
 
@@ -541,6 +540,7 @@ class cached_property(object):
     underlying function and sets the value in `__dict__` so future accesses
     will not re-call the property.
     """
+
     def __init__(self, f):
         self._fname = f.__name__
         self._f = f
@@ -641,8 +641,7 @@ class LinuxDistribution(object):
         * :py:exc:`UnicodeError`: A data source has unexpected characters or
           uses an unexpected encoding.
         """
-        self.os_release_file = os_release_file or \
-            os.path.join(_UNIXCONFDIR, _OS_RELEASE_BASENAME)
+        self.os_release_file = os_release_file or os.path.join(_UNIXCONFDIR, _OS_RELEASE_BASENAME)
         self.distro_release_file = distro_release_file or ''  # updated later
         self.include_lsb = include_lsb
         self.include_uname = include_uname
@@ -681,6 +680,7 @@ class LinuxDistribution(object):
 
         For details, see :func:`distro.id`.
         """
+
         def normalize(distro_id, table):
             distro_id = distro_id.lower().replace(' ', '_')
             return table.get(distro_id, distro_id)
@@ -709,16 +709,11 @@ class LinuxDistribution(object):
 
         For details, see :func:`distro.name`.
         """
-        name = self.os_release_attr('name') \
-            or self.lsb_release_attr('distributor_id') \
-            or self.distro_release_attr('name') \
-            or self.uname_attr('name')
+        name = self.os_release_attr('name') or self.lsb_release_attr('distributor_id') or self.distro_release_attr('name') or self.uname_attr('name')
         if pretty:
-            name = self.os_release_attr('pretty_name') \
-                or self.lsb_release_attr('description')
+            name = self.os_release_attr('pretty_name') or self.lsb_release_attr('description')
             if not name:
-                name = self.distro_release_attr('name') \
-                       or self.uname_attr('name')
+                name = self.distro_release_attr('name') or self.uname_attr('name')
                 version = self.version(pretty=True)
                 if version:
                     name = name + ' ' + version
@@ -812,10 +807,7 @@ class LinuxDistribution(object):
 
         For details, see :func:`distro.codename`.
         """
-        return self.os_release_attr('codename') \
-            or self.lsb_release_attr('codename') \
-            or self.distro_release_attr('codename') \
-            or ''
+        return self.os_release_attr('codename') or self.lsb_release_attr('codename') or self.distro_release_attr('codename') or ''
 
     def info(self, pretty=False, best=False):
         """

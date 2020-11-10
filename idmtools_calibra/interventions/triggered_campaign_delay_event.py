@@ -13,8 +13,7 @@ def triggered_campaign_delay_event(simulation, start: int = 0, nodeIDs: list = N
     event it broadcasts can be specified or randomly generated.
 
     Args:
-        config_builder: The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>`
-            containing the campaign configuration.
+        simulation: Simulation
         start: The day on which to start distributing the intervention
             (**Start_Day** parameter).
         nodeIDs: The list of nodes to apply this intervention to (**Node_List**

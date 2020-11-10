@@ -1,4 +1,4 @@
-# from dtk.generic import climate, demographics, disease, migration
+# from idmtools_calibra.generic import climate, demographics, disease, migration
 from idmtools_calibra.utilities.generic import climate, demographics, disease, migration
 
 params = {

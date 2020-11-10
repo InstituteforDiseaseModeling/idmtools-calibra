@@ -1,10 +1,9 @@
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.vector.species import get_species_names, get_species_param_block
+from idmtools_calibra.utilities.vector.species import get_species_names, get_species_param_block
 import copy
 
 
-def add_ATSB(cb, start_day: int=0, coverage: float=0.15, kill_cfg: any=None, duration: int=180, duration_std_dev: int=14,
-             insecticide: str = None, nodeIDs: list=None, node_property_restrictions: list=None):
+def add_ATSB(cb, start_day: int = 0, coverage: float = 0.15, kill_cfg: any = None, duration: int = 180, duration_std_dev: int = 14,
+             insecticide: str = None, nodeIDs: list = None, node_property_restrictions: list = None):
     """
     Add an attractive targeted sugar bait (ATSB) intervention (**SugarTrap** class) using the
     **StandardInterventionDistributionEventCoordinator**.
@@ -65,7 +64,7 @@ def add_ATSB(cb, start_day: int=0, coverage: float=0.15, kill_cfg: any=None, dur
                          "Please review/update and try again.\n")
     if not kill_cfg:
         kill_cfg = WaningEffectBoxExponential(
-            Initial_Effect=0.0337*coverage,
+            Initial_Effect=0.0337 * coverage,
             Box_Duration=180,
             Decay_Time_Constant=30)
 
@@ -93,11 +92,11 @@ def add_ATSB(cb, start_day: int=0, coverage: float=0.15, kill_cfg: any=None, dur
     cb.add_event(event)
 
 
-def add_topical_repellent(config_builder, start_day: int=0, coverage_by_ages: list=None, cost: float=0,
-                          insecticide: str=None,
-                          repelling_initial: float=0.95, repelling_duration=0.3,
-                          repetitions: int=1, tsteps_btwn: int=1, nodeIDs: list=None,
-                          node_property_restrictions: list=None, ind_property_restrictions: list=None):
+def add_topical_repellent(config_builder, start_day: int = 0, coverage_by_ages: list = None, cost: float = 0,
+                          insecticide: str = None,
+                          repelling_initial: float = 0.95, repelling_duration=0.3,
+                          repetitions: int = 1, tsteps_btwn: int = 1, nodeIDs: list = None,
+                          node_property_restrictions: list = None, ind_property_restrictions: list = None):
     """
     Add a topical insect repellent intervention (**SimpleIndividualRepellent** class)
     using the **StandardInterventionDistributionEventCoordinator** or a **BirthTriggeredIV**
@@ -207,9 +206,9 @@ def add_topical_repellent(config_builder, start_day: int=0, coverage_by_ages: li
             config_builder.add_event(repellent_event)
 
 
-def add_ors_node(config_builder, start_day: int=0, spray_coverage: float=1, killing_initial: float=0.95,
-                 killing_decay: int=100, cost: float=1, insecticide: str=None, nodeIDs: list=None,
-                 node_property_restrictions: list=None):
+def add_ors_node(config_builder, start_day: int = 0, spray_coverage: float = 1, killing_initial: float = 0.95,
+                 killing_decay: int = 100, cost: float = 1, insecticide: str = None, nodeIDs: list = None,
+                 node_property_restrictions: list = None):
     """
     Add an outdoor residential spraying intervention (**SpaceSpraying** class) using
     **StandardInterventionDistributionEventCoordinator**
@@ -253,22 +252,22 @@ def add_ors_node(config_builder, start_day: int=0, spray_coverage: float=1, kill
         node_cfg = NodeSetAll()
 
     ors_event = CampaignEvent(
-                Event_Name="Outdoor Residual Spray",
-                Nodeset_Config=node_cfg,
-                Start_Day=start_day,
-                Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                    Node_Property_Restrictions=node_property_restrictions,
-                    Intervention_Config=SpaceSpraying(
-                            Spray_Kill_Target=SpaceSpraying_Spray_Kill_Target_Enum.SpaceSpray_FemalesAndMales,
-                            Habitat_Target=SpaceSpraying_Habitat_Target_Enum.ALL_HABITATS,
-                            Spray_Coverage=spray_coverage,
-                            Cost_To_Consumer=cost,
-                            Killing_Config=WaningEffectExponential(
-                                Initial_Effect=killing_initial,
-                                Decay_Time_Constant=killing_decay
-                            )
-                        )
+        Event_Name="Outdoor Residual Spray",
+        Nodeset_Config=node_cfg,
+        Start_Day=start_day,
+        Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
+            Node_Property_Restrictions=node_property_restrictions,
+            Intervention_Config=SpaceSpraying(
+                Spray_Kill_Target=SpaceSpraying_Spray_Kill_Target_Enum.SpaceSpray_FemalesAndMales,
+                Habitat_Target=SpaceSpraying_Habitat_Target_Enum.ALL_HABITATS,
+                Spray_Coverage=spray_coverage,
+                Cost_To_Consumer=cost,
+                Killing_Config=WaningEffectExponential(
+                    Initial_Effect=killing_initial,
+                    Decay_Time_Constant=killing_decay
                 )
+            )
+        )
     )
     if insecticide:
         ors_event.Event_Coordinator_Config.Intervention_Config.Insecticide_Name = insecticide
@@ -276,10 +275,10 @@ def add_ors_node(config_builder, start_day: int=0, spray_coverage: float=1, kill
     config_builder.add_event(ors_event)
 
 
-def add_larvicides(config_builder, start_day: int=0, habitat_target: str="ALL_HABITATS", spray_coverage: float=1,
-                   killing_initial: float=1, killing_duration: int=100, killing_decay: int=150, cost: float=1,
-                   insecticide: str=None,
-                   nodeIDs: list=None, node_property_restrictions: list=None):
+def add_larvicides(config_builder, start_day: int = 0, habitat_target: str = "ALL_HABITATS", spray_coverage: float = 1,
+                   killing_initial: float = 1, killing_duration: int = 100, killing_decay: int = 150, cost: float = 1,
+                   insecticide: str = None,
+                   nodeIDs: list = None, node_property_restrictions: list = None):
     """
     Add a mosquito larvicide intervention to the campaign using the
     **Larvicides** class, please note the Killing and Blocking configurations are using
@@ -334,15 +333,15 @@ def add_larvicides(config_builder, start_day: int=0, habitat_target: str="ALL_HA
         Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
             Node_Property_Restrictions=node_property_restrictions,
             Intervention_Config=Larvicides(
-                        Spray_Coverage=spray_coverage,
-                        Habitat_Target=Larvicides_Habitat_Target_Enum[habitat_target],
-                        Cost_To_Consumer=cost,
-                        Larval_Killing_Config=WaningEffectBoxExponential(
-                            Box_Duration=killing_duration,
-                            Decay_Time_Constant=killing_decay,
-                            Initial_Effect=killing_initial
-                        )
-                    )
+                Spray_Coverage=spray_coverage,
+                Habitat_Target=Larvicides_Habitat_Target_Enum[habitat_target],
+                Cost_To_Consumer=cost,
+                Larval_Killing_Config=WaningEffectBoxExponential(
+                    Box_Duration=killing_duration,
+                    Decay_Time_Constant=killing_decay,
+                    Initial_Effect=killing_initial
+                )
+            )
         )
     )
     if insecticide:
@@ -350,11 +349,11 @@ def add_larvicides(config_builder, start_day: int=0, habitat_target: str="ALL_HA
     config_builder.add_event(event)
 
 
-def add_eave_tubes(config_builder, start_day: int=0, coverage: float=1, killing_initial: float=1.0,
-                   killing_decay: int=180, blocking_initial: float=1.0, blocking_decay: int=730,
-                   outdoor_killing_discount: float=0.3, cost: float=0, insecticide: str=None,
-                   outdoor_insecticide: str=None,
-                   nodeIDs: list=None, node_property_restrictions: list=None, ind_property_restrictions: list=None):
+def add_eave_tubes(config_builder, start_day: int = 0, coverage: float = 1, killing_initial: float = 1.0,
+                   killing_decay: int = 180, blocking_initial: float = 1.0, blocking_decay: int = 730,
+                   outdoor_killing_discount: float = 0.3, cost: float = 0, insecticide: str = None,
+                   outdoor_insecticide: str = None,
+                   nodeIDs: list = None, node_property_restrictions: list = None, ind_property_restrictions: list = None):
     """
     Add insecticidal tubes to the eaves of houses (**IRSHousingModification** intervention class) and
     an outdoor residential spraying intervention (**SpaceSpraying** class) using
@@ -443,6 +442,6 @@ def add_eave_tubes(config_builder, start_day: int=0, coverage: float=1, killing_
     config_builder.add_event(indoor_event)
 
     add_ors_node(config_builder, start_day=start_day, spray_coverage=coverage,
-                 killing_initial=killing_initial*outdoor_killing_discount,
+                 killing_initial=killing_initial * outdoor_killing_discount,
                  killing_decay=killing_decay, cost=cost, insecticide=outdoor_insecticide,
                  nodeIDs=nodeIDs, node_property_restrictions=node_property_restrictions)
