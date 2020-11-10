@@ -1,5 +1,3 @@
-
-
 class ModFn(object):
     def __init__(self, func, *args, **kwargs):
         self.func = func
@@ -16,5 +14,3 @@ class ModFn(object):
                 md[k] = v.item()
 
         return md
-
-

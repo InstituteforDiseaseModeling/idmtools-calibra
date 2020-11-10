@@ -6,11 +6,10 @@ def format(reports):
 
 
 class BaseReport(object):
-
     dlls = {}
 
-    def __init__(self, type=""):
-        self.type = type
+    def __init__(self, report_type=""):
+        self.type = report_type
 
     def to_dict(self):
         try:
@@ -27,12 +26,11 @@ class BaseReport(object):
 
 class BaseVectorStatsReport(BaseReport):
     dlls = {}
-    def __init__(self,
-                 stratify_by_species=1,
-                 species_list=[],
-                 type=""):
 
-        BaseReport.__init__(self, type)
+    def __init__(self, stratify_by_species=1, species_list=None, report_type=""):
+        BaseReport.__init__(self, report_type)
+        if species_list is None:
+            species_list = []
         self.stratify_by_species = stratify_by_species
         self.species_list = species_list
 
@@ -44,7 +42,6 @@ class BaseVectorStatsReport(BaseReport):
 
 
 class BaseVectorGeneticsReport(BaseReport):
-
     dlls = {}
 
     def __init__(self,
@@ -52,12 +49,12 @@ class BaseVectorGeneticsReport(BaseReport):
                  gender='VECTOR_FEMALE',
                  include_vector_state_columns=0,
                  specific_genome_combinations_for_stratification=None,
-                 allele_combinations_for_stratification = None,
-                 stratify_by = '',
-                 combine_similar_genomes = 0,
-                 type=""):
+                 allele_combinations_for_stratification=None,
+                 stratify_by='',
+                 combine_similar_genomes=0,
+                 report_type=""):
 
-        BaseReport.__init__(self, type)
+        BaseReport.__init__(self, report_type)
         self.species = species
         self.gender = gender
         self.include_vector_state_columns = include_vector_state_columns
@@ -69,11 +66,11 @@ class BaseVectorGeneticsReport(BaseReport):
         if not specific_genome_combinations_for_stratification:
             specific_genome_combinations_for_stratification = [
                 {
-                    "Allele_Combination" : [
-                        ["X","*"]
+                    "Allele_Combination": [
+                        ["X", "*"]
                     ]
                 }
-                     ]
+            ]
         self.specific_genome_combinations_for_stratification = specific_genome_combinations_for_stratification
 
     def to_dict(self):
@@ -90,21 +87,16 @@ class BaseVectorGeneticsReport(BaseReport):
 
 
 class BaseDemographicsReport(BaseReport):
-
     dlls = {}
 
-    def __init__(self,
-                 stratify_by_gender=0,
-                 age_bins=None,
-                 IP_key_to_collect="",
-                 type=""):
+    def __init__(self, stratify_by_gender=0, age_bins=None, ip_key_to_collect="", report_type=""):
 
-        BaseReport.__init__(self, type)
+        BaseReport.__init__(self, report_type)
         self.stratify_by_gender = stratify_by_gender
         if not age_bins:
             age_bins = []
         self.age_bins = age_bins
-        self.IP_key_to_collect = IP_key_to_collect
+        self.IP_key_to_collect = ip_key_to_collect
 
     def to_dict(self):
         d = super(BaseDemographicsReport, self).to_dict()
@@ -116,18 +108,10 @@ class BaseDemographicsReport(BaseReport):
 
 
 class BaseEventReport(BaseReport):
-
     dlls = {}
 
-    def __init__(self,
-                 event_trigger_list,
-                 start_day=0,
-                 duration_days=1000000,
-                 report_description="",
-                 nodeset_config=None,
-                 type=""):
-
-        BaseReport.__init__(self, type)
+    def __init__(self, event_trigger_list, start_day=0, duration_days=1000000, report_description="", nodeset_config=None, report_type=""):
+        BaseReport.__init__(self, report_type)
         self.start_day = start_day
         self.duration_days = duration_days
         self.report_description = report_description
@@ -147,21 +131,11 @@ class BaseEventReport(BaseReport):
 
 
 class BaseEventReportIntervalOutput(BaseEventReport):
-
     dlls = {}
 
-    def __init__(self,
-                 event_trigger_list,
-                 start_day=0,
-                 duration_days=1000000,
-                 report_description="",
-                 nodeset_config=None,
-                 max_number_reports=15,
-                 reporting_interval=73,
-                 type=""):
-
-        BaseEventReport.__init__(self, event_trigger_list, start_day, duration_days, 
-                                     report_description, nodeset_config, type)
+    def __init__(self, event_trigger_list, start_day=0, duration_days=1000000, report_description="", nodeset_config=None, max_number_reports=15, reporting_interval=73, report_type=""):
+        BaseEventReport.__init__(self, event_trigger_list, start_day, duration_days,
+                                 report_description, nodeset_config, report_type)
         self.max_number_reports = max_number_reports
         self.reporting_interval = reporting_interval
 
@@ -173,18 +147,11 @@ class BaseEventReportIntervalOutput(BaseEventReport):
 
 
 class BaseMalariaTransmissionReport(BaseReport):
-
     dlls = {}
 
-    def __init__(self,
-                 start_day=0,
-                 duration_days=10000,
-                 report_description='',
-                 nodes=None,
-                 type='ReportSimpleMalariaTransmissionJSON',
-                 pretty_format=1):
+    def __init__(self, start_day=0, duration_days=10000, report_description='', nodes=None, report_type='ReportSimpleMalariaTransmissionJSON', pretty_format=1):
 
-        BaseReport.__init__(self, type)
+        BaseReport.__init__(self, report_type)
         self.start_day = start_day
         self.duration_days = duration_days
         self.pretty_format = pretty_format
@@ -204,14 +171,11 @@ class BaseMalariaTransmissionReport(BaseReport):
         return d
 
 
-def add_node_demographics_report(cb, stratify_by_gender=0, age_bins=None, IP_key_to_collect=''):
-    node_demographics_report = BaseDemographicsReport(stratify_by_gender=stratify_by_gender,
-                                                      age_bins=age_bins,
-                                                      IP_key_to_collect=IP_key_to_collect,
-                                                      type='ReportNodeDemographics')
+def add_node_demographics_report(cb, stratify_by_gender=0, age_bins=None, ip_key_to_collect=''):
+    node_demographics_report = BaseDemographicsReport(stratify_by_gender=stratify_by_gender, age_bins=age_bins, ip_key_to_collect=ip_key_to_collect, report_type='ReportNodeDemographics')
     cb.add_reports(node_demographics_report)
 
 
 def add_human_migration_tracking_report(cb):
-    human_migration_tracking_report = BaseReport(type='ReportHumanMigrationTracking')
+    human_migration_tracking_report = BaseReport(report_type='ReportHumanMigrationTracking')
     cb.add_reports(human_migration_tracking_report)

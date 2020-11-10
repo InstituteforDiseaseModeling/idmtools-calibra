@@ -1,14 +1,14 @@
-from dtk.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
+from idmtools_calibra.interventions.triggered_campaign_delay_event import triggered_campaign_delay_event
 
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.utils.Campaign.CampaignEnum import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignEnum import *
 
 
-def change_node_property(cb, target_property_name: str=None, target_property_value: str=None, start_day: int=0,
-                         daily_prob: float=1, max_duration: int=9.3228e+35, revert: int=0, nodeIDs: list=None,
-                         node_property_restrictions: list=None, triggered_campaign_delay: int=0,
-                         trigger_condition_list: list=None, listening_duration: int=-1,
-                         disqualifying_properties: list=None, check_eligibility_at_trigger: bool=False):
+def change_node_property(cb, target_property_name: str = None, target_property_value: str = None, start_day: int = 0,
+                         daily_prob: float = 1, max_duration: int = 9.3228e+35, revert: int = 0, nodeIDs: list = None,
+                         node_property_restrictions: list = None, triggered_campaign_delay: int = 0,
+                         trigger_condition_list: list = None, listening_duration: int = -1,
+                         disqualifying_properties: list = None, check_eligibility_at_trigger: bool = False):
     """
     Add an intervention that changes the node property value to another on a
     particular day or after a triggering event using the
@@ -109,10 +109,10 @@ def change_node_property(cb, target_property_name: str=None, target_property_val
             Nodeset_Config=node_cfg,
             Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
                 Intervention_Config=NodeLevelHealthTriggeredIV(
-                    Blackout_Event_Trigger="Node_Property_Change_Blackout",     # [TODO]: enum??
+                    Blackout_Event_Trigger="Node_Property_Change_Blackout",  # [TODO]: enum??
                     # we don't care about this, just need something to be here so the blackout works at all
                     Blackout_Period=1,  # so we only distribute the node event(s) once on that day in case of
-                                        # multiple triggers
+                    # multiple triggers
                     Blackout_On_First_Occurrence=1,
                     Duration=listening_duration,
                     Trigger_Condition_List=trigger_condition_list,
@@ -135,12 +135,12 @@ def change_node_property(cb, target_property_name: str=None, target_property_val
         cb.add_event(changer_event)
 
 
-def change_individual_property_at_age(cb, target_property_name: str=None, target_property_value: str=None,
-                                      change_age_in_days: int=None, start_day: int=0,
-                                      listening_duration: int=-1, coverage: float=1, daily_prob: float=1,
-                                      max_duration: int=9.3228e+35, revert: int=0, nodeIDs: list=None,
-                                      node_property_restrictions: list=None, ind_property_restrictions: list=None,
-                                      disqualifying_properties: list=None):
+def change_individual_property_at_age(cb, target_property_name: str = None, target_property_value: str = None,
+                                      change_age_in_days: int = None, start_day: int = 0,
+                                      listening_duration: int = -1, coverage: float = 1, daily_prob: float = 1,
+                                      max_duration: int = 9.3228e+35, revert: int = 0, nodeIDs: list = None,
+                                      node_property_restrictions: list = None, ind_property_restrictions: list = None,
+                                      disqualifying_properties: list = None):
     """
     Add an intervention that changes an individual's individual property at
     a given number of days after birth using the **PropertyValueChanger**
@@ -248,14 +248,14 @@ def change_individual_property_at_age(cb, target_property_name: str=None, target
     cb.add_event(campaign_event)
 
 
-def change_individual_property(cb, target_property_name: str=None, target_property_value: str=None,
-                               target_group: any='Everyone', start_day: int=0, coverage: float=1, daily_prob: float=1,
-                               max_duration: int=9.3228e+35, revert: int=0, nodeIDs: list=None,
-                               node_property_restrictions: list=None, ind_property_restrictions: list=None,
-                               triggered_campaign_delay: int=0, trigger_condition_list: list=None,
-                               listening_duration: int=-1, blackout_flag: bool=True,
-                               disqualifying_properties: list=None, target_residents_only: bool=False,
-                               check_eligibility_at_trigger: bool=False):
+def change_individual_property(cb, target_property_name: str = None, target_property_value: str = None,
+                               target_group: any = 'Everyone', start_day: int = 0, coverage: float = 1, daily_prob: float = 1,
+                               max_duration: int = 9.3228e+35, revert: int = 0, nodeIDs: list = None,
+                               node_property_restrictions: list = None, ind_property_restrictions: list = None,
+                               triggered_campaign_delay: int = 0, trigger_condition_list: list = None,
+                               listening_duration: int = -1, blackout_flag: bool = True,
+                               disqualifying_properties: list = None, target_residents_only: bool = False,
+                               check_eligibility_at_trigger: bool = False):
     """
     Add an intervention that changes the individual property value to another on a
     particular day or after a triggering event using the
@@ -392,29 +392,29 @@ def change_individual_property(cb, target_property_name: str=None, target_proper
                                                                      ind_property_restrictions=trigger_ind_property_restrictions,
                                                                      node_property_restrictions=trigger_node_property_restrictions)]
         changer_event = CampaignEvent(
-                Start_Day=start_day,
-                Nodeset_Config=node_cfg,
-                Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
-                    Intervention_Config=NodeLevelHealthTriggeredIV(
-                        # Blackout event trigger and period only used when blackout_flag is true
-                        Blackout_Event_Trigger="Ind_Property_Blackout",
-                        Blackout_Period=1,
-                        # so we only change value once per time step
-                        Blackout_On_First_Occurrence=blackout_flag,
-                        Target_Residents_Only=target_residents_only,
-                        Duration=listening_duration,
-                        Trigger_Condition_List=trigger_condition_list,
-                        Demographic_Coverage=coverage,
-                        Target_Demographic=target_group,
-                        Target_Age_Min=age_min,
-                        Target_Age_Max=age_max,
-                        Target_Gender=gender,
-                        Node_Property_Restrictions=node_property_restrictions,
-                        Property_Restrictions_Within_Node=ind_property_restrictions,
-                        Actual_IndividualIntervention_Config=property_value_changer
-                    )
+            Start_Day=start_day,
+            Nodeset_Config=node_cfg,
+            Event_Coordinator_Config=StandardInterventionDistributionEventCoordinator(
+                Intervention_Config=NodeLevelHealthTriggeredIV(
+                    # Blackout event trigger and period only used when blackout_flag is true
+                    Blackout_Event_Trigger="Ind_Property_Blackout",
+                    Blackout_Period=1,
+                    # so we only change value once per time step
+                    Blackout_On_First_Occurrence=blackout_flag,
+                    Target_Residents_Only=target_residents_only,
+                    Duration=listening_duration,
+                    Trigger_Condition_List=trigger_condition_list,
+                    Demographic_Coverage=coverage,
+                    Target_Demographic=target_group,
+                    Target_Age_Min=age_min,
+                    Target_Age_Max=age_max,
+                    Target_Gender=gender,
+                    Node_Property_Restrictions=node_property_restrictions,
+                    Property_Restrictions_Within_Node=ind_property_restrictions,
+                    Actual_IndividualIntervention_Config=property_value_changer
                 )
             )
+        )
 
         cb.add_event(changer_event)
     else:
@@ -433,4 +433,3 @@ def change_individual_property(cb, target_property_name: str=None, target_proper
             )
         )
         cb.add_event(changer_event)
-

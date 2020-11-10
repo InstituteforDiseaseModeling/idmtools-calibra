@@ -27,7 +27,7 @@ def configure_site(cb, site, pop_scale=1):
     cb.set_param("Config_Name", StudySite.site)
     cfg_fn = globals().get('configure_' + StudySite.site.lower(), None)
     if cfg_fn:
-        #logging.debug('StudySite.site = %s' % StudySite.site)
+        # logging.debug('StudySite.site = %s' % StudySite.site)
         StudySite.set_geography(cb, geography_from_site(StudySite.site), pop_scale)
         cfg_fn(cb)
         if pop_scale != 1:
@@ -56,46 +56,45 @@ def set_habitat_scale(simulation, scale):
     simulation.task.set_parameter('x_Temporary_Larval_Habitat', scale)
 
 
-# -------------------------------------------------------------------------------
 def configure_magude(simulation):
-    set_larval_habitat(simulation, {"gambiae": {'TEMPORARY_RAINFALL': 2.2e9, "LINEAR_SPLINE": {
-                          "Capacity_Distribution_Per_Year": {
-                              "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083,
-                                        182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
-                              # "Values": [3, 0.8, 1.25, 0.1, 2.7, 10, 6, 35, 2.8, 1.5, 1.6, 2.1] # with 'x_Temporary_Larval_Habitat': 0.2 for EIR~10
-                              "Values": [3, 0.8,  1.25, 0.1,  2.7, 8, 4, 35, 6.8,  6.5, 2.6, 2.1]},
-                              "Max_Larval_Capacity": 1e8
-                                    }},
-
-                             "funestus": {'WATER_VEGETATION': 4e8, "LINEAR_SPLINE": {
-                          "Capacity_Distribution_Per_Year": {
-                              "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083,
-                                        182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
-                              # "Values": [3, 0.8, 1.25, 0.1, 2.7, 10, 6, 35, 2.8, 1.5, 1.6, 2.1] # with 'x_Temporary_Larval_Habitat': 0.2 for EIR~10
-                              "Values": [3, 0.8,  1.25, 0.1,  2.7, 8, 4, 35, 6.8,  6.5, 2.6, 2.1]},
-                              "Max_Larval_Capacity": 1e8
-                                    }}
-                            })
+    set_larval_habitat(simulation, {
+        "gambiae": {
+            'TEMPORARY_RAINFALL': 2.2e9,
+            "LINEAR_SPLINE": {
+                "Capacity_Distribution_Per_Year": {
+                    "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083, 182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
+                    "Values": [3, 0.8, 1.25, 0.1, 2.7, 8, 4, 35, 6.8, 6.5, 2.6, 2.1]
+                },
+                "Max_Larval_Capacity": 1e8}
+        },
+        "funestus": {
+            'WATER_VEGETATION': 4e8,
+            "LINEAR_SPLINE": {
+                "Capacity_Distribution_Per_Year": {
+                    "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083, 182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
+                    "Values": [3, 0.8, 1.25, 0.1, 2.7, 8, 4, 35, 6.8, 6.5, 2.6, 2.1]
+                }, "Max_Larval_Capacity": 1e8
+            }
+        }
+    })
 
 
 def configure_garki_gridded_net(simulation):
     set_larval_habitat(simulation, {"gambiae": {'TEMPORARY_RAINFALL': 2.2e9, "LINEAR_SPLINE": {
-                          "Capacity_Distribution_Per_Year": {
-                              "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083,
-                                        182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
-                              # "Values": [3, 0.8, 1.25, 0.1, 2.7, 10, 6, 35, 2.8, 1.5, 1.6, 2.1] # with 'x_Temporary_Larval_Habitat': 0.2 for EIR~10
-                              "Values": [3, 0.8,  1.25, 0.1,  2.7, 8, 4, 35, 6.8,  6.5, 2.6, 2.1]},
-                              "Max_Larval_Capacity": 1e8
-                            }
-                            }})
+        "Capacity_Distribution_Per_Year": {
+            "Times": [0.0, 30.417, 60.833, 91.25, 121.667, 152.083,
+                      182.5, 212.917, 243.333, 273.75, 304.167, 334.583],
+            "Values": [3, 0.8, 1.25, 0.1, 2.7, 8, 4, 35, 6.8, 6.5, 2.6, 2.1]},
+        "Max_Larval_Capacity": 1e8
+    }}})
 
 
 # Namawala, Tanzania: EIR = 400
 def configure_namawala(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 7.5e9, 'CONSTANT': 1e7},
-                            "funestus": {'WATER_VEGETATION': 4e8},
-                            "gambiae": {'TEMPORARY_RAINFALL': 8.3e8, 'CONSTANT': 1e7}
-                            })
+                                    "funestus": {'WATER_VEGETATION': 4e8},
+                                    "gambiae": {'TEMPORARY_RAINFALL': 8.3e8, 'CONSTANT': 1e7}
+                                    })
 
 
 # "Puerto_Rico": Tanzania: EIR = 400
@@ -106,53 +105,53 @@ def configure_puerto_rico(simulation):
 # Sugungum, Garki, Jigawa, Nigeria: EIR = 132 (56 from funestus)
 def configure_sugungum(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 2.3e9, 'CONSTANT': 1.25e7},
-                            "funestus": {'WATER_VEGETATION': 6e8},
-                            "gambiae": {'TEMPORARY_RAINFALL': 2.3e9, 'CONSTANT': 1.25e7}})
+                                    "funestus": {'WATER_VEGETATION': 6e8},
+                                    "gambiae": {'TEMPORARY_RAINFALL': 2.3e9, 'CONSTANT': 1.25e7}})
 
 
 # Matsari, Garki, Jigawa, Nigeria: EIR = 68 (2 from funestus)
 def configure_matsari(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 2.2e9, 'CONSTANT': 1.25e7},
-                            "funestus": {'WATER_VEGETATION': 2.5e7},
-                            "gambiae": {'TEMPORARY_RAINFALL': 2.2e9, 'CONSTANT': 1.25e7}
-                            })
+                                    "funestus": {'WATER_VEGETATION': 2.5e7},
+                                    "gambiae": {'TEMPORARY_RAINFALL': 2.2e9, 'CONSTANT': 1.25e7}
+                                    })
 
 
 # Rafin Marke, Garki, Jigawa, Nigeria: EIR = 18
 def configure_rafin_marke(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 5e8, 'CONSTANT': 8e6},
-                            "gambiae": {'TEMPORARY_RAINFALL': 5e8, 'CONSTANT': 8e6}
-                            })
+                                    "gambiae": {'TEMPORARY_RAINFALL': 5e8, 'CONSTANT': 8e6}
+                                    })
 
 
 # Dielmo, Senegal: EIR = 200
 def configure_dielmo(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 4e9, 'CONSTANT': 1e7},
-                            "funestus": {'WATER_VEGETATION': 5e8},
-                            "gambiae": {'TEMPORARY_RAINFALL': 4e9, 'CONSTANT': 1e7}})
+                                    "funestus": {'WATER_VEGETATION': 5e8},
+                                    "gambiae": {'TEMPORARY_RAINFALL': 4e9, 'CONSTANT': 1e7}})
 
 
 # Ndiop, Senegal: EIR = 20
 def configure_ndiop(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 4e8, 'CONSTANT': 5e6},
-                            "gambiae": {'TEMPORARY_RAINFALL': 4e8, 'CONSTANT': 5e6}})
+                                    "gambiae": {'TEMPORARY_RAINFALL': 4e8, 'CONSTANT': 5e6}})
 
 
 # Thies, Senegal
 def configure_thies(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 4e7, 'CONSTANT': 1.5e6},
-                            "gambiae": {'TEMPORARY_RAINFALL': 4e7, 'CONSTANT': 1.5e6}})
+                                    "gambiae": {'TEMPORARY_RAINFALL': 4e7, 'CONSTANT': 1.5e6}})
 
 
 # Burkina sites from A L Ouedraogo
 def configure_dapelogo(simulation):
     set_larval_habitat(simulation, {"funestus": {'WATER_VEGETATION': 5e8},
-                            "gambiae": {'TEMPORARY_RAINFALL': 3e10, 'CONSTANT': 1e8}})
+                                    "gambiae": {'TEMPORARY_RAINFALL': 3e10, 'CONSTANT': 1e8}})
 
 
 def configure_laye(simulation):
     set_larval_habitat(simulation, {"funestus": {'WATER_VEGETATION': 5e7},
-                            "gambiae": {'TEMPORARY_RAINFALL': 3e9, 'CONSTANT': 1e7}})
+                                    "gambiae": {'TEMPORARY_RAINFALL': 3e9, 'CONSTANT': 1e7}})
 
 
 # Sinazongwe, Southern, Zambia: EIR ~= 20
@@ -166,12 +165,12 @@ def configure_chipepo(simulation):
     set_species_param(simulation, "arabiensis", "Indoor_Feeding_Fraction", 0.5)
 
 
-# [TODO]: zdu notes
+# [TODO]: Fix simulation enable call here
 def configure_sinazongweconstant(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'CONSTANT': 1.5e9}})
     set_species_param(simulation, "arabiensis", "Indoor_Feeding_Fraction", 0.5)
     set_climate_constant(simulation, Base_Air_Temperature=22, Base_Rainfall=10)
-    cb.enable('Climate_Stochasticity')
+    simulation.enable('Climate_Stochasticity')
 
 
 # Gwembe, Southern, Zambia: EIR ~= 0.1-20
@@ -220,14 +219,14 @@ def configure_munumbwe_1_node(simulation):
 # Mocuba, Zambezia, Mozambique: EIR = 70
 def configure_mocuba(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 1e8, 'CONSTANT': 5e6},
-                            "funestus": {'WATER_VEGETATION': 8e8}})
+                                    "funestus": {'WATER_VEGETATION': 8e8}})
 
 
 # West Kenya: EIR ~ 100
 def configure_west_kenya(simulation):
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 2.2e9, 'CONSTANT': 1e7},
-                            "funestus": {'WATER_VEGETATION': 7e8},
-                            "gambiae": {'TEMPORARY_RAINFALL': 5.5e9, 'CONSTANT': 1e7}})
+                                    "funestus": {'WATER_VEGETATION': 7e8},
+                                    "gambiae": {'TEMPORARY_RAINFALL': 5.5e9, 'CONSTANT': 1e7}})
 
 
 # Solomon_Islands
@@ -242,7 +241,7 @@ def configure_solomon_islands_2node(simulation):
 # Nabang on Chinese-Burmese border
 def configure_nabang(simulation):
     set_larval_habitat(simulation, {"maculatus": {"WATER_VEGETATION": 1e8},
-                            "minimus": {"WATER_VEGETATION": 1e8}})
+                                    "minimus": {"WATER_VEGETATION": 1e8}})
 
 
 def configure_gwembe_sinazongwe_115_nodes(simulation):
@@ -258,7 +257,7 @@ def configure_gwembe_sinazongwe_115_nodes(simulation):
     for now we only configure water vegetation
     '''
     set_larval_habitat(simulation, {"arabiensis": {'TEMPORARY_RAINFALL': 1e8, 'CONSTANT': 2e6},
-                            "funestus": {"WATER_VEGETATION": 2e7}})
+                                    "funestus": {"WATER_VEGETATION": 2e7}})
 
     set_species_param(simulation, "arabiensis", "Indoor_Feeding_Fraction", 0.5)
 
@@ -267,4 +266,4 @@ def configure_gwembe_sinazongwe_115_nodes(simulation):
 # but maculatus more zoophilic --> fewer human bites
 def configure_tha_song_yang(simulation):
     set_larval_habitat(simulation, {"minimus": {"WATER_VEGETATION": 1e8},
-                            "maculatus": {"WATER_VEGETATION": 1e8}})
+                                    "maculatus": {"WATER_VEGETATION": 1e8}})

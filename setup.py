@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """The setup script for the itertool"""
-import sys
-
 from setuptools import setup, find_packages
 
 with open('README.md') as readme_file:

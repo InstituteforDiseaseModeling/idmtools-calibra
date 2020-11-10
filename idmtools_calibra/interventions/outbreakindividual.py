@@ -1,5 +1,3 @@
-
-
 def recurring_outbreak(simulation, outbreak_fraction=0.01, repetitions=-1, tsteps_btwn=365, target='Everyone',
                        start_day=0,
                        strain=(0, 0), nodes={"class": "NodeSetAll"}, outbreak_source="PrevalenceIncrease"):

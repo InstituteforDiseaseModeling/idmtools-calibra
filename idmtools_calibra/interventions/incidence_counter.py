@@ -1,4 +1,4 @@
-from dtk.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
 
 
 def add_incidence_counter(cb,
@@ -132,6 +132,4 @@ def add_incidence_counter(cb,
             "Target_Age_Max": target_group['agemax']
         })
 
-
     cb.add_event(monitoring_event)
-

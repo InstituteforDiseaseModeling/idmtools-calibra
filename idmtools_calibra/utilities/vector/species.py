@@ -256,7 +256,7 @@ def filter_species(simulation, species: list):
     throws ValueError exception is the species you want left are not present in config
 
     Args:
-        cb: config builder
+        simulation: simulation
         species: list is vector names that you want present in your config.json
 
     Returns:
@@ -278,14 +278,14 @@ def filter_species(simulation, species: list):
         simulation.task.config["parameters"]["Vector_Species_Params"].remove(unwanted)
 
 
-def set_params_by_species(params: dict, ss: list, sim_type: str="VECTOR_SIM"):
+def set_params_by_species(params: dict, ss: list, sim_type: str = "VECTOR_SIM"):
     """
 
     Args:
         params: params to which you want to append the species
         ss: list of species
         sim_type: sim type you're setting up for
-    
+
     Returns:
         nothing
     """
@@ -293,7 +293,7 @@ def set_params_by_species(params: dict, ss: list, sim_type: str="VECTOR_SIM"):
     for s in ss:
         pp.append(vector_params_by_species[s].copy())
         if sim_type == "MALARIA_SIM":
-            pp[-1]["Acquire_Modifier"] = 0.8  ## gametocyte success modeled explicitly
+            pp[-1]["Acquire_Modifier"] = 0.8  # gametocyte success modeled explicitly
 
     vector_species_params = {
         "Vector_Species_Params": pp
@@ -302,14 +302,13 @@ def set_params_by_species(params: dict, ss: list, sim_type: str="VECTOR_SIM"):
     params.update(vector_species_params)
 
 
-def set_species(simulation, species_list: list, overwrite: bool=True):
+def set_species(simulation, species_list: list, overwrite: bool = True):
     """
         Adds species from the list to the config.json in your simulation,
         By default, overwrites whatever species are in config now.
     Args:
-        cb: config builder
+        simulation: simulation
         species_list: list of species to add to the simulation
-        sim_type: sim type you're setting up for
         overwrite: when true - overwrite whatever species are present already with the species in the list
             when false - add the species in the list to the species already present, if species already
             in config, it is left as-is.
@@ -324,7 +323,7 @@ def set_species(simulation, species_list: list, overwrite: bool=True):
         if overwrite or not get_species_param_block(simulation, s):
             current_species = vector_params_by_species[s].copy()
             if sim_type == "MALARIA_SIM":
-                current_species["Acquire_Modifier"] = 0.8  ## gametocyte success modeled explicitly
+                current_species["Acquire_Modifier"] = 0.8  # gametocyte success modeled explicitly
             pp.append(current_species)
 
     simulation.task.config["parameters"]['Vector_Species_Params'] = pp
@@ -343,7 +342,7 @@ def get_species_names(simulation):
     """
         Returns the list of names of vector species found in the config.
     Args:
-        cb:
+        simulation:
 
     Returns:
         List of all the species present in the config.json
@@ -371,9 +370,9 @@ def get_species_param_block(simulation, species):
 
 def update_species_param(simulation, species, parameter, value, overwrite=True):
     """ Update a 'Vector_Species_Param' variable in a config file; return a length-one dict with a numeric value.
-    
+
     Args:
-        cb: DTKConfigBuilder object with a 'config' attribute.
+        simulation: Simulation
         species: (string) vector species whose parameter will be updated.
         parameter: (string) 'Vector_Species_Param' variable to be updated.
         value: (float, dict) New value for 'parameter'.
@@ -381,7 +380,7 @@ def update_species_param(simulation, species, parameter, value, overwrite=True):
         overwrite: (logical) Relevant only if 'value' is a dict.
             If True, will replace the entire original parameter with whatever is passed in 'value'.
             If False, will change only the elements specified in 'value'.
-    
+
     Returns: 
         a dict whose key traces the config parameters from 'species' onward (including the key of 'value' if 'value'
         is a dict) and whose value is equal to the updated config value.
@@ -425,7 +424,12 @@ def scale_all_habitats(simulation, scale):
 def set_larval_habitat(simulation, habitats):
     """
     Set vector species and habitat parameters of config argument and return
-    
+
+    Args::
+
+        simulation: Simulation
+        habitats: habitats
+
     Example::
 
         habitats = {"arabiensis": {"TEMPORARY_RAINFALL": 1.7e9, "CONSTANT": 1e7}}
@@ -437,7 +441,7 @@ def set_larval_habitat(simulation, habitats):
 def set_species_genes(simulation, genes):
     """
     Set vector species and gene parameters of config argument and return
-    
+
     Example::
 
         genes = {"arabiensis": [
@@ -469,7 +473,7 @@ def set_species_genes(simulation, genes):
 def set_species_trait_modifiers(simulation, traits):
     """
         Set vector species and gene parameters of config argument and return
-        
+
         Example::
 
             traits = {"arabiensis": [{
@@ -502,7 +506,7 @@ def set_species_trait_modifiers(simulation, traits):
 def set_species_drivers(simulation, drivers):
     """
         Set vector species and gene parameters of config argument and return.
-        
+
         Example::
 
             drivers = {"arabiensis": [

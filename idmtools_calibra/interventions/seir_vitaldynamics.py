@@ -1,6 +1,5 @@
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.utils.Campaign.CampaignEnum import *
-
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignEnum import *
 
 seir_vitaldynamics_campaign = Campaign(
     Use_Defaults=True,
@@ -32,9 +31,9 @@ seir_vitaldynamics_campaign = Campaign(
                 Demographic_Coverage=0.001,
                 Intervention_Config=OutbreakIndividual(
                     Antigen=0,
-                    Event_Name="Outbreak",              # [TODO]: un-defined
+                    Event_Name="Outbreak",  # [TODO]: un-defined
                     Genome=0,
-                    Outbreak_Source="ImportCases"       # [TODO]: un-defined
+                    Outbreak_Source="ImportCases"  # [TODO]: un-defined
                 ),
                 Number_Repetitions=10,
                 Target_Demographic=StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.Everyone,

@@ -1,7 +1,7 @@
-from dtk.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
 
 
-def heg_release(cb, released_number, num_repetitions = 13, timesteps_between_reps = 14):
+def heg_release(cb, released_number, num_repetitions=13, timesteps_between_reps=14):
     """
     Release *A. arabiensis* mosquitoes with a homing endonucleouse (HEG) genetic
     modification using the **MosquitoRelease** class.
@@ -55,7 +55,7 @@ def heg_release(cb, released_number, num_repetitions = 13, timesteps_between_rep
     )
 
     cb.add_event(heg_release_event)
-    
+
     return {'num_released': released_number,
             'num_repetitions': num_repetitions,
             'timesteps_btw_reps': timesteps_between_reps}

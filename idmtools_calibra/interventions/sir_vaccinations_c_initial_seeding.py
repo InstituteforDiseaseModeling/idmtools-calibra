@@ -1,6 +1,5 @@
-from dtk.utils.Campaign.CampaignClass import *
-from dtk.utils.Campaign.CampaignEnum import *
-
+from idmtools_calibra.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignEnum import *
 
 sir_vaccinations_c_campaign = Campaign(
     Campaign_Name="Initial Seeding",
@@ -12,11 +11,11 @@ sir_vaccinations_c_campaign = Campaign(
                 Intervention_Config=OutbreakIndividual(
                     Antigen=0,
                     Genome=0,
-                    Outbreak_Source="PrevalenceIncrease"        # [TODO]: un-defined
+                    Outbreak_Source="PrevalenceIncrease"  # [TODO]: un-defined
                 ),
                 Target_Demographic=StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.Everyone,
             ),
-            Event_Name="Outbreak",                              # [TODO]: un-defined
+            Event_Name="Outbreak",  # [TODO]: un-defined
             Nodeset_Config=NodeSetAll(),
             Start_Day=30
         ),
@@ -40,7 +39,7 @@ sir_vaccinations_c_campaign = Campaign(
                 Target_Demographic=StandardInterventionDistributionEventCoordinator_Target_Demographic_Enum.Everyone,
                 Timesteps_Between_Repetitions=7
             ),
-            Event_Name="Simple",                                # [TODO]: un-defined
+            Event_Name="Simple",  # [TODO]: un-defined
             Nodeset_Config=NodeSetAll(),
             Start_Day=1
         )

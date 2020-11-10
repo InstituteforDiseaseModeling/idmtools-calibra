@@ -3,7 +3,6 @@ from collections import namedtuple
 from idmtools.utils.local_os import LocalOS
 from idmtools_calibra.utilities.demographics.node import lat_lon_from_nodeid
 
-
 # --------------------------------------------------------------
 # Larval habitat parameters
 # --------------------------------------------------------------

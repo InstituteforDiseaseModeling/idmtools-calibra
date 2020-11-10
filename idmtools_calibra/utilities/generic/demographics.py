@@ -13,7 +13,7 @@ params = {
     "Enable_Demographics_Initial": 1,
     "Enable_Demographics_Other": 0,
     "Enable_Demographics_Reporting": 0,
-    "Enable_Demographics_Builtin":0,
+    "Enable_Demographics_Builtin": 0,
     "Enable_Demographics_Risk": 0,
 
     "Enable_Immunity_Initialization_Distribution": 0,  # compatibility with EMOD v2.0 and earlier

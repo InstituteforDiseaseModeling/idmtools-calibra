@@ -1,102 +1,110 @@
-.PHONY: clean clean-all lint coverage release dist bump-minor bump-major bump-patch bump-release
-# Python from command line
-IPY=python -c
-# If user did not define python, set our default to python
-PY?=python
-# Shortcut for running scripts from the dev_scripts folder
+.PHONY: help clean lint test test-all test-failed test-long test-no-long test-comps test-docer test-docker test-python test-smoke test-report coverage-report coverage coverage-smoke coverage-all coverage-report-view merge-reports dist release-staging bump-release bump-release-dry-run bump-minor bump-minor-dry-run bump-major bump-major-dry-run bump-patch bump-patch-dry-run
+PACKAGE_NAME=idmtools_calibra
+# Platform Independent options for common commands
+MV?=mv
+RM?=rm
+# Convience function for running dev scripts
 PDS=$(PY) ./.dev_scripts/
-# Shortcut for the cleandir command
-CLDIR=$(PDS)clean_dir.py
-# Shortcut for the run command
+PY?=python
+IPY=python -c
 PDR=$(PDS)run.py
-# Shortcut for commnad to run tests with
-TEST_COMMAND=py.test --durations=3 -v --junitxml=test_results.xml
-# Test command options
-TEST_RUN_OPTS=?
-# Builds full test command
-FULL_TEST_CMD=$(PDR) -w 'tests' $(TEST_RUN_OPTS) -ex '$(TEST_COMMAND)
-# Command to run coverage
-COVERAGE_CMD=$(PDR) -w 'tests' $(TEST_RUN_OPTS) -p . ../ -ex 'coverage run --omit="*/test*,*/setup.py"
-REPO_URL=?https://packages.idmod.org/api/pypi/idm-pypi-staging/
-PACKAGE_NAME=itertool
-
-# Makefile rules
+CLDIR=$(PDS)clean_dir.py
+PYPI_URL?=https://packages.idmod.org/api/pypi/idm-pypi-staging/
 
 help:
 	$(PDS)get_help_from_makefile.py
 
-setup-dev: ## Install all dependencies needed for development
-	$(PDS)bootstrap.py
-
 clean: ## Clean most of the temp-data from the project
-	$(CLDIR) --file-patterns "*.py[co],*.done,*.log,**/.coverage" \
-		--dir-patterns "**/__pycache__,**/htmlcov,**/.pytest_cache" --directories "dist,build"
-	$(PDR) -wd "docs" -ex "make clean"
+	$(MAKE) -C tests clean
+	-rm -rf *.pyc *.pyo *.done *.log .coverage dist build **/__pycache__
 
-# WARNING: You will need to re-install after running this
-clean-all:  ## Deleting package info hides plugins so we only want to do that for packaging
-	@make clean
-	$(CLDIR) --dir-patterns "**/*.egg-info/"lint: ## check style with flake8
-	flake8 --ignore=E501,W291 $(PACKAGE_NAME) tests
+clean-all: clean ## Deleting package info hides plugins so we only want to do that for packaging
+	-rm -rf **/*.egg-info/
 
 lint: ## check style with flake8
-	flake8 --ignore=E501,W291 --exclude="itertool/interventions/**, itertool/utilities/**, itertool/resamplers/**, examples/**, tests/**" $(PACKAGE_NAME) tests
+	flake8 --ignore=E501,W291 $(PACKAGE_NAME)
 
 test: ## Run our tests
-	$(FULL_TEST_CMD)
+	$(MAKE) -C tests $@
+
+test-all: ## Run all our tests
+	$(MAKE) -C tests $@
 
 test-failed: ## Run only previously failed tests
-	$(FULL_TEST_CMD) --lf'
+	$(MAKE) -C tests $@
 
-# If you want to label tests and then exclude those from a rule, you can use the following
-#test-unit-only: ## Run only unit tests
-#	$(FULL_TEST_CMD) -m "not comps and not docker"'
+test-long: ## Run any tests that takes more than 30s
+	$(MAKE) -C tests $@
 
-coverage: ## Generate a code-coverage report
-	@make clean
-	# We have to run in our tests folder to use the proper config
-	$(COVERAGE_CMD)
-	@+$(IPY) "import shutil as s; s.move('tests/.coverage','.coverage')"
-	coverage report -m
-	coverage html -i
-	$(PDS)/launch_dir_in_browser.py htmlcov/index.html
+test-no-long: ## Run any tests that takes less than 30s
+	$(MAKE) -C tests $@
 
-# Release
-dist: ## build our package
-	@make clean
-	python setup.py sdist bdist_wheel
+test-comps: ## Run our comps tests
+	$(MAKE) -C tests $@
 
-release: ## perform a release to staging
-	@make dist
-	twine upload --verbose --repository-url $(REPO_URL) dist/*
+test-docker: ## Run our docker tests
+	$(MAKE) -C tests $@
+
+test-python: ## Run our python tests
+	$(MAKE) -C tests $@
+
+test-smoke: ## Run our smoke tests
+	$(MAKE) -C tests $@
+
+test-report: ## Launch test report in browser
+	$(MAKE) -C tests $@
+
+coverage-report: coverage ## Generate HTML report from coverage. Requires running coverage run first(coverage, coverage-smoke, coverage-all)
+	$(MAKE) -C tests $@
+
+coverage-report-view: coverage-report
+	$(MAKE) -C tests $@
+
+coverage: clean ## Generate a code-coverage report
+	$(MAKE) -C tests $@
+
+coverage-smoke: clean ## Generate a code-coverage report
+	$(MAKE) -C tests $@
+
+coverage-all: ## Generate a code-coverage report using all tests
+	$(MAKE) -C tests $@
+
+# Release related rules
+
+dist: clean ## build our package
+	python setup.py sdist
+
+release-staging: dist ## perform a release to staging
+	twine upload --verbose --repository-url $(PYPI_URL) dist/*
 
 bump-release: ## bump the release version.
 	bump2version release --commit
 
+# Use before release-staging-release-commit to confirm next version.
 bump-release-dry-run: ## bump the release version. (dry run)
 	bump2version release --dry-run --allow-dirty --verbose
-
-bump-major: ## bump the major version
-	bump2version major --commit
-
-bump-major-dry-run: ## bump the major version(dry run)
-	bump2version major --dry-run --allow-dirty --verbose
-
-bump-minor: ## bump the minor version
-	bump2version minor --commit
-
-bump-minor-dry-run: ## bump the minor version(dry run)
-	bump2version minor --dry-run --allow-dirty --verbose
 
 bump-patch: ## bump the patch version
 	bump2version patch --commit
 
-bump-patch-dry-run: ## bump the patch version(dry run)
-	bump2version patch --dry-run --allow-dirty --verbose# Docs
-build-docs: ## build docs(only works on linux at moment due to make.bat not running by default)
-	$(PDR) -wd 'docs' -ex 'make html'
+bump-minor: ## bump the minor version
+	bump2version minor --commit
 
-build-docs-server: ## builds docs and launch a webserver
-	@make build-docs
-	@+$(IPY) "print('Serving documentation @ server at http://localhost:8000 . Ctrl + C Will Stop Server')"
-	$(PDR) -wd 'docs/_build/html' -ex 'python -m http.server'
+bump-major: ## bump the major version
+	bump2version major --commit
+
+bump-patch-dry-run: ## bump the patch version(dry run)
+	bump2version patch --dry-run --allow-dirty --verbose
+
+bump-minor-dry-run: ## bump the minor version(dry run)
+	bump2version minor --dry-run --allow-dirty --verbose
+
+bump-major-dry-run: ## bump the major version(dry run)
+	bump2version major --dry-run --allow-dirty --verbose
+
+dev-watch: ## Run lint on any python code changes
+	$(PDS)run_commands_and_wait.py --command 'watchmedo shell-command --drop --wait --interval 10 --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --recursive --command="$(MAKE) --ignore-errors lint"' \
+        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_calibra' \
+
+changelog: ## Generate partial changelog
+	$(PDS)changelog.py

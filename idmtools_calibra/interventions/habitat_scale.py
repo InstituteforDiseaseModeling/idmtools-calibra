@@ -1,4 +1,4 @@
-from dtk.utils.Campaign.CampaignClass import *
+from idmtools_calibra.utils.Campaign.CampaignClass import *
 
 
 def scale_larval_habitats(cb, df=None,

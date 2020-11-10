@@ -58,9 +58,9 @@ class vector_stats_report_fn:
         self.stratify_by_species = stratify_by_species
 
     def __call__(self, simulation):
-        return simulation.task.reporters.add_reports(BaseVectorStatsReport(type="ReportVectorStats",
-                                                    stratify_by_species=self.stratify_by_species,
-                                                    species_list=self.species_list))
+        return simulation.task.reporters.add_reports(BaseVectorStatsReport(report_type="ReportVectorStats",
+                                                                           stratify_by_species=self.stratify_by_species,
+                                                                           species_list=self.species_list))
 
 
 class survey_report_fn:

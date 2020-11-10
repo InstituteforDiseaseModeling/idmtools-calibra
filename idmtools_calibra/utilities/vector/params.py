@@ -6,7 +6,7 @@ from idmtools_calibra.utilities.vector.species import set_params_by_species
 
 disease_params = {
     "Incubation_Period_Distribution": "FIXED_DURATION",
-    "Base_Incubation_Period": 25,  ###
+    "Base_Incubation_Period": 25,
 
     "Infectious_Period_Distribution": "EXPONENTIAL_DURATION",
     "Base_Infectious_Period": 180,
@@ -14,7 +14,7 @@ disease_params = {
 
     "Enable_Superinfection": 1,
     "Max_Individual_Infections": 5,
-    "Infection_Updates_Per_Timestep": 1,  ###
+    "Infection_Updates_Per_Timestep": 1,
 
     "Post_Infection_Acquisition_Multiplier": 1,
     "Post_Infection_Mortality_Multiplier": 1,
@@ -24,7 +24,7 @@ disease_params = {
 
 cohort_params = {
 
-    'Enable_Vector_Species_Report' : 0,
+    'Enable_Vector_Species_Report': 0,
     "Vector_Sampling_Type": "VECTOR_COMPARTMENTS_NUMBER",
     "Mosquito_Weight": 1,
 

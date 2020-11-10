@@ -1,5 +1,3 @@
-
-
 def add_mosquito_release(simulation, start_day: int = 0, species: str = "arabiensis",
                          number: int = 100, repetitions: int = -1, tsteps_btwn: int = 365,
                          released_genome: list = None,
