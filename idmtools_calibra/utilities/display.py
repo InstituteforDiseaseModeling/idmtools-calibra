@@ -5,10 +5,10 @@ def on_off(test):
     return "on" if test else "off"
 
 
-def pluralize(i, l="s"):
+def pluralize(i, unit="s"):
     if isinstance(i, Iterable):
-        return l if len(i) > 1 else ""
-    return l if i > 1 else ""
+        return unit if len(i) > 1 else ""
+    return unit if i > 1 else ""
 
 
 def verbose_timedelta(delta):

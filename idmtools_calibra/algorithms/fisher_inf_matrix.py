@@ -70,10 +70,7 @@ def perturbed_points(center, xmin, xmax, m=10, n=5, sample_size=1, resolution_ra
     counter = 0
     for j in range(n):
         run_numbers = np.random.randint(1, 101, sample_size)
-        x_perturbed[
-        (j * (4 * sample_size * m)):
-        ((j + 1) * (4 * sample_size * m)), 3
-        ] = np.tile(np.repeat(run_numbers, 4), m)
+        x_perturbed[(j * (4 * sample_size * m)): ((j + 1) * (4 * sample_size * m)), 3] = np.tile(np.repeat(run_numbers, 4), m)
 
         for k in range(m):
 

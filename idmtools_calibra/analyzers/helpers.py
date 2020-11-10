@@ -382,7 +382,7 @@ def get_risk_by_distance(df_sim, distances, ddf):
                     & (ddf['node2'] != nodelist[hh_num])  # noqa: W503
                     & (ddf['dist'] <= n_dist)  # noqa: W503
                     & (ddf['dist'] > distances[k - 1])  # noqa: W503
-                    ]['node2'].values
+                ]['node2'].values
 
                 ndf = df_sim[df_sim['node'].isin(neighbors)]
                 num_pos = sum(ndf['pos'].values)
@@ -575,8 +575,11 @@ def hhs_to_nodes(csv_filename, hhs_file, metadata):
     # migration_radius = 2
 
     hh_records = all_hh_records[
-        (all_hh_records.lon > x_min) & (all_hh_records.lon < x_max) & (all_hh_records.lat > y_min) & (all_hh_records.lat < y_max)
-        ]
+        (all_hh_records.lon > x_min) &  # noqa: W504
+        (all_hh_records.lon < x_max) &  # noqa: W504
+        (all_hh_records.lat > y_min) &  # noqa: W504
+        (all_hh_records.lat < y_max)
+    ]
 
     # get point locations of households
     points = hh_records.as_matrix(["lon", "lat"])

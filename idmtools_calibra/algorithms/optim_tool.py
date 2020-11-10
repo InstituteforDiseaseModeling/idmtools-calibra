@@ -76,8 +76,7 @@ class OptimTool(NextPointAlgorithm):
         # TODO: be more sensitive with params, user could have added or removed variables, need to adjust
         # TODO: Check min <= center <= max for params
         # TODO: could clean this up with a helper function
-        self.params = self.args[
-            'params'] if 'params' in self.args else self.params  # Guess may move, but should be ignored
+        self.params = self.args['params'] if 'params' in self.args else self.params  # Guess may move, but should be ignored
         self.mu_r = self.args['mu_r'] if 'mu_r' in self.args else self.mu_r
         self.sigma_r = self.args['sigma_r'] if 'sigma_r' in self.args else self.sigma_r
         self.center_repeats = self.args['center_repeats'] if 'center_repeats' in self.args else self.center_repeats
@@ -457,6 +456,5 @@ class OptimTool(NextPointAlgorithm):
     @staticmethod
     def get_r(num_params, volume_fraction):
         r = math.exp(
-            1 / float(num_params) * (
-                    math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
+            1 / float(num_params) * (math.log(volume_fraction) - gammaln(num_params / 2. + 1) + num_params / 2. * math.log(math.pi)))
         return r
