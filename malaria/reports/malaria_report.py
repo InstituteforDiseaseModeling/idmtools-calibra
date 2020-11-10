@@ -1,5 +1,5 @@
 import sys
-from itertool.utilities.reports.custom_report import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
+from idmtools_calibra.utilities.reports.custom_report import BaseReport, BaseEventReport, BaseEventReportIntervalOutput, \
     BaseMalariaTransmissionReport
 
 

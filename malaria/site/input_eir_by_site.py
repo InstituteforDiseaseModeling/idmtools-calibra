@@ -1,6 +1,6 @@
 from collections import deque
-from itertool.utilities.generic.geography import set_geography
-from itertool.interventions.input_EIR import add_InputEIR
+from idmtools_calibra.utilities.generic.geography import set_geography
+from idmtools_calibra.interventions.input_EIR import add_InputEIR
 
 # Study-site EIR by month of year
 study_site_monthly_EIRs = {

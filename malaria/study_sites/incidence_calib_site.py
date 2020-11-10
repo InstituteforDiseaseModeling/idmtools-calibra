@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta
-from itertool.calib_site import CalibSite
+from idmtools_calibra.calib_site import CalibSite
 
 from malaria.analyzers.channel_by_age_cohort_analyzer import IncidenceByAgeCohortAnalyzer
 from malaria.analyzers.helpers import channel_age_json_to_pandas

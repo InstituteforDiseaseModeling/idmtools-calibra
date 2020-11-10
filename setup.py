@@ -10,7 +10,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read().split("\n")
+    requirements = ["-i" not in line for line in requirements_file.read().split("\n")]
 
 with open('history_matching_requirements.txt') as requirements_file:
     history_matching_requirements = requirements_file.read().split("\n")
@@ -46,7 +46,7 @@ setup(
     long_description=readme,
     include_package_data=True,
     keywords='modeling, IDM',
-    name='itertool',
+    name='idmtools-calibra',
     packages=find_packages(),
     setup_requires=setup_requirements,
     python_requires='>=3.6.*, !=3.7.0, !=3.7.1, !=3.7.2, <3.9',

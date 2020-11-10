@@ -10,7 +10,7 @@ import numpy.ma as ma
 import pandas as pd
 import vincenty as vincenty
 
-from itertool.analyzers import malaria_summary
+from idmtools_calibra.analyzers import malaria_summary
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ from abc import ABCMeta
 import pandas as pd
 
 from idmtools_emodpy_malaria.emod_220.study_sites.site_setup_functions import *
-from itertool.calib_site import CalibSite
+from idmtools_calibra.calib_site import CalibSite
 
 logger = logging.getLogger(__name__)
 

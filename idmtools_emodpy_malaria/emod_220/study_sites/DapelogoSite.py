@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from itertool.analyzers.helpers import season_channel_age_density_json_to_pandas
+from idmtools_calibra.analyzers.helpers import season_channel_age_density_json_to_pandas
 
 logger = logging.getLogger(__name__)
 

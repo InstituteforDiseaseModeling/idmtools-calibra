@@ -2,8 +2,8 @@
 import os
 
 # from simtools.SetupParser import SetupParser
-from itertool.utilities.parsers.JSON import json2dict
-from itertool.utilities.vector.study_sites import StudySite, set_habitat_scale
+from idmtools_calibra.utilities.parsers.JSON import json2dict
+from idmtools_calibra.utilities.vector.study_sites import StudySite, set_habitat_scale
 
 params = {
     "Antibody_CSP_Decay_Days": 90,

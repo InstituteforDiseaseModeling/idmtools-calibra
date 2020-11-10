@@ -1,14 +1,14 @@
 
-from itertool.utilities.vector.species import set_larval_habitat, set_species_param, set_params_by_species
-from itertool.interventions.input_EIR import add_InputEIR
-from itertool.interventions.mosquito_release import add_mosquito_release
-from itertool.interventions.itn import add_ITN
-from itertool.interventions.itn_age_season import add_ITN_age_season
-from itertool.interventions.irs import add_node_IRS, add_IRS
-from itertool.interventions.outbreakindividual import recurring_outbreak
-from itertool.interventions.migrate_to import add_migration_event
+from idmtools_calibra.utilities.vector.species import set_larval_habitat, set_species_param, set_params_by_species
+from idmtools_calibra.interventions.input_EIR import add_InputEIR
+from idmtools_calibra.interventions.mosquito_release import add_mosquito_release
+from idmtools_calibra.interventions.itn import add_ITN
+from idmtools_calibra.interventions.itn_age_season import add_ITN_age_season
+from idmtools_calibra.interventions.irs import add_node_IRS, add_IRS
+from idmtools_calibra.interventions.outbreakindividual import recurring_outbreak
+from idmtools_calibra.interventions.migrate_to import add_migration_event
 from malaria.interventions.health_seeking import add_health_seeking
-from itertool.utilities.reports.custom_report import BaseReport, BaseVectorStatsReport
+from idmtools_calibra.utilities.reports.custom_report import BaseReport, BaseVectorStatsReport
 
 import json
 import numpy as np
@@ -359,7 +359,7 @@ class add_seasonal_HS_by_NP_fn:
         self.seasonal_health_seeking(simulation)
 
     def set_hs_group(self, simulation):
-        from itertool.interventions.property_change import change_node_property
+        from idmtools_calibra.interventions.property_change import change_node_property
 
         with open(self.fname) as fin:
             interv = json.loads(fin.read())

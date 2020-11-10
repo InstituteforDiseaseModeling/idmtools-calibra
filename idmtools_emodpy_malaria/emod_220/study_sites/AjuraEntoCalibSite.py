@@ -3,7 +3,7 @@ import logging
 import os
 
 from idmtools_emodpy_malaria.emod_220.study_sites.entomology_calib_site import EntomologyCalibSite
-from itertool.analyzers.helpers import garki_multi_year_ento_data
+from idmtools_calibra.analyzers.helpers import garki_multi_year_ento_data
 
 logger = logging.getLogger(__name__)
 
