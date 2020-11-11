@@ -6,11 +6,11 @@ from idmtools_calibra.resamplers.calibration_point import CalibrationPoint
 
 
 class RandomPerturbationResampler(BaseResampler):
-    def __init__(self, **kwargs):
+    def __init__(self, calib_manager=None, **kwargs):
         """
         :param kwargs: These are arguments passed directly to the perturbed points generation routine.
         """
-        super().__init__()
+        super().__init__(calib_manager)
         # TODO What are these? EEK
         self.center_point = None
         self.resampled_points_df: pd.DataFrame = None

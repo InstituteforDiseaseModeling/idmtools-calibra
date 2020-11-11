@@ -47,9 +47,14 @@ class CalibrationPoint:
     def get_attribute(self, key, parameter_type=None, as_type=None):
         """
         Returns the specified attribute of each CalibrationParameter as a list, ordered by parameter
-        name.
-        :param key:
-        :return:
+
+        Args:
+            key:
+            parameter_type:
+            as_type:
+
+        Returns:
+
         """
         considered_params = self._filter_parameters(parameter_type=parameter_type)
         attrs = [getattr(param, key.lower()) for param in considered_params]
@@ -67,27 +72,36 @@ class CalibrationPoint:
     def get_parameter(self, name):
         """
         Relies on their being exactly one parameter with the given name.
-        :param name:
-        :return:
+
+        Args:
+            name:
+
+        Returns:
+
         """
         return [param for param in self.parameters if param.name == name][0]
 
     def to_dict(self):
         """
         Converts CalibrationPoint objects to a dictionary. Useful e.g. for dumping to a json file.
-        :return: a dict containing all needed information for recreating a CalibrationPoint object via from_dict()
+
+        Returns:
+            a dict containing all needed information for recreating a CalibrationPoint object via from_dict()
         """
         return dict(parameters=[param.to_dict() for param in self.parameters], likelihood=self.likelihood)
 
     @classmethod
-    def from_dict(cls, dict):
+    def from_dict(cls, src_dict):
         """
-        Inverse method of to_dict
-        :param dict: a dictionary equivalent to one returned by to_dict()
-        :return: a CalibrationPoint object
+        Inverse method of to_dict. Builds point from a Dictionary
+        Args:
+            src_dict: a dictionary equivalent to one returned by to_dict()
+
+        Returns:
+            a CalibrationPoint object
         """
-        params = [CalibrationParameter.from_dict(p) for p in dict['parameters']]
-        likelihood = dict['likelihood']
+        params = [CalibrationParameter.from_dict(p) for p in src_dict['parameters']]
+        likelihood = src_dict['likelihood']
         return cls(parameters=params, likelihood=likelihood)
 
     def to_dataframe(self, parameter_type=None):
