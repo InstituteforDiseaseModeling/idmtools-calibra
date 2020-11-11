@@ -40,7 +40,7 @@ class CalibManager(object):
 
     def __init__(self, task, map_sample_to_model_input_fn,
                  sites, next_point, platform=None, name='calib_test', sim_runs_per_param_set=1, max_iterations=5,
-                 plotters=None):
+                 plotters=None, map_replicates_callback=None):
 
         self.name = name
         self.platform = platform
@@ -59,6 +59,7 @@ class CalibManager(object):
         self.current_iteration = None
         self.resume = False
         self.experiment_builder_function = None  # if not overridden in the set method, use internally-generated func
+        self.map_replicates_callback = map_replicates_callback
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
@@ -132,9 +133,21 @@ class CalibManager(object):
         """
         self.experiment_builder_function = exp_builder_function
 
+    def set_map_replicates_callback(self, map_replicates_callback):
+        """
+        This sets the maps replicate callback. This callback should take a value parameter that is the value of the replicate.
+
+        Normally you would want to map this to a value in the config
+        Args:
+            map_replicates_callback:
+
+        Returns:
+
+        """
+        self.map_replicates_callback = map_replicates_callback
+
     def exp_builder_func(self, next_params, n_replicates=None):
         from idmtools.builders import SimulationBuilder
-        from emodpy.emod_task import EMODTask
         from functools import partial
 
         if self.experiment_builder_function is not None:
@@ -144,21 +157,20 @@ class CalibManager(object):
         if not n_replicates:
             n_replicates = self.sim_runs_per_param_set
 
-        fs1 = [ModFn(site.setup_fn) for site in self.sites]
-        fs2 = [ModFn(partial(EMODTask.set_parameter_sweep_callback, param="Run_Number", value=i + 1)) for i in
-               range(n_replicates)]  # use existing function
-        fs3 = [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
-               index, samples in enumerate(next_params)]
-
-        # print(type(fs2), len(fs2))
-        if n_replicates > 1 and len(fs2) == 1:
-            fs2 = fs2[0]
+        sweeps = [[ModFn(site.setup_fn) for site in self.sites]]
+        if self.map_replicates_callback:
+            sweep = [ModFn(partial(self.map_replicates_callback, value=i + 1)) for i in range(n_replicates)]
+            if n_replicates > 1 and len(sweep) == 1:
+                sweep = sweep[0]
+            sweeps.append(sweep)
+        sweeps.append([ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
-        builder.sweeps.append(fs1)
-        builder.sweeps.append(fs2)
-        builder.sweeps.append(fs3)
-        builder.count = len(fs1) * len(fs2) * len(fs3)
+        count = None
+        for sweep in sweeps:
+            builder.sweeps.append(sweep)
+            count = len(sweep) if count is None else count * len(sweep)
+        builder.count = count
 
         return builder
 
