@@ -23,7 +23,7 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-platform = Platform('bayesian')  # switch to BELEGOST with platform = Platform('BELEGOST')
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
 env = platform.environment
 plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
     else EradicationBambooBuilds.MALARIA
@@ -126,8 +126,8 @@ calib_manager = CalibManager(name='IMIS_default_config',
                              sites=sites,
                              next_point=IMIS(prior, **next_point_kwargs),
                              sim_runs_per_param_set=1,
-                             max_iterations=2,
-                             plotters=plotters.count,
+                             max_iterations=3,
+                             plotters=plotters,
                              map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
 
 run_calib_args = {'calib_manager': calib_manager}
