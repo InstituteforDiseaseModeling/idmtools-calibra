@@ -2,6 +2,11 @@
 # Execute directly: 'python example_IMIS_simple.py'
 
 import os
+from functools import partial
+
+from emodpy.utils import EradicationBambooBuilds
+
+from examples.helper import download_bamboo_exe
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.prior import MultiVariatePrior
 from idmtools_calibra.algorithms.imis import IMIS
@@ -9,14 +14,20 @@ from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from emodpy.emod_task import EMODTask
-from idmtools_calibra.utilities.helper import download_bamboo_exe
+from idmtools.core.platform_factory import Platform
+
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
+plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
+    else EradicationBambooBuilds.MALARIA
+
 # Test latest bamboo Eradication.exe (it won't download if exists already)
-exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'))
+exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=plan)
 config_path = os.path.join(INPUT_PATH, "config.json")
 campaign_path = os.path.join(INPUT_PATH, "empty_campaign.json")
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
@@ -28,6 +39,13 @@ task = EMODTask.from_files(
     campaign_path=campaign_path,
     demographics_paths=demographics_path
 )
+
+task.set_parameter("Serialization_Mask_Node_Write", 0)
+task.set_parameter("Serialization_Precision", "REDUCED")
+task.set_parameter("Serialized_Population_Reading_Type", "NONE")
+task.set_parameter("Serialized_Population_Writing_Type", "TIMESTEP")
+task.set_parameter("Serialization_Time_Steps", [365])
+task.set_parameter("Inset_Chart_Reporting_Include_30Day_Avg_Infection_Duration", 1)
 
 sites = [
     DielmoCalibSite()
@@ -94,7 +112,5 @@ calib_manager = CalibManager(name='IMIS_simple',
 run_calib_args = {'calib_manager': calib_manager}
 
 if __name__ == "__main__":
-    from idmtools.core.platform_factory import Platform
-    platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()

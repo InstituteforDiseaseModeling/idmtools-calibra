@@ -22,7 +22,7 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-platform = Platform('BELEGOST')  # switch to CALCOLON with platform = Platform('CALCULON')
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
 env = platform.environment
 plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
     else EradicationBambooBuilds.MALARIA
