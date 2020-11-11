@@ -104,7 +104,10 @@ def generate_model_config_from_exe(local_dir, platform, plan=EradicationBambooBu
 
     # generate schema
     if not os.path.exists(schema_path):
-        gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
+        if os.name == "posix":  # very much hardcoding SLURM target
+            gs.dtk_to_schema(exe_path, path_to_write_schema=schema_path)
+        else:
+            download_latest_schema(plan=plan, scheduled_builds_only=False, out_path=schema_path)
 
     # use our file name
     if not os.path.exists(config_path):
