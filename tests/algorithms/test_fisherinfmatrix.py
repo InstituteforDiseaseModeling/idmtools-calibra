@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib as plt
 from matplotlib.patches import Ellipse
 
-from idmtools_calibra.algorithms.FisherInfMatrix import FisherInfMatrix, trunc_gauss
+from idmtools_calibra.algorithms.fisher_inf_matrix import compute_fisher_inf_matrix, trunc_gauss
 
 
 def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
@@ -57,7 +57,7 @@ class TestStuff(unittest.TestCase):
         # df_perturbed_points.to_csv("data2.csv")
         # df_perturbed_points = pd.DataFrame.from_csv("data.csv")
         ll = pd.DataFrame.from_csv("LLdata.csv")
-        fisher = FisherInfMatrix(center_point, ll)
+        fisher = compute_fisher_inf_matrix(center_point, ll)
         covariance = np.linalg.inv(fisher)
 
         print("eigs of fisher: ", np.linalg.eigvals(fisher))

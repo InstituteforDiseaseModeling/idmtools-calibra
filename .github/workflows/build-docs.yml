@@ -2,7 +2,7 @@ name: "Build docs"
 on:
   push:
     paths:
-      - 'itertool/**'
+      - 'idmtools_calibra/**'
       - 'docs/*'
       - 'requirements.txt'
       - 'setup.py'

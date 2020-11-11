@@ -13,7 +13,7 @@ with open('requirements.txt') as requirements_file:
 with open('history_matching_requirements.txt') as requirements_file:
     history_matching_requirements = requirements_file.read().split("\n")
 
-dev_requirements = ['flake8', 'coverage', 'py-make', 'bump2version', 'twine']
+dev_requirements = ['flake8', 'coverage', 'bump2version', 'twine']
 setup_requirements = []
 test_requirements = ['pytest', 'pytest-runner', 'pytest-timeout', 'pytest-cache'] + dev_requirements
 

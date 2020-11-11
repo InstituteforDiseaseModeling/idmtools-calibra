@@ -19,7 +19,7 @@
 # User Installation
 
 ```bash
-pip install itertool --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-calibra --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
 ```
 
 ## Pre-requisites
@@ -36,11 +36,10 @@ When setting up your environment for the first time, you can use the following i
    > git clone https://github.com/InstituteforDiseaseModeling/idmtools_calibra.git
    ```
 2) Create a virtualenv. On Windows, please use venv to create the environment
-   `python -m venv itertool`
+   `python -m venv idmtools_calibra`
    On Unix(Mac/Linux) you can use venv or virtualenv
 3) Activate the virtualenv
-4) If you are on windows, run `pip install py-make --upgrade --force-reinstall`
-5) Then run `python ./.dev_scripts/bootstrap.py`. This will install all the tools. 
+4) Then run `python ./.dev_scripts/bootstrap.py`. This will install all the tools. 
 
 ## Development Tips
 
@@ -56,7 +55,7 @@ On Windows, you can use `pymake` instead of `make`
 
 ## Building docs
 
-From your virtualenv, install itertool and all dependencies. Then from the docs folder, run ``pip install -r requirements.txt``. You can build the docs from that folder using ``make html``. 
+From your virtualenv, install idmtools_calibra and all dependencies. Then from the docs folder, run ``pip install -r requirements.txt``. You can build the docs from that folder using ``make html``. 
 
 To pick up docstring changes, you must re-run the setup script to include those changes in the itertool installation. Then run ``make clean`` and re-run ``make html``. 
 

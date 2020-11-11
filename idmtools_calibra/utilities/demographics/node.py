@@ -7,17 +7,23 @@ class Node:
     default_population = 1000
     res_in_degrees = 2.5 / 60
 
-    def __init__(self, lat, lon, pop, name='', area=None, forced_id=None, extra_attributes={}, meta={}):
+    def __init__(self, lat, lon, pop, name='', area=None, forced_id=None, extra_attributes=None, meta=None):
         """
-        Represent a Node
-        :param lat: Latitude
-        :param lon: Longitude
-        :param pop: Population
-        :param name:  Facility name
-        :param area:  Area
-        :param forced_id: Do we want a custom id instead of the normal ID based on lat/lon?
-        :param extra_attributes: Extra node attributes
+
+        Args:
+            lat: Latitude
+            lon: Longitude
+            pop: Population
+            name: Facility name
+            area: Area
+            forced_id: Do we want a custom id instead of the normal ID based on lat/lon?
+            extra_attributes: Extra node attributes
+            meta:
         """
+        if meta is None:
+            meta = {}
+        if extra_attributes is None:
+            extra_attributes = {}
         self.name = name
         self.lat = lat
         self.lon = lon
@@ -82,14 +88,14 @@ class Node:
 def get_xpix_ypix(nodeid):
     ypix = (nodeid - 1) & 2 ** 16 - 1
     xpix = (nodeid - 1) >> 16
-    return (xpix, ypix)
+    return xpix, ypix
 
 
 def lat_lon_from_nodeid(nodeid, res_in_deg=Node.res_in_degrees):
     xpix, ypix = get_xpix_ypix(nodeid)
     lat = (0.5 + ypix) * res_in_deg - 90.0
     lon = (0.5 + xpix) * res_in_deg - 180.0
-    return (lat, lon)
+    return lat, lon
 
 
 def xpix_ypix_from_lat_lon(lat, lon, res_in_deg=Node.res_in_degrees):
@@ -106,5 +112,8 @@ def nodeid_from_lat_lon(lat, lon, res_in_deg=Node.res_in_degrees):
 
 def nodes_for_DTK(filename, nodes):
     with open(filename, 'w') as f:
-        json.dump({'Nodes': [{'NodeID': n.id,
-                              'NodeAttributes': n.to_dict()} for n in nodes]}, f, indent=4)
+        json.dump(
+            {'Nodes': [
+                {'NodeID': n.id,
+                 'NodeAttributes': n.to_dict()} for n in nodes
+            ]}, f, indent=4)

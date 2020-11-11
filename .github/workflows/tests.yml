@@ -1,10 +1,10 @@
-# This workflows will install itertool from setup-dev then run tests with curl command
+ This workflows will install idmtools_calibra from setup-dev then run tests with curl command
 #
 #curl command from your cmd:
 # curl -XPOST -u "username:githubPAT" -H "Accept: application/vnd.github.everest-preview+json" \
 # -H "Content-Type: application/json" \
 # --data "{\"event_type\": \"run_setup_dev_test\"}" \
-#  https://api.github.com/repos/InstituteforDiseaseModeling/itertool/dispatches
+#  https://api.github.com/repos/InstituteforDiseaseModeling/idmtools_calibra/dispatches
 #
 # Note, this test will checkout 'dev' branch
 
@@ -40,12 +40,12 @@ jobs:
       - name: Run setup-dev
         run: |
           make setup-dev
-      - name: run itertool tests
+      - name: run idmtools_calibra tests
         run: |
             py.test --durations=3 -v --junitxml=test_results.xml
-      - name: Upload itertool test results
+      - name: Upload idmtools_calibra test results
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: itertool_test_results
+          name: idmtools_calibra_test_results
           path: tests/test_results.xml
