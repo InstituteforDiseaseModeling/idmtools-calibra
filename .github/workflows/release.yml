@@ -1,4 +1,4 @@
-name: "Staging: itertool"
+name: "Staging: idmtools_calibra"
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
       - dev
       - master
     paths:
-      - 'itertool/**'
+      - 'idmtools_calibra/**'
       - 'requirements.txt'
       - 'dev_requirements.txt'
       - 'setup.py'
 
 jobs:
   release:
-    name: "Release itertool"
+    name: "Release idmtools_calibra"
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
