@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any, Callable, List, Union
 
 from functools import partial
 
@@ -11,8 +11,15 @@ from datetime import datetime
 from logging import getLogger
 
 from idmtools.builders import SimulationBuilder
+from idmtools.core.context import get_current_platform
+from idmtools.entities.iplatform import IPlatform
+from idmtools.entities.itask import ITask
+from idmtools.entities.simulation import Simulation
 from idmtools.utils.json import IDMJSONEncoder
+from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
+from idmtools_calibra.calib_site import CalibSite
 from idmtools_calibra.iteration_state import IterationState
+from idmtools_calibra.plotters.base_plotter import BasePlotter
 from idmtools_calibra.utils import StatusPoint
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.utilities.helper import validate_exp_name
@@ -44,11 +51,14 @@ class CalibManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, task, map_sample_to_model_input_fn,
-                 sites, next_point, platform=None, name='calib_test', sim_runs_per_param_set=1, max_iterations=5,
-                 plotters=None, map_replicates_callback=None):
+    def __init__(self, task: ITask, map_sample_to_model_input_fn, sites: List[CalibSite], next_point: NextPointAlgorithm,
+                 platform: Optional[IPlatform] = None, name: str = 'calib_test',
+                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None,
+                 map_replicates_callback: Union[Callable[[Simulation, Any], Dict], partial] = None):
 
         self.name = name
+        if platform is None:
+            platform = get_current_platform()
         self.platform = platform
         self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
@@ -69,8 +79,7 @@ class CalibManager(object):
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
-        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None,
-                   name=calibration_directory)
+        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None, name=calibration_directory)
 
     @property
     def suite_id(self):
