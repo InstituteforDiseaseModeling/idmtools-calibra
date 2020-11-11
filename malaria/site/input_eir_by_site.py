@@ -57,7 +57,7 @@ def configure_site_EIR(simulation, site, habitat=1, circular_shift=0, birth_coho
                        'Maternal_Antibodies_Type': 'CONSTANT_INITIAL_IMMUNITY',
                        'Maternal_Antibody_Protection': mAb
                        })
-
+    simulation.name = site
     # Shift order of months according to circular_shift argument
     EIR_deque = deque(EIRs)
     EIR_deque.rotate(circular_shift)
