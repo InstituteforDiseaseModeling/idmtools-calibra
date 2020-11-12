@@ -2,7 +2,7 @@
 Installation
 ============
 
-Follow the instructions below to install |itertool|.
+Follow the instructions below to install |calibra|.
 
 Requirements
 ============
@@ -18,7 +18,4 @@ more information, see documentation for venv_ or Anaconda_.
 Installation
 ============
 
-
-
-Quick start guide
-=================
+See instructions in the GitHub repository README. 

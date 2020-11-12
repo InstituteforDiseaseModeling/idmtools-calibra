@@ -47,7 +47,7 @@ if "%1" == "help" (
 if "%1" == "clean" (
 	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
 	del /q /s %BUILDDIR%\*
-	del itertool*.rst modules.rst >nul 2>&1
+	del idmtools_calibra*.rst modules.rst >nul 2>&1
 	goto end
 )
 
@@ -78,9 +78,9 @@ if "%1" == "generate-api" (
     set SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,ignore-module-all
 
     del modules.rst >nul 2>&1
-    del itertool_index.rst >nul 2>&1
-    sphinx-apidoc -f -e -M -o . ../itertool
-	REN modules.rst itertool_index.rst
+    del idmtools_calibra_index.rst >nul 2>&1
+    sphinx-apidoc -f -e -M -o . ../idmtools_calibra
+	REN modules.rst idmtools_calibra_index.rst
 	goto end
 )
 

@@ -47,7 +47,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf itertool*.rst modules.rst
+	rm -rf idmtools_calibra*.rst modules.rst
 
 .PHONY: generate-api
 

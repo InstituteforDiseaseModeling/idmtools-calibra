@@ -88,7 +88,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'itertool'
+project = u'idmtools_calibra'
 copyright = u'2020, Bill & Melinda Gates Foundation. All rights reserved.'
 author = u'Institute for Disease Modeling'
 
@@ -284,7 +284,7 @@ html_use_opensearch = 'www.idmod.org/docs/'
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'itertool'
+htmlhelp_basename = 'idmtools_calibra'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -310,7 +310,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'itertool-docs.tex', u'itertool',
+    (master_doc, 'idmtools_calibra.tex', u'idmtools_calibra',
      u'Institute for Disease Modeling', 'manual'),
 ]
 
@@ -352,7 +352,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'itertool-docs', u'itertool',
+    (master_doc, 'idmtools_calibra-docs', u'idmtools_calibra',
      [author], 1)
 ]
 
@@ -366,8 +366,8 @@ man_show_urls = True
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'itertool-docs', u'itertool',
-     author, 'Institute for Disease Modeling', 'How to use itertool for calibration',
+    (master_doc, 'idmtools_calibra-docs', u'idmtools_calibra',
+     author, 'Institute for Disease Modeling', 'How to use idmtools_calibra for calibration',
      'Miscellaneous'),
 ]
 
