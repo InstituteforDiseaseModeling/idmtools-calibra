@@ -1,20 +1,8 @@
 import os
-import sys
-import copy
-import numpy as np
-# from kf_emod_task import KF_EMODTask
-from tb_emod_task import TB_EMODTask
-from idmtools.assets import AssetCollection, Asset
-
-from emodpy.emod_task import EMODTask
-from emodpy.utils import EradicationBambooBuilds
+from idmtools.assets import Asset
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 from idmtools_calibra.utilities.mod_fn import ModFn
-from idmtools_calibra.calib_manager import CalibManager
-from idmtools_calibra.algorithms.optim_tool import OptimTool
-from idmtools_calibra.utilities.helper import generate_default_config_from_exe
 
-# from tb.TBCustomReports import *
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
 from tb.add_HIVIncidence import add_HIVIncidence
@@ -30,12 +18,58 @@ from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
 # from tb.utils.TBCustomReports import add_tb_report
 from tb.TBCustomReports import add_tb_report
 
+from tb_emod_task import TB_EMODTask
+
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
 print(INPUT_PATH)
 print(os.path.exists(INPUT_PATH))
+
+
+# use Bradley's EXE
+exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')  # Brad's exe
+config_path = os.path.join(INPUT_PATH, 'tb_config.json')
+
+# Create task
+task = TB_EMODTask.from_files(
+    eradication_path=exe_path,
+    config_path=config_path,
+)
+
+task.legacy_exe = True
+
+# Select a campaign
+task.campaign = EMODEmptyCampaign.campaign()
+
+a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
+a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
+a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
+           relative_path='reporter_plugins')
+
+task.common_assets.add_assets([a1, a2, a3])
+
+# [TODO] zdu: set more missing parameter
+task.set_parameter("Custom_Coordinator_Events", [])
+task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
+task.set_parameter("Custom_Node_Events", [])
+task.set_parameter("Enable_Infectivity_Reservoir", 0)
+task.set_parameter("Enable_Initial_Susceptibility_Distribution", 0)
+task.set_parameter("Post_Infection_Mortality_Multiplier", 1)
+task.set_parameter("Post_Infection_Transmission_Multiplier", 1)
+task.set_parameter("Report_Coordinator_Event_Recorder", 0)
+task.set_parameter("Report_Node_Event_Recorder", 0)
+task.set_parameter("Report_Surveillance_Event_Recorder", 0)
+
+task.set_parameter("Post_Infection_Acquisition_Multiplier", 0.5)
+
+# parameters to set once debugging is done
+task.set_parameter('logLevel_default', 'ERROR')
+# Disable Default_Reporting
+task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
+
+exp_name = 'Timing Test'
 
 
 # Parameter setting functions
@@ -89,53 +123,6 @@ def Add_Drugs(simulation, resist_pro):
     add_tb_drug_type(simulation.task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     add_tb_drug_type(simulation.task, 'DOTSLQ', 180.0, 0.5, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     return {'ResistancePro': resist_pro}
-
-
-# use Bradley's EXE
-exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\Eradication_decline.exe'  # Brad's exe
-config_path = os.path.join(INPUT_PATH, 'tb_config.json')
-
-# Create task
-task = TB_EMODTask.from_files(
-    eradication_path=exe_path,
-    config_path=config_path,
-)
-
-task.legacy_exe = True
-
-# Select a campaign
-task.campaign = EMODEmptyCampaign.campaign()
-
-a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
-a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
-a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
-           relative_path='reporter_plugins')
-# a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'lib_customreport_TBHIV_ReportByAge.so'), relative_path='reporter_plugins')    # SLURM
-
-# a4 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'lib_customreport_TBHIV_ReportByAge.dll'), relative_path='reporter_plugins')
-
-task.common_assets.add_assets([a1, a2, a3])
-
-# [TODO] zdu: set more missing parameter
-task.set_parameter("Custom_Coordinator_Events", [])
-task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
-task.set_parameter("Custom_Node_Events", [])
-task.set_parameter("Enable_Infectivity_Reservoir", 0)
-task.set_parameter("Enable_Initial_Susceptibility_Distribution", 0)
-task.set_parameter("Post_Infection_Mortality_Multiplier", 1)
-task.set_parameter("Post_Infection_Transmission_Multiplier", 1)
-task.set_parameter("Report_Coordinator_Event_Recorder", 0)
-task.set_parameter("Report_Node_Event_Recorder", 0)
-task.set_parameter("Report_Surveillance_Event_Recorder", 0)
-
-task.set_parameter("Post_Infection_Acquisition_Multiplier", 0.5)
-
-# parameters to set once debugging is done
-task.set_parameter('logLevel_default', 'ERROR')
-# Disable Default_Reporting
-task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
-
-exp_name = 'Timing Test'
 
 # campaign parameters
 burn_initial = 1 * 365
@@ -317,6 +304,7 @@ add_tbhiv_treat(task, 'DOTSLQ', ['TBTestPositive', 'TBDS_Positive'], start_day=d
 add_tbhiv_treat(task, 'DOTSMDR', ['TBMDRTestPositive'], start_day=dots_start,
                 latent_multiplier=0)
 
+from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools.builders import SimulationBuilder
 from emodpy.emod_task import EMODTask
 from functools import partial
@@ -337,20 +325,8 @@ builder.sweeps.append(fs5)
 builder.sweeps.append(fs6)
 builder.count = len(fs1) * len(fs2) * len(fs3) * len(fs4) * len(fs5) * len(fs6)
 
-from idmtools.entities.templated_simulation import TemplatedSimulations
-
 ts = TemplatedSimulations(base_task=task)
 ts.add_builder(builder)
-
-# builder.tags.update({'Simulation_Duration': cb.get_param('Simulation_Duration')})
-# builder.tags.update({'x_Other_Mortality': cb.get_param('x_Other_Mortality')})
-# builder.tags.update({'TB_Smear_Negative_Infectivity_Multiplier':
-#                          cb.get_param('TB_Smear_Negative_Infectivity_Multiplier'),
-#                      'TB_Presymptomatic_Rate': cb.get_param('TB_Presymptomatic_Rate'),
-#                      'TB_Active_Presymptomatic_Infectivity_Multiplier': cb.get_param(
-#                          'TB_Active_Presymptomatic_Infectivity_Multiplier'),
-#                      'Base_Population_Scale_Factor': cb.get_param('Base_Population_Scale_Factor')})
-# builder.tags.update({'low_seek': low_seek})
 
 ts.tags.update({'Simulation_Duration': task.get_parameter('Simulation_Duration')})
 ts.tags.update({'x_Other_Mortality': task.get_parameter('x_Other_Mortality')})
@@ -362,28 +338,13 @@ ts.tags.update({'TB_Smear_Negative_Infectivity_Multiplier':
                 'Base_Population_Scale_Factor': task.get_parameter('Base_Population_Scale_Factor')})
 ts.tags.update({'low_seek': low_seek})
 
-# run_sim_args = {
-#     'exp_name': exp_name,
-#     'config_builder': cb,
-#     'exp_builder': builder
-# }
-
 if __name__ == "__main__":
-    # SetupParser.init()
-    # exp_manager = ExperimentManagerFactory.from_cb(cb)
-    # exp_manager.run_simulations(**run_sim_args)
-
     from idmtools.core.platform_factory import Platform
-    platform = Platform('COMPS2')  # SLURM
-
-    # from idmtools.entities.templated_simulation import TemplatedSimulations
     from idmtools.entities.experiment import Experiment
 
-    #
-    # ts = TemplatedSimulations(base_task=task)
-    # ts.add_builder(builder)
+    platform = Platform('COMPS2')  # SLURM
 
-    exp_name = 'Timing Test idm 1'  # [TODO] zdu: test with simple name
+    exp_name = 'Timing Test idm 2'  # [TODO] zdu: test with simple name
     experiment = Experiment(name=exp_name)
 
     # create mixed experiment from two templates
