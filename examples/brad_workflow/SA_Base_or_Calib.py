@@ -1,23 +1,13 @@
-# from dtk.utils.core.DTKConfigBuilder import DTKConfigBuilder
-# from simtools.ExperimentManager.ExperimentManagerFactory import ExperimentManagerFactory
-# from simtools.ModBuilder import ModBuilder, ModFn
 import os
 import sys
 import copy
 import numpy as np
-# from kf_emod_task import KF_EMODTask
-from tb_emod_task import TB_EMODTask
-from idmtools.assets import AssetCollection, Asset
-
-from emodpy.emod_task import EMODTask
-from emodpy.utils import EradicationBambooBuilds
-from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+from idmtools.assets import Asset
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
-# from itertool.utilities.helper import generate_default_config_from_exe
 
-# from tb.TBCustomReports import *
+from tb_emod_task import TB_EMODTask
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
 from tb.add_HIVIncidence import add_HIVIncidence
@@ -33,8 +23,9 @@ from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
 # from tb.utils.TBCustomReports import add_tb_report
 from tb.TBCustomReports import add_tb_report
 
+from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+
 sys.path.append('./analyzer_dev')
-# from CalibSites import SouthAfricaCalibSite
 from analyzer_dev.CalibSites import SouthAfricaCalibSite
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
@@ -45,12 +36,71 @@ print(INPUT_PATH)
 print(os.path.exists(INPUT_PATH))
 # exit()
 
+# Generate default config from Eradication.exe
+# exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
+#                                                                       EradicationBambooBuilds.CI_GENERIC)
+# use Bradley's EXE
+exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')  # Brad's exe
+
+# test: latest tbhiv
+# exe_path = os.path.join(INPUT_PATH, 'Eradication_tbhiv_win.exe')  # bamboo
+
+config_path = os.path.join(INPUT_PATH, 'tb_config.json')
+
+# Create task: windows
+task = TB_EMODTask.from_files(
+    eradication_path=exe_path,
+    config_path=config_path,
+)
+
+task.legacy_exe = True  # used for TB_EMODTask
+
+# Create task: Linux: Calculon
+# from emodpy.emod_task import EMODTask
+# task = EMODTask.from_files(
+#     eradication_path=exe_path,
+#     config_path=config_path,
+# )
+
+
+# Select a campaign
+task.campaign = EMODEmptyCampaign.campaign()
+
+a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
+a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
+a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
+           relative_path='reporter_plugins')
+
+task.common_assets.add_assets([a1, a2, a3])
+
+# [TODO] zdu: set more missing parameter
+task.set_parameter("Custom_Coordinator_Events", [])
+task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
+task.set_parameter("Custom_Node_Events", [])
+task.set_parameter("Enable_Infectivity_Reservoir", 0)
+task.set_parameter("Enable_Initial_Susceptibility_Distribution", 0)
+task.set_parameter("Post_Infection_Mortality_Multiplier", 1)
+task.set_parameter("Post_Infection_Transmission_Multiplier", 1)
+task.set_parameter("Report_Coordinator_Event_Recorder", 0)
+task.set_parameter("Report_Node_Event_Recorder", 0)
+task.set_parameter("Report_Surveillance_Event_Recorder", 0)
+
+# boiler plate setup + Name experiment
+# SetupParser.default_block = 'HPC'
+exp_name = 'TB SA experiment 3'
+# cb = DTKConfigBuilder.from_defaults('TBHIV_SIM')
+
+# parameters to set once debugging is done
+task.set_parameter('logLevel_default', 'ERROR')
+# cb.disable('Default_Reporting')
+task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
+
+sites = [SouthAfricaCalibSite()]  # yeah its plural
+
 
 initial_pop = 10000
 verbose = True
 calibration_on = False
-sites = [SouthAfricaCalibSite()]  # yeah its plural
-
 
 # Parameter setting functions
 def setRunNumber(task, run):
@@ -276,76 +326,6 @@ params = [
 if verbose:
     print([a['Name'] for a in params])
     print('Number params', len(params))
-
-# Generate default config from Eradication.exe
-# exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
-#                                                                       EradicationBambooBuilds.CI_GENERIC)
-# use Bradley's EXE
-exe_path = r'C:\Projects\idmtools_calbra_zdu\examples\inputs\Eradication_decline.exe'  # Brad's exe
-# exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\bamboo\Eradication.exe'      # malaria
-# exe_path = r'C:\Projects\itertool_zdu2\tests\download_demo\exes\CI_GENERIC\Eradication.exe'     # generic
-# exe_path = r'C:\Projects\itertool_zdu2\tests\download_demo\exes\TBHIV\Eradication.exe'          # tbhiv
-# exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\Eradication'         # ye's tbhiv test
-# exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\Eradication.exe'     # ye's tbhiv test
-# exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\Eradication_tbhiv'         # SLURM
-
-# exe_path = r'C:\Projects\itertool_zdu2\examples\inputs\bamboo\Eradication_tbhiv'      # Ye: Calculon
-
-exe_path = r'C:\Projects\idmtools_calbra_zdu\examples\inputs\Eradication_tbhiv_win.exe'
-
-config_path = os.path.join(INPUT_PATH, 'tb_config.json')
-# config_path = os.path.join(INPUT_PATH, 'tbhiv_config.json')
-# config_path = os.path.join(INPUT_PATH, 'jbloedow_config.json')      # SLURM
-
-# Create task: windows
-task = TB_EMODTask.from_files(
-    eradication_path=exe_path,
-    config_path=config_path,
-)
-
-task.legacy_exe = True  # used for TB_EMODTask
-
-# Create task: Linux: Calculon
-# task = EMODTask.from_files(
-#     eradication_path=exe_path,
-#     config_path=config_path,
-# )
-
-
-# Select a campaign
-task.campaign = EMODEmptyCampaign.campaign()
-
-a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
-a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
-a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
-           relative_path='reporter_plugins')
-# a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'lib_customreport_TBHIV_ReportByAge.so'), relative_path='reporter_plugins')    # SLURM
-
-# a4 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'lib_customreport_TBHIV_ReportByAge.dll'), relative_path='reporter_plugins')
-
-task.common_assets.add_assets([a1, a2, a3])
-
-# [TODO] zdu: set more missing parameter
-task.set_parameter("Custom_Coordinator_Events", [])
-task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
-task.set_parameter("Custom_Node_Events", [])
-task.set_parameter("Enable_Infectivity_Reservoir", 0)
-task.set_parameter("Enable_Initial_Susceptibility_Distribution", 0)
-task.set_parameter("Post_Infection_Mortality_Multiplier", 1)
-task.set_parameter("Post_Infection_Transmission_Multiplier", 1)
-task.set_parameter("Report_Coordinator_Event_Recorder", 0)
-task.set_parameter("Report_Node_Event_Recorder", 0)
-task.set_parameter("Report_Surveillance_Event_Recorder", 0)
-
-# boiler plate setup + Name experiment
-# SetupParser.default_block = 'HPC'
-exp_name = 'TB SA experiment 3'
-# cb = DTKConfigBuilder.from_defaults('TBHIV_SIM')
-
-# parameters to set once debugging is done
-task.set_parameter('logLevel_default', 'ERROR')
-# cb.disable('Default_Reporting')
-task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
 
 # campaign parameters
 burn_initial = 1 * 365
@@ -806,7 +786,6 @@ else:
                  'TB_Fast_Progressor_Fraction_Adult': 0.15,
                  "TB_Slow_Progressor_Rate": 1.5425e-05}
 
-
     from idmtools.builders import SimulationBuilder
     from emodpy.emod_task import EMODTask
     from functools import partial
@@ -827,6 +806,7 @@ else:
 
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
+
     platform = Platform('COMPS2')  # SLURM
 
     if calibration_on:
