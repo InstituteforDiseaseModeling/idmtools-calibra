@@ -22,7 +22,7 @@ def validate_exp_name(exp_name):
         return True
 
 
-def download_bamboo_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA):
+def download_bamboo_exe(local_dir, plan=EradicationBambooBuilds.MALARIA_WIN):
     """
     Check and download Eradication.exe from bamboo, generate schema and default config file
     Args:
@@ -44,7 +44,7 @@ def download_bamboo_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA):
     return exe_path
 
 
-def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA):
+def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.MALARIA_WIN):
     """
     Check and download Eradication.exe from bamboo, generate schema and default config file
     Args:
@@ -81,7 +81,7 @@ def generate_default_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_
     return exe_path, schema_path, config_path
 
 
-def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.CI_MALARIA, model="MALARIA_SIM"):
+def generate_model_config_from_exe(local_dir, plan=EradicationBambooBuilds.MALARIA_WIN, model="MALARIA_SIM"):
     """
     Check and download Eradication.exe from bamboo, generate schema and default config file
     Args:
