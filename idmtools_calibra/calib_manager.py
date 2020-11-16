@@ -1,3 +1,7 @@
+from typing import Optional, Dict, Any, Callable, List, Union
+
+from functools import partial
+
 import os
 import re
 import json
@@ -5,8 +9,17 @@ import shutil
 import pandas as pd
 from datetime import datetime
 from logging import getLogger
+
+from idmtools.builders import SimulationBuilder
+from idmtools.core.context import get_current_platform
+from idmtools.entities.iplatform import IPlatform
+from idmtools.entities.itask import ITask
+from idmtools.entities.simulation import Simulation
 from idmtools.utils.json import IDMJSONEncoder
+from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
+from idmtools_calibra.calib_site import CalibSite
 from idmtools_calibra.iteration_state import IterationState
+from idmtools_calibra.plotters.base_plotter import BasePlotter
 from idmtools_calibra.utils import StatusPoint
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.utilities.helper import validate_exp_name
@@ -38,11 +51,14 @@ class CalibManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, task, map_sample_to_model_input_fn,
-                 sites, next_point, platform=None, name='calib_test', sim_runs_per_param_set=1, max_iterations=5,
-                 plotters=None, map_replicates_callback=None):
+    def __init__(self, task: ITask, map_sample_to_model_input_fn, sites: List[CalibSite], next_point: NextPointAlgorithm,
+                 platform: Optional[IPlatform] = None, name: str = 'calib_test',
+                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None,
+                 map_replicates_callback: Union[Callable[[Simulation, Any], Dict], partial] = None):
 
         self.name = name
+        if platform is None:
+            platform = get_current_platform()
         self.platform = platform
         self.task = task
         self.map_sample_to_model_input_fn = SampleIndexWrapper(map_sample_to_model_input_fn)
@@ -63,8 +79,7 @@ class CalibManager(object):
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
-        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None,
-                   name=calibration_directory)
+        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None, name=calibration_directory)
 
     @property
     def suite_id(self):
@@ -146,9 +161,17 @@ class CalibManager(object):
         """
         self.map_replicates_callback = map_replicates_callback
 
-    def exp_builder_func(self, next_params, n_replicates=None):
-        from idmtools.builders import SimulationBuilder
-        from functools import partial
+    def experiment_builder_function(self, next_params, n_replicates: Optional[int] = None) -> SimulationBuilder:
+        """
+        Defines the function that builds the experiment for each iteration of a calibration run
+
+        Args:
+            next_params: The next parameters to run
+            n_replicates: Number of replicates
+
+        Returns:
+            Simulation Builder
+        """
 
         if self.experiment_builder_function is not None:
             builder = self.experiment_builder_function
@@ -163,7 +186,9 @@ class CalibManager(object):
             if n_replicates > 1 and len(sweep) == 1:
                 sweep = sweep[0]
             sweeps.append(sweep)
-        sweeps.append([ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)])
+        sweeps.append([
+            ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)
+        ])
 
         builder = SimulationBuilder()
         count = None
@@ -194,7 +219,7 @@ class CalibManager(object):
                               suite_id=self.suite_id,
                               next_point_algo=self.next_point,
                               map_sample_to_model_input_fn=self.map_sample_to_model_input_fn,
-                              exp_builder_func=self.exp_builder_func,
+                              experiment_builder_function=self.experiment_builder_function,
                               sim_runs_per_param_set=self.sim_runs_per_param_set,
                               site_analyzer_names=self.site_analyzer_names(),
                               analyzer_list=self.analyzer_list,
@@ -230,9 +255,6 @@ class CalibManager(object):
                 self.create_calibration()
             elif var == "R":
                 self.resume_calibration()
-                exit()  # avoid calling self.run_iterations(**kwargs)
-            elif var == "P":
-                self.replot_calibration(iteration=None)
                 exit()  # avoid calling self.run_iterations(**kwargs)
         else:
             os.mkdir(self.name)
@@ -373,7 +395,7 @@ class CalibManager(object):
     def required_components(self):
         # update required objects for resume, reanalyze and replot
         kwargs = {
-            'exp_builder_func': self.exp_builder_func,
+            'experiment_builder_function': self.experiment_builder_function,
             'next_point_algo': self.next_point,
             'task': self.task,
             'analyzer_list': self.analyzer_list,

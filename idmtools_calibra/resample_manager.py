@@ -1,8 +1,7 @@
 import os
 from logging import getLogger
-
 import pandas as pd
-
+from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.resamplers.calibration_point import CalibrationPoint, CalibrationParameter
 from idmtools_calibra.resamplers.calibration_points import CalibrationPoints
 
@@ -11,7 +10,7 @@ user_logger = getLogger('user')
 
 
 class ResampleManager:
-    def __init__(self, steps, calibration_manager, restart_at_step=None):
+    def __init__(self, steps, calibration_manager: CalibManager, restart_at_step=None):
         for resampler in steps:
             resampler.set_calibration_manager(calibration_manager)
         self.steps = steps

@@ -24,7 +24,8 @@ class OptimToolPBnBPlotter(BasePlotter):
     def cleanup(self):
         pass
 
-    def plot_state_evolution(self, **kwargs):
+    @staticmethod
+    def plot_state_evolution(**kwargs):
         data = kwargs.pop('data')
         all_it = data['Iteration'].astype(int)
 
