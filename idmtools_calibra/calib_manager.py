@@ -15,6 +15,11 @@ from idmtools_calibra.utilities.display import verbose_timedelta
 logger = getLogger(__name__)
 
 
+def set_run_number(simulation, value):
+    simulation.task.set_parameter('Run_Number', value)
+    return {'Run_Number': value}
+
+
 class SampleIndexWrapper(object):
     """
     Wrapper for a SimConfigBuilder-modifying function to add metadata
@@ -40,7 +45,7 @@ class CalibManager(object):
 
     def __init__(self, task, map_sample_to_model_input_fn,
                  sites, next_point, platform=None, name='calib_test', sim_runs_per_param_set=1, max_iterations=5,
-                 plotters=None, map_replicates_callback=None):
+                 plotters=None):
 
         self.name = name
         self.platform = platform
@@ -59,7 +64,7 @@ class CalibManager(object):
         self.current_iteration = None
         self.resume = False
         self.experiment_builder_function = None  # if not overridden in the set method, use internally-generated func
-        self.map_replicates_callback = map_replicates_callback
+        # self.map_replicates_callback = map_replicates_callback
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
@@ -158,12 +163,13 @@ class CalibManager(object):
             n_replicates = self.sim_runs_per_param_set
 
         sweeps = [[ModFn(site.setup_fn) for site in self.sites]]
-        if self.map_replicates_callback:
-            sweep = [ModFn(partial(self.map_replicates_callback, value=i + 1)) for i in range(n_replicates)]
-            if n_replicates > 1 and len(sweep) == 1:
-                sweep = sweep[0]
-            sweeps.append(sweep)
-        sweeps.append([ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)])
+        sweep = [ModFn(set_run_number, value=i + 1) for i in range(n_replicates)]
+        if n_replicates > 1 and len(sweep) == 1:
+            sweep = sweep[0]
+        sweeps.append(sweep)
+        sweeps.append(
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+             index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
         count = None

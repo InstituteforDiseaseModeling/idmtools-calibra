@@ -97,15 +97,15 @@ task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
 
 sites = [SouthAfricaCalibSite()]  # yeah its plural
 
-
 initial_pop = 10000
 verbose = True
 calibration_on = False
 
+
 # Parameter setting functions
-def setRunNumber(task, run):
-    task.set_parameter('Run_Number', run)
-    return {'Run_Number': run}
+def set_run_number(simulation, value):
+    simulation.task.set_parameter('Run_Number', value)
+    return {'Run_Number': value}
 
 
 def setHIVslow(task, pro):
@@ -787,11 +787,8 @@ else:
                  "TB_Slow_Progressor_Rate": 1.5425e-05}
 
     from idmtools.builders import SimulationBuilder
-    from emodpy.emod_task import EMODTask
-    from functools import partial
 
-    fs1 = [ModFn(partial(EMODTask.set_parameter_sweep_callback, param="Run_Number", value=i)) for i in
-           range(0, 3)]  # 100
+    fs1 = [ModFn(set_run_number, value=i) for i in range(0, 3)]  # 100
     fs2 = [ModFn(Add_Drugs, resist) for resist in [0.0, 1.0e-1]]
     fs3 = [ModFn(map_sample_to_model_input, ss) for ss in [subsample]]
 
@@ -819,7 +816,7 @@ if __name__ == "__main__":
         ts = TemplatedSimulations(base_task=task)
         ts.add_builder(builder)
 
-        exp_name = 'tb_sa_tbhiv_demo 3'  # [TODO] zdu: test with simple name
+        exp_name = 'tb_sa_tbhiv_demo 4'  # [TODO] zdu: test with simple name
         experiment = Experiment(name=exp_name)
 
         # create mixed experiment from two templates
