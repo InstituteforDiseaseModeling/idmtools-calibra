@@ -187,8 +187,7 @@ calib_manager = CalibManager(name='Optimtool_simple',      # <-- Please customiz
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
                              max_iterations=3,          # <-- Iterations
-                             plotters=plotters,
-                             map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
+                             plotters=plotters)
 
 run_calib_args = {
     "calib_manager": calib_manager
