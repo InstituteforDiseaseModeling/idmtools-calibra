@@ -196,7 +196,7 @@ class IterationState:
         from idmtools.entities.experiment import Experiment
 
         ts = TemplatedSimulations(base_task=self.task)
-        builder = self.exp_builder_func(next_params)
+        builder = self.experiment_builder_function(next_params)
         ts.add_builder(builder)
 
         exp_name = '%s_iter%d' % (self.calibration_name, self.iteration)
