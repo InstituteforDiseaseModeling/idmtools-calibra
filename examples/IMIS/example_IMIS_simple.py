@@ -106,8 +106,7 @@ calib_manager = CalibManager(name='IMIS_simple',
                              next_point=IMIS(prior, **next_point_kwargs),
                              sim_runs_per_param_set=1,
                              max_iterations=3,
-                             plotters=plotters,
-                             map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
+                             plotters=plotters)
 
 run_calib_args = {'calib_manager': calib_manager}
 
