@@ -219,7 +219,7 @@ class CalibManager(object):
                               suite_id=self.suite_id,
                               next_point_algo=self.next_point,
                               map_sample_to_model_input_fn=self.map_sample_to_model_input_fn,
-                              exp_builder_func=self.experiment_builder_function,
+                              experiment_builder_function=self.experiment_builder_function,
                               sim_runs_per_param_set=self.sim_runs_per_param_set,
                               site_analyzer_names=self.site_analyzer_names(),
                               analyzer_list=self.analyzer_list,
@@ -395,7 +395,7 @@ class CalibManager(object):
     def required_components(self):
         # update required objects for resume, reanalyze and replot
         kwargs = {
-            'exp_builder_func': self.experiment_builder_function,
+            'experiment_builder_function': self.experiment_builder_function,
             'next_point_algo': self.next_point,
             'task': self.task,
             'analyzer_list': self.analyzer_list,

@@ -43,7 +43,7 @@ class IterationState:
         self.next_point_algo = None
         self.analyzer_list = []
         self.site_analyzer_names = {}
-        self.exp_builder_func = None
+        self.experiment_builder_function = None
         self.map_sample_to_model_input_fn = None
         self.sim_runs_per_param_set = None
         self.plotters = []
