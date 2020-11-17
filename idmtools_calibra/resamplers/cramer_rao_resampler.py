@@ -18,13 +18,13 @@ user_logger = getLogger('user')
 
 
 class CramerRaoResampler(BaseResampler):
-    def __init__(self, **kwargs):
+    def __init__(self, calib_manager=None, **kwargs):
         """
         Args:
             n_resampling_points: The number of resampled points to generate
             kwargs: These are arguments passed directly to the underlying resampling routine.
         """
-        super().__init__()
+        super().__init__(calib_manager)
         # self.n_resampling_points = n_resampling_points # the number of points to resample/generate
         self.resample_kwargs = kwargs
 

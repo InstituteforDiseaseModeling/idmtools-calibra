@@ -43,7 +43,7 @@ class IterationState:
         self.next_point_algo = None
         self.analyzer_list = []
         self.site_analyzer_names = {}
-        self.exp_builder_func = None
+        self.experiment_builder_function = None
         self.map_sample_to_model_input_fn = None
         self.sim_runs_per_param_set = None
         self.plotters = []
@@ -196,7 +196,7 @@ class IterationState:
         from idmtools.entities.experiment import Experiment
 
         ts = TemplatedSimulations(base_task=self.task)
-        builder = self.exp_builder_func(next_params)
+        builder = self.experiment_builder_function(next_params)
         ts.add_builder(builder)
 
         exp_name = '%s_iter%d' % (self.calibration_name, self.iteration)

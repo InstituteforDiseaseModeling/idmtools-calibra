@@ -1,19 +1,17 @@
 # flake8: noqa E402
 import logging
 import os
-import matplotlib
-
-matplotlib.use('Agg', force=True)
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import cm
 from idmtools_calibra.plotters.base_plotter import BasePlotter
 from idmtools_calibra.utils import StatusPoint
+import matplotlib
+matplotlib.use('Agg', force=True)
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
-
 sns.set_style('white')
 
 
