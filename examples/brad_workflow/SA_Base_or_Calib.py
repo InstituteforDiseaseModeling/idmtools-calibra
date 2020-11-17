@@ -7,7 +7,6 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 
-from tb_emod_task import TB_EMODTask
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
 from tb.add_HIVIncidence import add_HIVIncidence
@@ -22,6 +21,7 @@ from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
 from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
 # from tb.utils.TBCustomReports import add_tb_report
 from tb.TBCustomReports import add_tb_report
+from tb_emod_task import TB_EMODTask
 
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
@@ -712,18 +712,6 @@ def constrain_sample(sample):
     return sample
 
 
-# Function used to set config parameter and also add file to simulation
-from functools import partial
-
-
-def param_update(simulation, param, value):
-    simulation.task.transient_assets.add_asset(Asset(os.path.join(INPUT_PATH, 'emodules_map.json')))
-    return {}
-
-
-# Function specially set parameter Run_Number
-set_Fake = partial(param_update, param="fake")
-
 if calibration_on:
 
     volume_fraction = 0.001  # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
@@ -798,8 +786,6 @@ else:
     builder.sweeps.append(fs3)
     builder.count = len(fs1) * len(fs2) * len(fs3)
 
-    # [TODO] zdu: may not really need
-    builder.add_sweep_definition(set_Fake, range(1))  # add emodules_map.json for each sim
 
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
