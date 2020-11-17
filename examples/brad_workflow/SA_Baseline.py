@@ -307,7 +307,7 @@ add_tbhiv_treat(task, 'DOTSMDR', ['TBMDRTestPositive'], start_day=dots_start,
 from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools.builders import SimulationBuilder
 
-fs1 = [ModFn(set_run_number(), value=g) for g in range(0, 10)]
+fs1 = [ModFn(set_run_number, value=g) for g in range(0, 10)]
 fs2 = [ModFn(setprimaryHIVpro, v) for v in [1.5]]  # [TODO] zdu: these methods need to take simulation as input!!
 fs3 = [ModFn(setHIVslow, v) for v in [4]]
 fs4 = [ModFn(Add_Drugs, d) for d in [0.0]]
