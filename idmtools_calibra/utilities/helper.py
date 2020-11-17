@@ -30,4 +30,3 @@ def json_to_pandas(channel_data, bins, channel=None):
     channel_series = pd.Series(np.array(channel_data).flatten(), index=multi_index, name=channel)
     logger.debug('\n%s', channel_series)
     return channel_series
-

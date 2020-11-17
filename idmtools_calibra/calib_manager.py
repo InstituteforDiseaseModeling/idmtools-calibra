@@ -175,17 +175,17 @@ class CalibManager(object):
         Returns:
             Simulation Builder
         """
-
         if not n_replicates:
             n_replicates = self.sim_runs_per_param_set
 
         sweeps = [[ModFn(site.setup_fn) for site in self.sites]]
-        if self.map_replicates_callback:
-            sweep = [ModFn(partial(self.map_replicates_callback, value=i + 1)) for i in range(n_replicates)]
-            if n_replicates > 1 and len(sweep) == 1:
-                sweep = sweep[0]
-            sweeps.append(sweep)
-        sweeps.append([ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)])
+        sweep = [ModFn(set_run_number, value=i + 1) for i in range(n_replicates)]
+        if n_replicates > 1 and len(sweep) == 1:
+            sweep = sweep[0]
+        sweeps.append(sweep)
+        sweeps.append(
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+             index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
         count = None
