@@ -4,6 +4,10 @@ from functools import partial
 
 import os
 import copy
+
+from emodpy.utils import EradicationBambooBuilds
+
+from examples.helper import download_bamboo_exe
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
@@ -12,14 +16,20 @@ from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from malaria.study_sites.dielmo_calib_site import DielmoCalibSite
 from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
-from idmtools_calibra.utilities.helper import download_bamboo_exe
+from idmtools.core.platform_factory import Platform
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
+plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
+    else EradicationBambooBuilds.MALARIA
+
 # Test latest bamboo Eradication.exe (it won't download if exists already)
-exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'))
+exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=plan)
+
 config_path = os.path.join(INPUT_PATH, "config.json")
 campaign_path = os.path.join(INPUT_PATH, "empty_campaign.json")
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
@@ -31,6 +41,14 @@ task = EMODTask.from_files(
     campaign_path=campaign_path,
     demographics_paths=demographics_path
 )
+
+# update few parameters
+task.set_parameter("Serialization_Mask_Node_Write", 0)
+task.set_parameter("Serialization_Precision", "REDUCED")
+task.set_parameter("Serialized_Population_Reading_Type", "NONE")
+task.set_parameter("Serialized_Population_Writing_Type", "TIMESTEP")
+task.set_parameter("Serialization_Time_Steps", [365])
+task.set_parameter("Inset_Chart_Reporting_Include_30Day_Avg_Infection_Duration", 1)
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -171,22 +189,24 @@ if num_params == 0:
 
 r = OptimTool.get_r(num_params, volume_fraction)
 
-
 optimtool = OptimTool(params,
-                      constrain_sample,         # <-- WILL NOT BE SAVED IN ITERATION STATE
-                      mu_r=r,                   # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
-                      sigma_r=r / 10.,          # <-- stdev of radius
-                      center_repeats=2,         # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=9   # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
+                      mu_r=r,
+                      # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
+                      sigma_r=r / 10.,  # <-- stdev of radius
+                      center_repeats=2,
+                      # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
+                      samples_per_iteration=9
+                      # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
                       )
 
-calib_manager = CalibManager(name='Optimtool_simple',      # <-- Please customize this name
+calib_manager = CalibManager(name='Optimtool_simple',  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
                              sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=3,          # <-- Iterations
+                             max_iterations=3,  # <-- Iterations
                              plotters=plotters,
                              map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
 
@@ -195,7 +215,5 @@ run_calib_args = {
 }
 
 if __name__ == "__main__":
-    from idmtools.core.platform_factory import Platform
-    platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()

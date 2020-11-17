@@ -4,6 +4,8 @@ from functools import partial
 
 import os
 import copy
+
+from examples.helper import generate_default_config_from_exe
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
@@ -16,15 +18,18 @@ from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-from idmtools_calibra.utilities.helper import generate_default_config_from_exe
+from idmtools.core.platform_factory import Platform
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Generate default config from Eradication.exe
-exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
-                                                         EradicationBambooBuilds.CI_MALARIA)
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
+plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' else EradicationBambooBuilds.MALARIA
+# Generate default config from Eradication.exe(or Eradication for Linux)
+exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"), platform,
+                                                                      plan=plan)
 
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
 
@@ -60,6 +65,7 @@ task.set_parameter("Custom_Node_Events", [])
 task.set_parameter("Enable_Climate_Stochasticity", 0)
 task.set_parameter("Enable_Demographics_Risk", 0)
 task.set_parameter("Incubation_Period_Constant", 25)
+task.set_parameter("Inset_Chart_Reporting_Include_30Day_Avg_Infection_Duration", 1)
 
 # List of sites we want to calibrate on
 sites = [DielmoCalibSite(), NdiopCalibSite()]
@@ -226,8 +232,5 @@ run_calib_args = {
 }
 
 if __name__ == "__main__":
-    from idmtools.core.platform_factory import Platform
-
-    platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()

@@ -3,13 +3,12 @@
 from functools import partial
 
 import os
-import copy
+
+from examples.helper import generate_default_config_from_exe
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.prior import MultiVariatePrior
 from idmtools_calibra.algorithms.imis import IMIS
-from idmtools_calibra.algorithms.optim_tool import OptimTool
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
-from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools_calibra.utilities.vector import params as vector_params
 from malaria import params as malaria_params
@@ -18,15 +17,19 @@ from malaria.study_sites.ndiop_calib_site import NdiopCalibSite
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-from idmtools_calibra.utilities.helper import generate_default_config_from_exe
+from idmtools.core.platform_factory import Platform
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Generate default config from Eradication.exe
-exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
-                                                         EradicationBambooBuilds.CI_MALARIA)
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
+plan = EradicationBambooBuilds.MALARIA_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
+    else EradicationBambooBuilds.MALARIA
+# Generate default config from Eradication.exe(or Eradication for Linux)
+exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"), platform,
+                                                                      plan=plan)
 
 demographics_path = os.path.join(INPUT_PATH, "demographics", "birth_cohort_demographics.compiled.json")
 
@@ -62,6 +65,8 @@ task.set_parameter("Custom_Node_Events", [])
 task.set_parameter("Enable_Climate_Stochasticity", 0)
 task.set_parameter("Enable_Demographics_Risk", 0)
 task.set_parameter("Incubation_Period_Constant", 25)
+task.set_parameter("Inset_Chart_Reporting_Include_30Day_Avg_Infection_Duration", 1)
+
 
 sites = [
     DielmoCalibSite()
@@ -121,14 +126,12 @@ calib_manager = CalibManager(name='IMIS_default_config',
                              sites=sites,
                              next_point=IMIS(prior, **next_point_kwargs),
                              sim_runs_per_param_set=1,
-                             max_iterations=2,
-                             plotters=plotters.count,
+                             max_iterations=3,
+                             plotters=plotters,
                              map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
 
 run_calib_args = {'calib_manager': calib_manager}
 
 if __name__ == "__main__":
-    from idmtools.core.platform_factory import Platform
-    platform = Platform('COMPS2')
     calib_manager.platform = platform
     calib_manager.run_calibration()

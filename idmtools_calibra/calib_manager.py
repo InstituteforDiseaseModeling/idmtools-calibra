@@ -172,6 +172,7 @@ class CalibManager(object):
         Returns:
             Simulation Builder
         """
+
         if not n_replicates:
             n_replicates = self.sim_runs_per_param_set
 
