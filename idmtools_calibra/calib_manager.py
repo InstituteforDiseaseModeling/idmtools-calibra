@@ -74,7 +74,7 @@ class CalibManager(object):
         self.latest_iteration = 0
         self.current_iteration = None
         self.resume = False
-        self.experiment_builder_function = None  # if not overridden in the set method, use internally-generated func
+        self.experiment_builder_function = self.default_experiment_builder_function  # if not overridden in the set method, use internally-generated func
         self.map_replicates_callback = map_replicates_callback
 
     @classmethod
@@ -161,7 +161,7 @@ class CalibManager(object):
         """
         self.map_replicates_callback = map_replicates_callback
 
-    def experiment_builder_function(self, next_params, n_replicates: Optional[int] = None) -> SimulationBuilder:
+    def default_experiment_builder_function(self, next_params, n_replicates: Optional[int] = None) -> SimulationBuilder:
         """
         Defines the function that builds the experiment for each iteration of a calibration run
 
@@ -172,10 +172,6 @@ class CalibManager(object):
         Returns:
             Simulation Builder
         """
-
-        if self.experiment_builder_function is not None:
-            builder = self.experiment_builder_function
-            return builder
 
         if not n_replicates:
             n_replicates = self.sim_runs_per_param_set
