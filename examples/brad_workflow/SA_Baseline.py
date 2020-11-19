@@ -70,7 +70,7 @@ def set_run_number(simulation, value):
     return {'Run_Number': value}
 
 
-def setHIVslow(simulation, pro):
+def set_hiv_slow(simulation, pro):
     # this is very breakable right now
     tmp_loc = []
     for i, val in enumerate(simulation.task.get_parameter('TB_CD4_Activation_Vector')):
@@ -82,7 +82,7 @@ def setHIVslow(simulation, pro):
     return {'TB_CD4_Activation_Vector': tmp_loc}
 
 
-def setprimaryHIVpro(simulation, pro):
+def set_primary_hiv_pro(simulation, pro):
     # this is very breakable right now
     tmp_loc = []
     for i, val in enumerate(simulation.task.get_parameter('TB_CD4_Primary_Progression')):
@@ -91,14 +91,14 @@ def setprimaryHIVpro(simulation, pro):
     return {'TB_CD4_Primary_Progression': tmp_loc}
 
 
-def setCoinfDeath(simulation, rate):
+def set_coinf_death(simulation, rate):
     simulation.task.set_parameter('CoInfection_Mortality_Rate_Off_ART', rate)
     return {'CoInfection_Mortality_Rate_Off_ART': rate}
 
 
 # intervention functions
 
-def CRPSensSpec(task, sensCRP, specCRP):
+def cpr_sens_spec(task, sensCRP, specCRP):
     add_ActiveDiagnostic(task, ['HIVTestedNegative'], sensCRP, specCRP, start_day=intervention_day,
                          pos_event='CRPPosHIVNeg')
     add_ActiveDiagnostic(task, ['HIVTestedPositive'], sensCRP, specCRP,
@@ -106,12 +106,12 @@ def CRPSensSpec(task, sensCRP, specCRP):
     return {'CRPSensSpec': (sensCRP, specCRP)}
 
 
-def ModifyInfectivity(simulation, infectivity):
+def modify_infectivity(simulation, infectivity):
     simulation.task.set_parameter('Base_Infectivity', infectivity)
     return {'Base_Infectivity': infectivity}
 
 
-def Add_Drugs(simulation, resist_pro):
+def add_drugs(simulation, resist_pro):
     add_tb_drug_type(simulation.task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     add_tb_drug_type(simulation.task, 'DOTSLQ', 180.0, 0.5, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     return {'ResistancePro': resist_pro}
@@ -297,11 +297,11 @@ from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools.builders import SimulationBuilder
 
 fs1 = [ModFn(set_run_number, value=g) for g in range(0, 10)]
-fs2 = [ModFn(setprimaryHIVpro, v) for v in [1.5]]
-fs3 = [ModFn(setHIVslow, v) for v in [4]]
-fs4 = [ModFn(Add_Drugs, d) for d in [0.0]]
-fs5 = [ModFn(setCoinfDeath, dd) for dd in [1.2e-3]]
-fs6 = [ModFn(ModifyInfectivity, v) for v in [0.030]]
+fs2 = [ModFn(set_primary_hiv_pro, v) for v in [1.5]]
+fs3 = [ModFn(set_hiv_slow, v) for v in [4]]
+fs4 = [ModFn(add_drugs, d) for d in [0.0]]
+fs5 = [ModFn(set_coinf_death, dd) for dd in [1.2e-3]]
+fs6 = [ModFn(modify_infectivity, v) for v in [0.030]]
 
 builder = SimulationBuilder()
 builder.sweeps.append(fs1)
