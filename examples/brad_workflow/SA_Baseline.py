@@ -1,7 +1,8 @@
 import os
 from idmtools.assets import Asset
-from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 from idmtools_calibra.utilities.mod_fn import ModFn
+
+from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
@@ -15,21 +16,15 @@ from tb.add_ResistanceDiagnostic import add_ResistanceDiagnostic
 from tb.add_tb_drug_type import add_tb_drug_type
 from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
 from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
-# from tb.utils.TBCustomReports import add_tb_report
 from tb.TBCustomReports import add_tb_report
-
 from tb_emod_task import TB_EMODTask
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-print(INPUT_PATH)
-print(os.path.exists(INPUT_PATH))
-
-
-# use Bradley's EXE
-exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')  # Brad's exe
+# use Brad's EXE
+exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task
@@ -43,14 +38,15 @@ task.legacy_exe = True
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
+# Add required files as assets
 a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
 a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
-a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
-           relative_path='reporter_plugins')
+task.common_assets.add_assets([a1, a2])
 
-task.common_assets.add_assets([a1, a2, a3])
+# Add dll folder
+task.reporters.add_dll_folder(os.path.join(INPUT_PATH, 'dlls'))
 
-# [TODO] zdu: set more missing parameter
+# Add required parameter
 task.set_parameter("Custom_Coordinator_Events", [])
 task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
 task.set_parameter("Custom_Node_Events", [])
@@ -61,16 +57,12 @@ task.set_parameter("Post_Infection_Transmission_Multiplier", 1)
 task.set_parameter("Report_Coordinator_Event_Recorder", 0)
 task.set_parameter("Report_Node_Event_Recorder", 0)
 task.set_parameter("Report_Surveillance_Event_Recorder", 0)
-
 task.set_parameter("Post_Infection_Acquisition_Multiplier", 0.5)
 
 # parameters to set once debugging is done
 task.set_parameter('logLevel_default', 'ERROR')
 # Disable Default_Reporting
-task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
-
-exp_name = 'Timing Test'
-
+task.set_parameter('Enable_Default_Reporting', 0)
 
 # Parameter setting functions
 def set_run_number(simulation, value):
@@ -167,8 +159,6 @@ CRP_Specificity = 0.59
 intervention_day = dots_start + 18.0 * 365
 
 dots_plus_15 = dots_start + 15.0 * 365.0
-# cb.update_params({'TB_Smear_Negative_Infectivity_Multiplier': 0.34604, 'TB_Presymptomatic_Rate': 0.01165,
-#                   'TB_Active_Presymptomatic_Infectivity_Multiplier': 0.34604 * 0.3318}, validate=True)
 task.update_parameters({'TB_Smear_Negative_Infectivity_Multiplier': 0.34604, 'TB_Presymptomatic_Rate': 0.01165,
                         'TB_Active_Presymptomatic_Infectivity_Multiplier': 0.34604 * 0.3318})
 
@@ -205,8 +195,7 @@ task.set_parameter('Base_Population_Scale_Factor', 1000)
 add_tb_report(task, stop_year=2000,
               additional_events=['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',
                                  'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
-                                 'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'],
-              type='Report_TBHIV_ByAge')
+                                 'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'])
 
 # initial TB outbreak
 add_tbhiv_outbreak(task, 0.05, 'TB')
@@ -308,7 +297,7 @@ from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools.builders import SimulationBuilder
 
 fs1 = [ModFn(set_run_number, value=g) for g in range(0, 10)]
-fs2 = [ModFn(setprimaryHIVpro, v) for v in [1.5]]  # [TODO] zdu: these methods need to take simulation as input!!
+fs2 = [ModFn(setprimaryHIVpro, v) for v in [1.5]]
 fs3 = [ModFn(setHIVslow, v) for v in [4]]
 fs4 = [ModFn(Add_Drugs, d) for d in [0.0]]
 fs5 = [ModFn(setCoinfDeath, dd) for dd in [1.2e-3]]
@@ -336,16 +325,17 @@ ts.tags.update({'TB_Smear_Negative_Infectivity_Multiplier':
                 'Base_Population_Scale_Factor': task.get_parameter('Base_Population_Scale_Factor')})
 ts.tags.update({'low_seek': low_seek})
 
+exp_name = 'Timing Test'
+
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
     from idmtools.entities.experiment import Experiment
+    platform = Platform('COMPS2')
 
-    platform = Platform('COMPS2')  # SLURM
-
-    exp_name = 'Timing Test idm 2'  # [TODO] zdu: test with simple name
+    # Create Experiment
     experiment = Experiment(name=exp_name)
 
-    # create mixed experiment from two templates
+    # Add simulation using templates
     experiment.simulations = ts
 
     # run experiment
