@@ -1,5 +1,4 @@
 import os
-import sys
 import copy
 import numpy as np
 from idmtools.assets import Asset
@@ -23,15 +22,13 @@ from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
 from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
 from tb.TBCustomReports import add_tb_report
 from tb_emod_task import TB_EMODTask
-
-sys.path.append('./analyzer_dev')
 from analyzer_dev.CalibSites import SouthAfricaCalibSite
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# use Brad's exe
+# Use Brad's exe
 exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
@@ -770,7 +767,7 @@ if __name__ == "__main__":
         ts.add_builder(builder)
 
         # Create Experiment
-        exp_name = 'TB SA experiment 1'
+        exp_name = 'TB SA experiment'
         experiment = Experiment(name=exp_name)
 
         # Add simulation using templates
