@@ -7,6 +7,8 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 
+from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
 from tb.add_HIVIncidence import add_HIVIncidence
@@ -19,11 +21,8 @@ from tb.add_ResistanceDiagnostic import add_ResistanceDiagnostic
 from tb.add_tb_drug_type import add_tb_drug_type
 from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
 from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
-# from tb.utils.TBCustomReports import add_tb_report
 from tb.TBCustomReports import add_tb_report
 from tb_emod_task import TB_EMODTask
-
-from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
 sys.path.append('./analyzer_dev')
 from analyzer_dev.CalibSites import SouthAfricaCalibSite
@@ -32,19 +31,8 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-print(INPUT_PATH)
-print(os.path.exists(INPUT_PATH))
-# exit()
-
-# Generate default config from Eradication.exe
-# exe_path, schema_path, config_path = generate_default_config_from_exe(os.path.join(INPUT_PATH, "bamboo"),
-#                                                                       EradicationBambooBuilds.CI_GENERIC)
-# use Bradley's EXE
-exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')  # Brad's exe
-
-# test: latest tbhiv
-# exe_path = os.path.join(INPUT_PATH, 'Eradication_tbhiv_win.exe')  # bamboo
-
+# use Brad's exe
+exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task: windows
@@ -55,25 +43,18 @@ task = TB_EMODTask.from_files(
 
 task.legacy_exe = True  # used for TB_EMODTask
 
-# Create task: Linux: Calculon
-# from emodpy.emod_task import EMODTask
-# task = EMODTask.from_files(
-#     eradication_path=exe_path,
-#     config_path=config_path,
-# )
-
-
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
+# Add required files as assets
 a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.json'))
 a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
-a3 = Asset(os.path.join(INPUT_PATH, 'dlls', 'reporter_plugins', 'libcustomreport_TBHIV_ByAge.dll'),
-           relative_path='reporter_plugins')
+task.common_assets.add_assets([a1, a2])
 
-task.common_assets.add_assets([a1, a2, a3])
+# Add dll folder
+task.reporters.add_dll_folder(os.path.join(INPUT_PATH, 'dlls'))
 
-# [TODO] zdu: set more missing parameter
+#  Add required parameter
 task.set_parameter("Custom_Coordinator_Events", [])
 task.set_parameter("Enable_Abort_Zero_Infectivity", 0)
 task.set_parameter("Custom_Node_Events", [])
@@ -85,15 +66,10 @@ task.set_parameter("Report_Coordinator_Event_Recorder", 0)
 task.set_parameter("Report_Node_Event_Recorder", 0)
 task.set_parameter("Report_Surveillance_Event_Recorder", 0)
 
-# boiler plate setup + Name experiment
-# SetupParser.default_block = 'HPC'
-exp_name = 'TB SA experiment 3'
-# cb = DTKConfigBuilder.from_defaults('TBHIV_SIM')
-
 # parameters to set once debugging is done
 task.set_parameter('logLevel_default', 'ERROR')
 # cb.disable('Default_Reporting')
-task.set_parameter('Enable_Default_Reporting', 0)  # [TODO]: zdu
+task.set_parameter('Enable_Default_Reporting', 0)
 
 sites = [SouthAfricaCalibSite()]  # yeah its plural
 
@@ -370,9 +346,6 @@ CRP_Specificity = 0.59
 intervention_day = dots_start + 18.0 * 365
 
 dots_plus_15 = dots_start + 15.0 * 365.0
-# [TODO]: EMODTask doesn't support validate=True
-# task.update_parameters({'TB_Smear_Negative_Infectivity_Multiplier': 0.34604, 'TB_Presymptomatic_Rate': 0.01165,
-#                         'TB_Active_Presymptomatic_Infectivity_Multiplier': 0.34604 * 0.3318}, validate=True)
 task.update_parameters({'TB_Smear_Negative_Infectivity_Multiplier': 0.34604, 'TB_Presymptomatic_Rate': 0.01165,
                         'TB_Active_Presymptomatic_Infectivity_Multiplier': 0.34604 * 0.3318})
 low_seek = 1.0 / 263.0
@@ -382,10 +355,7 @@ tmp_name = 'Trial_Demog_SouthAfrica_3.json'
 task.set_parameter('Demographics_Filenames', [tmp_name, 'Base_Overlay_SouthAfrica_ReVacc.json'])
 task.set_parameter('x_Other_Mortality', 0.34)
 task.set_parameter('x_Birth', 1.43)
-additional_events = ['ProviderTestNoR'] + ["Below200", "Below350", "Below500", "Above500"]  # [TODO]: zdu, manually add
-
-# [TODO] zdu: temp test. It actually should be a transient asset on each simulation
-# task.common_assets.add_assets([Asset(os.path.join(INPUT_PATH, 'emodules_map.json'))])
+additional_events = ['ProviderTestNoR'] + ["Below200", "Below350", "Below500", "Above500"]
 
 # set underlying parameters (cut one of these
 task.set_parameter('Listed_Events',
@@ -394,7 +364,7 @@ task.set_parameter('Listed_Events',
                     'TBTestDOTSHigh', 'TBTestDOTSLow', 'Seek200', 'Seek350', 'Seek500', 'CRPPosHIVPos', 'CRPPosHIVNeg',
                     'LAMPosHIVPos', 'LAMPosHIVNeg', 'TLAM', 'B100', 'None', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle',
                     'BCG_Eligible_HIV', 'Disqualify'] + [
-                       'ProviderTestNoR'])  # [TODO] zdu: manually add ['ProviderTestNoR']
+                       'ProviderTestNoR'])
 
 task.set_parameter('Custom_Individual_Events',
                    ['TotalPos', 'TBMonitoring', 'Delay', 'Blackout', 'TBTestPreDOTSLow', 'TBTestPreDOTSHigh',
@@ -414,8 +384,7 @@ task.set_parameter('Base_Population_Scale_Factor', initial_pop)
 add_tb_report(task, stop_year=2000,
               additional_events=['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',
                                  'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
-                                 'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'],
-              type='Report_TBHIV_ByAge')
+                                 'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'])
 
 
 # block of functions to be used in calibration
@@ -493,7 +462,6 @@ def SetDurationHIV(cbin, duration, art_factor):
 
 if calibration_on:
     resist = 0.0
-    # Add_Drugs(task, resist)       # [TODO]: zdu
     Add_Drugs_calib(task, resist)
 
 # initial TB outbreak
@@ -786,7 +754,6 @@ else:
     builder.sweeps.append(fs3)
     builder.count = len(fs1) * len(fs2) * len(fs3)
 
-
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
 
@@ -802,10 +769,11 @@ if __name__ == "__main__":
         ts = TemplatedSimulations(base_task=task)
         ts.add_builder(builder)
 
-        exp_name = 'tb_sa_tbhiv_demo 4'  # [TODO] zdu: test with simple name
+        # Create Experiment
+        exp_name = 'TB SA experiment 1'
         experiment = Experiment(name=exp_name)
 
-        # create mixed experiment from two templates
+        # Add simulation using templates
         experiment.simulations = ts
 
         # run experiment
