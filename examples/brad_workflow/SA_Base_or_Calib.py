@@ -81,7 +81,7 @@ def set_run_number(simulation, value):
     return {'Run_Number': value}
 
 
-def setHIVslow(task, pro):
+def set_hiv_slow(task, pro):
     # this is very breakable right now
     tmp_loc = []
     for i, val in enumerate(task.get_parameter('TB_CD4_Activation_Vector')):
@@ -93,7 +93,7 @@ def setHIVslow(task, pro):
     return {'TB_CD4_Activation_Vector': tmp_loc}
 
 
-def setprimaryHIVpro(task, pro):
+def set_primary_hiv_pro(task, pro):
     # this is very breakable right now
     tmp_loc = []
     for i, val in enumerate(task.get_parameter('TB_CD4_Primary_Progression')):
@@ -102,14 +102,14 @@ def setprimaryHIVpro(task, pro):
     return {'TB_CD4_Primary_Progression': tmp_loc}
 
 
-def setCoinfDeath(task, rate):
+def set_coinf_death(task, rate):
     task.set_parameter('CoInfection_Mortality_Rate_Off_ART', rate)
     return {'CoInfection_Mortality_Rate_Off_ART': rate}
 
 
 # intervention functions
 
-def CRPSensSpec(task, sensCRP, specCRP):
+def cpr_sens_spec(task, sensCRP, specCRP):
     add_ActiveDiagnostic(task, ['HIVTestedNegative'], sensCRP, specCRP, start_day=intervention_day,
                          pos_event='CRPPosHIVNeg')
     add_ActiveDiagnostic(task, ['HIVTestedPositive'], sensCRP, specCRP,
@@ -117,19 +117,18 @@ def CRPSensSpec(task, sensCRP, specCRP):
     return {'CRPSensSpec': (sensCRP, specCRP)}
 
 
-def ModifyInfectivity(task, infectivity):
+def modify_infectivity(task, infectivity):
     task.set_parameter('Base_Infectivity', infectivity)
     return {'Base_Infectivity': infectivity}
 
 
-def Add_Drugs(simulation, resist_pro):
+def add_drugs(simulation, resist_pro):
     add_tb_drug_type(simulation.task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     add_tb_drug_type(simulation.task, 'DOTSLQ', 180.0, 0.5, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     return {'ResistancePro': resist_pro}
 
 
-# [TODO]: zdu: add to different from Add_Drugs
-def Add_Drugs_calib(task, resist_pro):
+def add_drugs_calib(task, resist_pro):
     add_tb_drug_type(task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     add_tb_drug_type(task, 'DOTSLQ', 180.0, 0.5, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     return {'ResistancePro': resist_pro}
@@ -386,7 +385,7 @@ add_tb_report(task, stop_year=2000,
 
 # block of functions to be used in calibration
 
-def SetSlowseek(cbin, duration):
+def set_slow_seek(cbin, duration):
     loc_rate = 1.0 / duration
     add_SimpleHealthSeeking(cbin, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
                                    'TBMDRTestDefault'],
@@ -396,7 +395,7 @@ def SetSlowseek(cbin, duration):
     return {'LowSeek_Duration': duration}
 
 
-def SetFastSeek(cbin, duration):
+def set_fast_seek(cbin, duration):
     loc_rate = 1.0 / duration
     add_SimpleHealthSeeking(cbin, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
                                    'TBMDRTestDefault'],
@@ -405,14 +404,14 @@ def SetFastSeek(cbin, duration):
     return {'HighSeek_Duration': duration}
 
 
-def SetCD4Infectivity(cbin, infectrel):
+def set_cd4_infectivity(cbin, infectrel):
     len_ob = len(list(cbin.get_parameter('TB_CD4_Infectiousness')))
     param_loc = list(np.repeat(infectrel, len_ob))
     cbin.set_parameter('TB_CD4_Infectiousness', param_loc)
     return {'TB_CD4_Infectiousness': param_loc}
 
 
-def SetCD4ActivationSlow(cbin, rel, whichn):
+def set_cd4_activation_slow(cbin, rel, whichn):
     # note base must be set first if we are calibrating that too (so slight danger could be improved)
     base = cbin.get_parameter('TB_Slow_Progressor_Rate')
     vals = cbin.get_parameter('TB_CD4_Activation_Vector')
@@ -424,7 +423,7 @@ def SetCD4ActivationSlow(cbin, rel, whichn):
     return {'CD4bin_' + str(np.min(whichn)): rel}
 
 
-def SetDurationNoHIV(cbin, death_fraction, duration):
+def set_duration_no_hiv(cbin, death_fraction, duration):
     # convert from years to days
     # should be set before setting HIV duration
     duration *= 365.0
@@ -440,7 +439,7 @@ def SetDurationNoHIV(cbin, death_fraction, duration):
             'Duration_Years': duration / 365.0}
 
 
-def SetDurationHIV(cbin, duration, art_factor):
+def set_duration_hiv(cbin, duration, art_factor):
     # convert from years to days, take care of inequality by constraints (i.e, constraint
     # will take care of possible negative values arising
     duration *= 365.0  # convert to days
@@ -459,7 +458,7 @@ def SetDurationHIV(cbin, duration, art_factor):
 
 if calibration_on:
     resist = 0.0
-    Add_Drugs_calib(task, resist)
+    add_drugs_calib(task, resist)
 
 # initial TB outbreak
 add_tbhiv_outbreak(task, 0.05, 'TB')
@@ -587,46 +586,46 @@ def map_sample_to_model_input(simulation, sample):
         tags.update({'TB_Presymptomatic_Rate': 1.0 / value})
     if 'Relative TB CD4 Infectiousness' in sample:
         value = sample.pop('Relative TB CD4 Infectiousness')
-        tags.update(SetCD4Infectivity(simulation.task, value))
+        tags.update(set_cd4_infectivity(simulation.task, value))
     if 'CD4_aq_below_200_rel' in sample:
         value = sample.pop('CD4_aq_below_200_rel')
-        tags.update(SetCD4ActivationSlow(simulation.task, value, [0, 1]))
+        tags.update(set_cd4_activation_slow(simulation.task, value, [0, 1]))
     if 'CD4_aq_200_300_rel' in sample:
         value = sample.pop('CD4_aq_200_300_rel')
-        tags.update(SetCD4ActivationSlow(simulation.task, value, [2]))
+        tags.update(set_cd4_activation_slow(simulation.task, value, [2]))
     if 'CD4_aq_300_400_rel' in sample:
         value = sample.pop('CD4_aq_300_400_rel')
-        tags.update(SetCD4ActivationSlow(simulation.task, value, [3]))
+        tags.update(set_cd4_activation_slow(simulation.task, value, [3]))
     if 'CD4_aq_400_500_rel' in sample:
         value = sample.pop('CD4_aq_400_500_rel')
-        tags.update(SetCD4ActivationSlow(simulation.task, value, [4]))
+        tags.update(set_cd4_activation_slow(simulation.task, value, [4]))
     if 'CD4_aq_above_500' in sample:
         value = sample.pop('CD4_aq_above_500')
-        tags.update(SetCD4ActivationSlow(simulation.task, value, [5, 6]))
+        tags.update(set_cd4_activation_slow(simulation.task, value, [5, 6]))
     if 'Death Fraction' in sample and 'TB Duration' in sample:
         val_dur = sample.pop('TB Duration')
         val_frac = sample.pop('Death Fraction')
 
-        out_params = SetDurationNoHIV(simulation.task, val_frac, val_dur)
+        out_params = set_duration_no_hiv(simulation.task, val_frac, val_dur)
         tags.update(out_params)
     if 'TBHIV Duration' in sample and 'ART Factor' in sample:
         val_art = sample.pop('ART Factor')
         val_dur = sample.pop('TBHIV Duration')
-        out_params = SetDurationHIV(simulation.task, val_dur, val_art)
+        out_params = set_duration_hiv(simulation.task, val_dur, val_art)
         tags.update(out_params)
     if 'Care Seeking Slow Duration Days' in sample:
         val = sample.pop('Care Seeking Slow Duration Days')
-        out_params = SetSlowseek(simulation.task, val)
+        out_params = set_slow_seek(simulation.task, val)
         tags.update(out_params)
         tags.update({'Care Seeking Slow Duration Days': val})
     if 'Care Seeking Fast Duration Days' in sample:
         val = sample.pop('Care Seeking Fast Duration Days')
-        out_params = SetFastSeek(simulation.task, val)
+        out_params = set_fast_seek(simulation.task, val)
         tags.update(out_params)
         tags.update({'Care Seeking Fast Duration Days': val})
     if 'Primary HIV multiplier' in sample:
         val = sample.pop('Primary HIV multiplier')
-        out_params = setprimaryHIVpro(simulation.task, val)
+        out_params = set_primary_hiv_pro(simulation.task, val)
         tags.update(out_params)
 
     for name, value in sample.items():
@@ -742,7 +741,7 @@ else:
     from idmtools.builders import SimulationBuilder
 
     fs1 = [ModFn(set_run_number, value=i) for i in range(0, 3)]  # 100
-    fs2 = [ModFn(Add_Drugs, resist) for resist in [0.0, 1.0e-1]]
+    fs2 = [ModFn(add_drugs, resist) for resist in [0.0, 1.0e-1]]
     fs3 = [ModFn(map_sample_to_model_input, ss) for ss in [subsample]]
 
     builder = SimulationBuilder()
@@ -754,7 +753,7 @@ else:
 if __name__ == "__main__":
     from idmtools.core.platform_factory import Platform
 
-    platform = Platform('COMPS2')  # SLURM
+    platform = Platform('COMPS2')
 
     if calibration_on:
         calib_manager.platform = platform
