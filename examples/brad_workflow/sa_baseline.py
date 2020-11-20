@@ -5,18 +5,18 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
-from tb.add_ActiveDiagnostic import add_ActiveDiagnostic
-from tb.add_HIVIncidence import add_HIVIncidence
-from tb.add_DiagnosticTreatNeg import add_DiagnosticTreatNeg
-from tb.add_SimpleHealthSeeking import add_SimpleHealthSeeking
-from tb.add_Ramp_DiagnosticTreatNeg import add_Ramp_DiagnosticTreatNeg
-from tb.add_cd4diagnostic import add_cd4diagnostic
+from tb.add_active_diagnostic import add_ActiveDiagnostic
+from tb.add_hiv_incidence import add_HIVIncidence
+from tb.add_diagnostic_treat_neg import add_DiagnosticTreatNeg
+from tb.add_simple_health_seeking import add_SimpleHealthSeeking
+from tb.add_ramp_diagnostic_treat_neg import add_Ramp_DiagnosticTreatNeg
+from tb.add_cd4_diagnostic import add_cd4diagnostic
 from tb.add_art import add_art
-from tb.add_ResistanceDiagnostic import add_ResistanceDiagnostic
+from tb.add_resistance_diagnostic import add_ResistanceDiagnostic
 from tb.add_tb_drug_type import add_tb_drug_type
 from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
-from tb.add_simplehivdiagnostic import add_simplehivdiagnostic
-from tb.TBCustomReports import add_tb_report
+from tb.add_simple_hiv_diagnostic import add_simplehivdiagnostic
+from tb.tb_custom_reports import add_tb_report
 from tb_emod_task import TB_EMODTask
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
