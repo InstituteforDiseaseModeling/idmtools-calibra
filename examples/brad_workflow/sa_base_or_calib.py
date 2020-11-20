@@ -29,6 +29,7 @@ INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
 # Use Brad's exe
+# [TODO]: download Brad's exe from https://comps.idmod.org/#explore/AssetCollections?filters=Id=a3135297-7e48-ea11-a2c3-c4346bcb1551&offset=0&count=10&layout=502C30&selectedId=a3135297-7e48-ea11-a2c3-c4346bcb1551
 exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
