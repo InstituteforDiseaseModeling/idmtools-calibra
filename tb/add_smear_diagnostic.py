@@ -1,6 +1,6 @@
-def add_SmearDiagnostic(task, trigger_treatment_list, base_sensitivity_smearpos, base_sensitivity_smearneg, pos_event= 'TestPositiveOnSmear', treatment_fraction= 1,
-                        start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
-                           event_name = 'TB Diagnosis Smear Simple'):
+def add_smear_diagnostic(task, trigger_treatment_list, base_sensitivity_smearpos, base_sensitivity_smearneg, pos_event='TestPositiveOnSmear', treatment_fraction= 1,
+                         start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
+                         event_name = 'TB Diagnosis Smear Simple'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

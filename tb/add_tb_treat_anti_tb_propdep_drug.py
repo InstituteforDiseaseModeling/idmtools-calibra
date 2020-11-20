@@ -1,5 +1,5 @@
-def add_tb_treat_antitbpropdepdrug(task, drug_names_list,trigger_treatment_list, state_enabled= 0,  start_day=0,
-                         duration=-1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',event_name = 'TB Treatment (old manual-style params)'):
+def add_tb_treat_anti_tb_propdep_drug(task, drug_names_list, trigger_treatment_list, state_enabled= 0, start_day=0,
+                                      duration=-1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout', event_name = 'TB Treatment (old manual-style params)'):
 
 #used in TB only (legacy) this drug style not used in TBHIV, see add_tbhiv_treat.py for these drugs
 #Format of drug name not consistent with most of current DTK  ie  [  {'Property1':'Value1'}, {'Property2':'Value2'}]  as opposed to one string

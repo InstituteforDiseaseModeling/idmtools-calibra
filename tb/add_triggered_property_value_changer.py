@@ -1,5 +1,5 @@
-def add_TriggeredPropertyValueChanger(task, trigger_treatment_list,property_to_change, final_prop_value,revert= 0, daily_prob= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
-                            black_period= 0, black_trigger= 'Blackout',event_name = 'Triggered Property Changer'):
+def add_triggered_property_value_changer(task, trigger_treatment_list, property_to_change, final_prop_value, revert= 0, daily_prob= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
+                                         black_period= 0, black_trigger= 'Blackout', event_name = 'Triggered Property Changer'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

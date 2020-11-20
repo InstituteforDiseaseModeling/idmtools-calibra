@@ -1,8 +1,8 @@
-def add_Ramp_DiagnosticTreatNeg(task, trigger_treatment_list, ramp_time,  base_sensitivity_smearpos, base_sensitivity_smearneg,
-                                base_sensitivity_smearpos2, base_sensitivity_smearneg2, treatment_fraction2,
-                                pos_event2= 'TBTestPositive', neg_event2= 'TBTestNegative', defaulters_event2= 'TBTestDefault',
-                                pos_event= 'TBTestPositive', neg_event= 'TBTestNegative',
-                           defaulters_event= 'TBTestDefault', treatment_fraction= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',event_name = 'TB Diagnosis Ramp'):
+def add_ramp_diagnostic_treat_neg(task, trigger_treatment_list, ramp_time, base_sensitivity_smearpos, base_sensitivity_smearneg,
+                                  base_sensitivity_smearpos2, base_sensitivity_smearneg2, treatment_fraction2,
+                                  pos_event2= 'TBTestPositive', neg_event2= 'TBTestNegative', defaulters_event2= 'TBTestDefault',
+                                  pos_event= 'TBTestPositive', neg_event= 'TBTestNegative',
+                                  defaulters_event= 'TBTestDefault', treatment_fraction= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout', event_name = 'TB Diagnosis Ramp'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

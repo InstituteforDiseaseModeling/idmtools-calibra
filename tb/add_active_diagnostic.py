@@ -1,6 +1,6 @@
-def add_ActiveDiagnostic(task, trigger_treatment_list, active_sensitivity, active_specificity, pos_event= 'TBTestPositive', treatment_fraction= 1,
-                        start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
-                           event_name = 'TB Diagnosis Active Simple'):
+def add_active_diagnostic(task, trigger_treatment_list, active_sensitivity, active_specificity, pos_event='TBTestPositive', treatment_fraction= 1,
+                          start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
+                          event_name = 'TB Diagnosis Active Simple'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

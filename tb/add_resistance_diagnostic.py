@@ -1,7 +1,7 @@
-def add_ResistanceDiagnostic(task, trigger_treatment_list, sensitivity, specificity, pos_event= 'TBMDRTestPositive',
-                        neg_event= 'TBMDRTestNegative', defaulters_event= 'TBMDRTestDefault', treatment_fraction= 1,
-                        treatment_fraction_negative_test= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
-                        event_name = 'TB Diagnosis MDR'):
+def add_resistance_diagnostic(task, trigger_treatment_list, sensitivity, specificity, pos_event='TBMDRTestPositive',
+                              neg_event= 'TBMDRTestNegative', defaulters_event= 'TBMDRTestDefault', treatment_fraction= 1,
+                              treatment_fraction_negative_test= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',
+                              event_name = 'TB Diagnosis MDR'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

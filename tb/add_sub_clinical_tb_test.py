@@ -1,6 +1,6 @@
-def add_SubClinicalTBTest(task, trigger_treatment_list, base_sensitivity_active_no_HIV = 0, base_specificity = 0.95,cd4_strata=[100.0, 200.0, 1000.0],
-                           strata_sensitivity = [0.56, 0.49, 0.15 ], subclinical_only= 1.0, pos_event= 'LAM_Positive', neg_event= 'LAM_Negative',
-                           defaulters_event= 'LAM_Default', treatment_fraction= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',event_name = 'TB SubClinical Diagnosis'):
+def add_sub_clinical_tb_test(task, trigger_treatment_list, base_sensitivity_active_no_HIV = 0, base_specificity = 0.95, cd4_strata=[100.0, 200.0, 1000.0],
+                             strata_sensitivity = [0.56, 0.49, 0.15 ], subclinical_only= 1.0, pos_event= 'LAM_Positive', neg_event= 'LAM_Negative',
+                             defaulters_event= 'LAM_Default', treatment_fraction= 1, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout', event_name = 'TB SubClinical Diagnosis'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

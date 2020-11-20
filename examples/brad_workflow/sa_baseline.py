@@ -5,17 +5,17 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
-from tb.add_active_diagnostic import add_ActiveDiagnostic
-from tb.add_hiv_incidence import add_HIVIncidence
-from tb.add_diagnostic_treat_neg import add_DiagnosticTreatNeg
-from tb.add_simple_health_seeking import add_SimpleHealthSeeking
-from tb.add_ramp_diagnostic_treat_neg import add_Ramp_DiagnosticTreatNeg
-from tb.add_cd4_diagnostic import add_cd4diagnostic
+from tb.add_active_diagnostic import add_active_diagnostic
+from tb.add_hiv_incidence import add_hiv_incidence
+from tb.add_diagnostic_treat_neg import add_diagnostic_treat_neg
+from tb.add_simple_health_seeking import add_simple_health_seeking
+from tb.add_ramp_diagnostic_treat_neg import add_ramp_diagnostic_treat_neg
+from tb.add_cd4_diagnostic import add_cd4_diagnostic
 from tb.add_art import add_art
-from tb.add_resistance_diagnostic import add_ResistanceDiagnostic
+from tb.add_resistance_diagnostic import add_resistance_diagnostic
 from tb.add_tb_drug_type import add_tb_drug_type
 from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
-from tb.add_simple_hiv_diagnostic import add_simplehivdiagnostic
+from tb.add_simple_hiv_diagnostic import add_simple_hiv_diagnostic
 from tb.tb_custom_reports import add_tb_report
 from tb_emod_task import TB_EMODTask
 
@@ -99,10 +99,10 @@ def set_coinf_death(simulation, rate):
 # intervention functions
 
 def cpr_sens_spec(task, sensCRP, specCRP):
-    add_ActiveDiagnostic(task, ['HIVTestedNegative'], sensCRP, specCRP, start_day=intervention_day,
-                         pos_event='CRPPosHIVNeg')
-    add_ActiveDiagnostic(task, ['HIVTestedPositive'], sensCRP, specCRP,
-                         start_day=intervention_day, pos_event='CRPPosHIVPos')
+    add_active_diagnostic(task, ['HIVTestedNegative'], sensCRP, specCRP, start_day=intervention_day,
+                          pos_event='CRPPosHIVNeg')
+    add_active_diagnostic(task, ['HIVTestedPositive'], sensCRP, specCRP,
+                          start_day=intervention_day, pos_event='CRPPosHIVPos')
     return {'CRPSensSpec': (sensCRP, specCRP)}
 
 
@@ -202,16 +202,16 @@ add_tbhiv_outbreak(task, 0.05, 'TB')
 task.set_parameter('TB_Slow_Progressor_Rate', 0.007 / 365.0)
 
 # HIV incidence, care seeking, and treatment by guidelines
-add_simplehivdiagnostic(task, ['HappyBirthday'], start_day=art_start, treatment_fraction=0.23,
-                        property_restrictions_list=['Care_Quality:High'])
-add_simplehivdiagnostic(task, ['HappyBirthday'], start_day=art_start, treatment_fraction=0.13,
-                        property_restrictions_list=['Care_Quality:Low'])
-add_cd4diagnostic(task, ['HIVTestedPositive'], start_day=art_start)
+add_simple_hiv_diagnostic(task, ['HappyBirthday'], start_day=art_start, treatment_fraction=0.23,
+                          property_restrictions_list=['Care_Quality:High'])
+add_simple_hiv_diagnostic(task, ['HappyBirthday'], start_day=art_start, treatment_fraction=0.13,
+                          property_restrictions_list=['Care_Quality:Low'])
+add_cd4_diagnostic(task, ['HIVTestedPositive'], start_day=art_start)
 
-add_HIVIncidence(task, hiv_epidemic_start - 1.0, start_day=hiv_epidemic_start)
-add_SimpleHealthSeeking(task, ['Below200'], 'Seek200', seek_200, start_day=art_start, duration=-1)
-add_SimpleHealthSeeking(task, ['Below350'], 'Seek350', seek_350_500, start_day=art_start + 3.0 * 365.0, duration=-1)
-add_SimpleHealthSeeking(task, ['Below500'], 'Seek500', seek_350_500, start_day=art_start + 6.0 * 365.0, duration=-1)
+add_hiv_incidence(task, hiv_epidemic_start - 1.0, start_day=hiv_epidemic_start)
+add_simple_health_seeking(task, ['Below200'], 'Seek200', seek_200, start_day=art_start, duration=-1)
+add_simple_health_seeking(task, ['Below350'], 'Seek350', seek_350_500, start_day=art_start + 3.0 * 365.0, duration=-1)
+add_simple_health_seeking(task, ['Below500'], 'Seek500', seek_350_500, start_day=art_start + 6.0 * 365.0, duration=-1)
 add_art(task, ['Seek200', 'Seek350', 'Seek500'], start_day=art_start)
 
 # set some drug properties
@@ -220,24 +220,24 @@ add_tb_drug_type(task, 'PreDOTSHigh', 180, 0.5, 0.03, 0, 0.10, 0.02)
 add_tb_drug_type(task, 'PreDOTSLow', 180, 0.5, 0.03, 0, 0.10, 0.02)
 add_tb_drug_type(task, 'Universal', 90, 0.8, 0.03, 0.02, 0.10, 0.02)
 
-add_SimpleHealthSeeking(task, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
+add_simple_health_seeking(task, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
                                'TBMDRTestDefault'],
                         'TBTestDOTSLow', low_seek, start_day=burn_initial,
-                        duration=-1, property_restrictions_list=['Care_Quality:Low'])
+                          duration=-1, property_restrictions_list=['Care_Quality:Low'])
 
-add_SimpleHealthSeeking(task, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
+add_simple_health_seeking(task, ['TBActivation', 'TBFailedDrugRegimen', 'TBTestDefault', 'TBTestNegative',
                                'TBMDRTestDefault'],
                         'TBTestDOTSHigh', high_seek, start_day=burn_initial,
-                        duration=-1, property_restrictions_list=['Care_Quality:High'])
+                          duration=-1, property_restrictions_list=['Care_Quality:High'])
 
-add_DiagnosticTreatNeg(task, ['TBTestDOTSHigh'], sens_smear_pos_pre_GH, sens_smear_neg_pre_GH,
-                       treatment_fraction=0.8,
-                       start_day=burn_initial, duration=burn_predots,
-                       property_restrictions_list=['Care_Quality:High'])
-add_DiagnosticTreatNeg(task, ['TBTestDOTSLow'], sens_smear_pos_pre_GL, sens_smear_neg_pre_GL,
-                       treatment_fraction=0.8,
-                       start_day=burn_initial, duration=burn_predots,
-                       property_restrictions_list=['Care_Quality:Low'])
+add_diagnostic_treat_neg(task, ['TBTestDOTSHigh'], sens_smear_pos_pre_GH, sens_smear_neg_pre_GH,
+                         treatment_fraction=0.8,
+                         start_day=burn_initial, duration=burn_predots,
+                         property_restrictions_list=['Care_Quality:High'])
+add_diagnostic_treat_neg(task, ['TBTestDOTSLow'], sens_smear_pos_pre_GL, sens_smear_neg_pre_GL,
+                         treatment_fraction=0.8,
+                         start_day=burn_initial, duration=burn_predots,
+                         property_restrictions_list=['Care_Quality:Low'])
 
 add_tbhiv_treat(task, 'PreDOTSLow', ['TBTestPositive'], start_day=burn_initial, duration=burn_predots,
                 latent_multiplier=0, property_restrictions_list=['Care_Quality:Low'])
@@ -245,44 +245,44 @@ add_tbhiv_treat(task, 'PreDOTSLow', ['TBTestPositive'], start_day=burn_initial, 
 add_tbhiv_treat(task, 'PreDOTSHigh', ['TBTestPositive'], start_day=burn_initial, duration=burn_predots,
                 latent_multiplier=0, property_restrictions_list=['Care_Quality:High'])
 
-add_DiagnosticTreatNeg(task, ['TBTestDOTSHigh'], sens_smear_pos_pre_GH, sens_smear_neg_pre_GH, treatment_fraction=0.8,
-                       start_day=dots_start, duration=genexpert_introduction - dots_start,
-                       property_restrictions_list=['Care_Quality:High'])
-add_DiagnosticTreatNeg(task, ['TBTestDOTSLow'], sens_smear_pos_pre_GL, sens_smear_neg_pre_GL, treatment_fraction=0.8,
-                       start_day=dots_start, duration=genexpert_introduction - dots_start,
-                       property_restrictions_list=['Care_Quality:Low'])
+add_diagnostic_treat_neg(task, ['TBTestDOTSHigh'], sens_smear_pos_pre_GH, sens_smear_neg_pre_GH, treatment_fraction=0.8,
+                         start_day=dots_start, duration=genexpert_introduction - dots_start,
+                         property_restrictions_list=['Care_Quality:High'])
+add_diagnostic_treat_neg(task, ['TBTestDOTSLow'], sens_smear_pos_pre_GL, sens_smear_neg_pre_GL, treatment_fraction=0.8,
+                         start_day=dots_start, duration=genexpert_introduction - dots_start,
+                         property_restrictions_list=['Care_Quality:Low'])
 
-add_Ramp_DiagnosticTreatNeg(task, ['TBTestDOTSHigh'], length_gene_xpert_ramp, sens_smear_pos_GXH, sens_smear_neg_GXH,
-                            sens_smear_pos_pre_GH, sens_smear_neg_pre_GH, 0.8, treatment_fraction=0.8,
-                            pos_event='ProviderOrdersTBTest', pos_event2='ProviderTestNoR',
-                            start_day=genexpert_introduction, duration=-1,
-                            property_restrictions_list=['Care_Quality:High'])
+add_ramp_diagnostic_treat_neg(task, ['TBTestDOTSHigh'], length_gene_xpert_ramp, sens_smear_pos_GXH, sens_smear_neg_GXH,
+                              sens_smear_pos_pre_GH, sens_smear_neg_pre_GH, 0.8, treatment_fraction=0.8,
+                              pos_event='ProviderOrdersTBTest', pos_event2='ProviderTestNoR',
+                              start_day=genexpert_introduction, duration=-1,
+                              property_restrictions_list=['Care_Quality:High'])
 
-add_Ramp_DiagnosticTreatNeg(task, ['TBTestDOTSLow'], length_gene_xpert_ramp, sens_smear_pos_GXL, sens_smear_neg_GXL,
-                            sens_smear_pos_pre_GL, sens_smear_neg_pre_GL, 0.8, treatment_fraction=0.8,
-                            pos_event='ProviderOrdersTBTest', pos_event2='ProviderTestNoR',
-                            start_day=genexpert_introduction, duration=-1,
-                            property_restrictions_list=['Care_Quality:Low'])
+add_ramp_diagnostic_treat_neg(task, ['TBTestDOTSLow'], length_gene_xpert_ramp, sens_smear_pos_GXL, sens_smear_neg_GXL,
+                              sens_smear_pos_pre_GL, sens_smear_neg_pre_GL, 0.8, treatment_fraction=0.8,
+                              pos_event='ProviderOrdersTBTest', pos_event2='ProviderTestNoR',
+                              start_day=genexpert_introduction, duration=-1,
+                              property_restrictions_list=['Care_Quality:Low'])
 
-add_ResistanceDiagnostic(task, ['ProviderOrdersTBTest'], sens_resistance_L, specificity_resistance,
-                         neg_event='TBDS_Positive',
-                         treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
-                         start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:Low'])
+add_resistance_diagnostic(task, ['ProviderOrdersTBTest'], sens_resistance_L, specificity_resistance,
+                          neg_event='TBDS_Positive',
+                          treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
+                          start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:Low'])
 
-add_ResistanceDiagnostic(task, ['ProviderOrdersTBTest'], sens_resistance_H, specificity_resistance,
-                         neg_event='TBDS_Positive',
-                         treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
-                         start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:High'])
+add_resistance_diagnostic(task, ['ProviderOrdersTBTest'], sens_resistance_H, specificity_resistance,
+                          neg_event='TBDS_Positive',
+                          treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
+                          start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:High'])
 
-add_ResistanceDiagnostic(task, ['ProviderTestNoR'], sens_resistance_L_clinical, specificity_resistance_clinical,
-                         neg_event='TBDS_Positive',
-                         treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
-                         start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:Low'])
+add_resistance_diagnostic(task, ['ProviderTestNoR'], sens_resistance_L_clinical, specificity_resistance_clinical,
+                          neg_event='TBDS_Positive',
+                          treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
+                          start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:Low'])
 
-add_ResistanceDiagnostic(task, ['ProviderTestNoR'], sens_resistance_H_clinical, specificity_resistance_clinical,
-                         neg_event='TBDS_Positive',
-                         treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
-                         start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:High'])
+add_resistance_diagnostic(task, ['ProviderTestNoR'], sens_resistance_H_clinical, specificity_resistance_clinical,
+                          neg_event='TBDS_Positive',
+                          treatment_fraction=0.5, treatment_fraction_negative_test=1.0,
+                          start_day=genexpert_introduction, property_restrictions_list=['Care_Quality:High'])
 
 add_tbhiv_treat(task, 'DOTSHQ', ['TBTestPositive', 'TBDS_Positive'], start_day=dots_start,
                 latent_multiplier=0, property_restrictions_list=['Care_Quality:High'])

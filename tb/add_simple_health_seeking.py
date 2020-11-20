@@ -1,5 +1,5 @@
-def add_SimpleHealthSeeking(task, trigger_treatment_list,output_event, probability_per_step, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
-                            black_period= 0, black_trigger= 'Blackout', event_name = 'Simple Health Seeking'):
+def add_simple_health_seeking(task, trigger_treatment_list, output_event, probability_per_step, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
+                              black_period= 0, black_trigger= 'Blackout', event_name = 'Simple Health Seeking'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

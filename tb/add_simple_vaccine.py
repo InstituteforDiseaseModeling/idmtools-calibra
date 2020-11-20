@@ -1,5 +1,5 @@
-def add_SimpleVaccine(task, trigger_treatment_list,initial_efficacy, vaccine_take= 1,vtype = 'AcquisitionBlocking', box_duration= 365, immune_decay= 3650, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
-                            black_period= 0, black_trigger= 'Blackout',event_name = 'Simple Vaccine'):
+def add_simple_vaccine(task, trigger_treatment_list, initial_efficacy, vaccine_take= 1, vtype ='AcquisitionBlocking', box_duration= 365, immune_decay= 3650, start_day=0, duration= -1, property_restrictions_list = [], nodeIDs=[],
+                       black_period= 0, black_trigger= 'Blackout', event_name = 'Simple Vaccine'):
 
     if vtype not in ['AcquisitionBlocking','TransmissionBlocking','MortalityBlocking','Generic']:
          raise ValueError('invalid input for vaccine type')

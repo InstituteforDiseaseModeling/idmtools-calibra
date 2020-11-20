@@ -1,5 +1,5 @@
-def add_simplehivdiagnostic(task, trigger_treatment_list, start_day=0, base_sensitivity= 1.0, base_specificity= 1.0, treatment_fraction= 1.0, daystodiag= 0,
-                        pos_event= 'HIVTestedPositive', neg_event= 'HIVTestedNegative', duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout',event_name = 'HIV Simple Diagnostic'):
+def add_simple_hiv_diagnostic(task, trigger_treatment_list, start_day=0, base_sensitivity= 1.0, base_specificity= 1.0, treatment_fraction= 1.0, daystodiag= 0,
+                              pos_event= 'HIVTestedPositive', neg_event= 'HIVTestedNegative', duration= -1, property_restrictions_list = [], nodeIDs=[], black_period= 0, black_trigger= 'Blackout', event_name = 'HIV Simple Diagnostic'):
 
     event_coord    = { 'class' : 'StandardInterventionDistributionEventCoordinator',
                        'Number_Distributions': -1,

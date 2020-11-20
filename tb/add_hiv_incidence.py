@@ -1,4 +1,4 @@
-def add_HIVIncidence(task, time_offset, reps= -1, interval= 1, start_day=0,  nodeIDs=[], event_name = 'HIV Incidence'):
+def add_hiv_incidence(task, time_offset, reps= -1, interval= 1, start_day=0, nodeIDs=[], event_name ='HIV Incidence'):
 
  # note reps= -1 is repeat forever in DTK
     event_coord    = { 'class' : 'GroupInterventionDistributionEventCoordinatorHIV',
