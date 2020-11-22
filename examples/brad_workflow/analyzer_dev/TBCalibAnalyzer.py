@@ -1,20 +1,9 @@
 import logging
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 import pandas as pd
 import numpy as np
-
-# from dtk.utils.analyzers import default_select_fn, default_group_fn, default_filter_fn
-# from dtk.utils.analyzers.plot import plot_by_channel
 from scipy.special import gammaln
-from functools import reduce
-
-# from calibtool.LL_calculators import gamma_poisson_pandas, beta_binomial_pandas
-# from simtools.Analysis.BaseAnalyzers import BaseAnalyzer
-# from simtools.Analysis.BaseAnalyzers.BaseCalibrationAnalyzer import BaseAnalyzer, BaseCalibrationAnalyzer
-from itertool.analyzers.base_calibration_analyzer import BaseCalibrationAnalyzer
+from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibrationAnalyzer
 
 logger = logging.getLogger(__name__)
 
