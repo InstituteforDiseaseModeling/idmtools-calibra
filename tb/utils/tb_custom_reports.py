@@ -1,4 +1,4 @@
-from reporters.custom import Report_TBHIV_ByAge
+from emodpy.reporters.custom import Report_TBHIV_ByAge
 from dataclasses import field
 
 
