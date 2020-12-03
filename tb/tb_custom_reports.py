@@ -3,7 +3,6 @@ from dataclasses import field
 
 
 class TBReport(Report_TBHIV_ByAge):
-    dll_file: str = field(default="libcustomreport_TBHIV_ByAge.dll")
 
     def add_report(self, max_age_yrs, min_age_yrs, start_year, stop_year, additional_events):
         self._add_report({
