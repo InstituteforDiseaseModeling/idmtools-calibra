@@ -12,7 +12,7 @@ from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
-from examples.helper import download_bamboo_exe
+from examples.helper import download_bamboo_exe, download_reporter
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_active_diagnostic import add_active_diagnostic
@@ -33,11 +33,17 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
 
-platform = Platform('COMPS2')
+plan = EradicationBambooBuilds.TBHIV_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
+    else EradicationBambooBuilds.TBHIV
 
 # Test latest bamboo Eradication.exe (it won't download if exists already)
-exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=EradicationBambooBuilds.TBHIV_WIN)
+exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=plan)
+reporter_plugins = os.path.join(INPUT_PATH, 'bamboo', 'reporter_plugins')
+download_reporter(reporter_plugins,  plan=plan)
+
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task: windows
@@ -55,7 +61,7 @@ a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
 task.common_assets.add_assets([a1, a2])
 
 # Add dll folder
-task.reporters.add_dll_folder(os.path.join(INPUT_PATH, 'dlls'))
+task.reporters.add_dll_folder(reporter_plugins)
 
 #  Add required parameter
 task.set_parameter("Custom_Coordinator_Events", [])
