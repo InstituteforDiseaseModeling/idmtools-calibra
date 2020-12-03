@@ -16,7 +16,7 @@ def download_bamboo_exe(local_dir, platform, plan=EradicationBambooBuilds.MALARI
 
     """
     env = platform.environment
-    exe = "Eradication.exe" if env.lower() == 'belegost' or env.lower() == 'bayesian' else "Eradication"
+    exe = f"Eradication_{plan.name.lower()}.exe" if env.lower() == 'belegost' or env.lower() == 'bayesian' else f"Eradication_{plan.name.lower()}"
     exe_path = os.path.join(local_dir, exe)
     if not os.path.exists(exe_path):
         eradication_path_bamboo = download_latest_bamboo(
