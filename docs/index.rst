@@ -1,10 +1,10 @@
 =====================
-Welcome to |itertool|
+Welcome to |calibra|
 =====================
 
-|itertool| give short description on purpose of library.
+|calibra| give short description on purpose of library.
 
-.. _GitHub: https://github.com/InstituteforDiseaseModeling/itertool
+.. _GitHub: https://github.com/InstituteforDiseaseModeling/idmtools_calibra
 
 
 
@@ -15,4 +15,3 @@ Welcome to |itertool|
    installation
    overview
    idmtools_calibra_index
-   glossary
