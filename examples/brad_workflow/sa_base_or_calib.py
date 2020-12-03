@@ -1,12 +1,14 @@
 import os
 import copy
 import numpy as np
+
 from idmtools.assets import Asset
 from idmtools.core.platform_factory import Platform
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 
+from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
 
@@ -25,7 +27,6 @@ from tb.add_tb_drug_type import add_tb_drug_type
 from tb.add_tbhiv_outbreak import add_tbhiv_outbreak
 from tb.add_simple_hiv_diagnostic import add_simple_hiv_diagnostic
 from tb.tb_custom_reports import add_tb_report
-from tb_emod_task import TB_EMODTask
 from analyzer_dev.CalibSites import SouthAfricaCalibSite
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
@@ -40,12 +41,10 @@ exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, pla
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task: windows
-task = TB_EMODTask.from_files(
+task = EMODTask.from_files(
     eradication_path=exe_path,
     config_path=config_path,
 )
-
-task.legacy_exe = True  # used for TB_EMODTask
 
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
@@ -747,7 +746,7 @@ else:
 
     from idmtools.builders import SimulationBuilder
 
-    fs1 = [ModFn(set_run_number, value=i) for i in range(0, 3)]  # 100
+    fs1 = [ModFn(set_run_number, value=i) for i in range(0, 2)]  # 100
     fs2 = [ModFn(add_drugs, resist) for resist in [0.0, 1.0e-1]]
     fs3 = [ModFn(map_sample_to_model_input, ss) for ss in [subsample]]
 
