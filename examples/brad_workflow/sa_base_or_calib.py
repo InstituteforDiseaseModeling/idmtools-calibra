@@ -2,11 +2,15 @@ import os
 import copy
 import numpy as np
 from idmtools.assets import Asset
+from idmtools.core.platform_factory import Platform
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 
+from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
+
+from examples.helper import download_bamboo_exe
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_active_diagnostic import add_active_diagnostic
@@ -28,9 +32,11 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-# Use Brad's exe
-# [TODO]: download Brad's exe from https://comps.idmod.org/#explore/AssetCollections?filters=Id=a3135297-7e48-ea11-a2c3-c4346bcb1551&offset=0&count=10&layout=502C30&selectedId=a3135297-7e48-ea11-a2c3-c4346bcb1551
-exe_path = os.path.join(INPUT_PATH, 'Eradication_decline.exe')
+
+platform = Platform('COMPS2')
+
+# Test latest bamboo Eradication.exe (it won't download if exists already)
+exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=EradicationBambooBuilds.TBHIV_WIN)
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task: windows
@@ -752,10 +758,6 @@ else:
     builder.count = len(fs1) * len(fs2) * len(fs3)
 
 if __name__ == "__main__":
-    from idmtools.core.platform_factory import Platform
-
-    platform = Platform('COMPS2')
-
     if calibration_on:
         calib_manager.platform = platform
         calib_manager.run_calibration()
