@@ -51,7 +51,8 @@ task = EMODTask.from_files(
     eradication_path=exe_path,
     config_path=config_path,
 )
-
+# for load so report flag
+task.is_linux = False if env.lower() == 'belegost' or env.lower() == 'bayesian' else True
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
@@ -60,7 +61,7 @@ a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.j
 a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
 task.common_assets.add_assets([a1, a2])
 
-# Add dll folder
+# Add reporter folder
 task.reporters.add_dll_folder(reporter_plugins)
 
 #  Add required parameter

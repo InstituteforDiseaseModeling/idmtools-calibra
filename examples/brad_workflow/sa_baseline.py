@@ -1,5 +1,7 @@
 import os
 
+
+
 from idmtools.assets import Asset
 from idmtools.core.platform_factory import Platform
 from idmtools_calibra.utilities.mod_fn import ModFn
@@ -7,8 +9,8 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-
-from examples.helper import download_bamboo_exe
+from emodpy.reporters.custom import Report_TBHIV_ByAge
+from examples.helper import download_bamboo_exe, download_reporter
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
 from tb.add_active_diagnostic import add_active_diagnostic
@@ -28,10 +30,17 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 INPUT_PATH = os.path.join('..', 'inputs')
 INPUT_PATH = os.path.abspath(INPUT_PATH)
 
-platform = Platform('COMPS2')
+platform = Platform('CALCULON')  # switch to BELEGOST with platform = Platform('BELEGOST')
+env = platform.environment
+
+plan = EradicationBambooBuilds.TBHIV_WIN if env.lower() == 'belegost' or env.lower() == 'bayesian' \
+    else EradicationBambooBuilds.TBHIV
 
 # Test latest bamboo Eradication.exe (it won't download if exists already)
-exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=EradicationBambooBuilds.TBHIV_WIN)
+exe_path = download_bamboo_exe(os.path.join(INPUT_PATH, 'bamboo'), platform, plan=plan)
+reporter_plugins = os.path.join(INPUT_PATH, 'bamboo', 'reporter_plugins')
+download_reporter(reporter_plugins,  plan=plan)
+
 config_path = os.path.join(INPUT_PATH, 'tb_config.json')
 
 # Create task
@@ -39,7 +48,7 @@ task = EMODTask.from_files(
     eradication_path=exe_path,
     config_path=config_path,
 )
-
+task.is_linux = False if env.lower() == 'belegost' or env.lower() == 'bayesian' else True
 # Select a campaign
 task.campaign = EMODEmptyCampaign.campaign()
 
@@ -48,8 +57,8 @@ a1 = Asset(os.path.join(INPUT_PATH, 'assets', 'Base_Overlay_SouthAfrica_ReVacc.j
 a2 = Asset(os.path.join(INPUT_PATH, 'assets', 'Trial_Demog_SouthAfrica_3.json'))
 task.common_assets.add_assets([a1, a2])
 
-# Add dll folder
-task.reporters.add_dll_folder(os.path.join(INPUT_PATH, 'dlls'))
+# Add reporter folder
+task.reporters.add_dll_folder(reporter_plugins)
 
 # Add required parameter
 task.set_parameter("Custom_Coordinator_Events", [])
@@ -201,6 +210,14 @@ add_tb_report(task, stop_year=2000,
               additional_events=['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',
                                  'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
                                  'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'])
+
+# Should use following line with new Eradication
+# report = Report_TBHIV_ByAge()
+# report.add_report(200, 0, 0, 200,
+#                  [['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',
+#                     'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
+#                     'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring']])
+# task.reporters.add_reporter(report)
 
 # initial TB outbreak
 add_tbhiv_outbreak(task, 0.05, 'TB')
