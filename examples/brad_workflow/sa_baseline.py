@@ -1,7 +1,5 @@
 import os
 
-
-
 from idmtools.assets import Asset
 from idmtools.core.platform_factory import Platform
 from idmtools_calibra.utilities.mod_fn import ModFn
@@ -9,7 +7,6 @@ from idmtools_calibra.utilities.mod_fn import ModFn
 from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.interventions.emod_empty_campaign import EMODEmptyCampaign
-from emodpy.reporters.custom import Report_TBHIV_ByAge
 from examples.helper import download_bamboo_exe, download_reporter
 
 from tb.add_tbhiv_treat import add_tbhiv_treat
@@ -212,6 +209,7 @@ add_tb_report(task, stop_year=2000,
                                  'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'])
 
 # Should use following line with new Eradication
+# from emodpy.reporters.custom import Report_TBHIV_ByAge
 # report = Report_TBHIV_ByAge()
 # report.add_report(200, 0, 0, 200,
 #                  [['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',

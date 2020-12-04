@@ -395,6 +395,15 @@ add_tb_report(task, stop_year=2000,
                                  'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
                                  'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring'])
 
+# Should use following line with new Eradication
+# from emodpy.reporters.custom import Report_TBHIV_ByAge
+# report = Report_TBHIV_ByAge()
+# report.add_report(200, 0, 0, 200,
+#                  [['TLAM', 'TruePos', 'TruePosHIV', 'B200', 'Bmiddle', 'Seek200', 'Seek350', 'Seek500',
+#                     'CRPPosHIVNeg', 'CRPPosHIVPos', 'B100', 'LAMPosHIVPos', 'LAMPosHIVNeg',
+#                     'HIVTestedNegative', 'HIVTestedPositive', 'TotalPos', 'TBMonitoring']])
+# task.reporters.add_reporter(report)
+
 
 # block of functions to be used in calibration
 
