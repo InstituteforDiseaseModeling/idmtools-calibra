@@ -305,6 +305,7 @@
         "TB_Reduced_Acquire": 1,
         "TB_Reduced_Transmit": 1
       }
-    }
+    },
+    "Base_Infectivity_Distribution": "CONSTANT_DISTRIBUTION"
   }
 }

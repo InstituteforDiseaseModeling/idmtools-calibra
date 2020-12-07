@@ -126,8 +126,8 @@ calib_manager = CalibManager(name='IMIS_default_config',
                              sites=sites,
                              next_point=IMIS(prior, **next_point_kwargs),
                              sim_runs_per_param_set=1,
-                             max_iterations=2,
-                             plotters=plotters.count)
+                             max_iterations=3,
+                             plotters=plotters)
 
 run_calib_args = {'calib_manager': calib_manager}
 

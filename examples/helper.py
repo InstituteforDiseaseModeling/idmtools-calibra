@@ -1,6 +1,7 @@
 import os
 import shutil
-from emodpy.utils import download_latest_bamboo, EradicationBambooBuilds, download_latest_schema
+from emodpy.utils import download_latest_bamboo, EradicationBambooBuilds, download_latest_schema, \
+    download_latest_reporters
 from emod_api.schema import get_schema as gs
 
 
@@ -16,7 +17,7 @@ def download_bamboo_exe(local_dir, platform, plan=EradicationBambooBuilds.MALARI
 
     """
     env = platform.environment
-    exe = "Eradication.exe" if env.lower() == 'belegost' or env.lower() == 'bayesian' else "Eradication"
+    exe = f"Eradication_{plan.name.lower()}.exe" if env.lower() == 'belegost' or env.lower() == 'bayesian' else f"Eradication_{plan.name.lower()}"
     exe_path = os.path.join(local_dir, exe)
     if not os.path.exists(exe_path):
         eradication_path_bamboo = download_latest_bamboo(
@@ -27,7 +28,6 @@ def download_bamboo_exe(local_dir, platform, plan=EradicationBambooBuilds.MALARI
         shutil.move(eradication_path_bamboo, exe_path)
 
     return exe_path
-
 
 def generate_default_config_from_exe(local_dir, platform, plan=EradicationBambooBuilds.MALARIA_WIN):
     """
@@ -114,3 +114,17 @@ def generate_model_config_from_exe(local_dir, platform, plan=EradicationBambooBu
         fs.SchemaConfigBuilder(schema_name=schema_path, config_out=config_path, model=model)
 
     return exe_path, schema_path, config_path
+
+
+def download_reporter(local_dir, plan=EradicationBambooBuilds.MALARIA_WIN):
+    """
+    Check and download reporters from bamboo
+    Args:
+        local_dir: local folder to contain Eradication.exe
+        plan: enum EradicationBambooBuilds
+
+    Returns: None
+
+    """
+
+    download_latest_reporters(plan=plan, scheduled_builds_only=False, out_path=local_dir)
