@@ -60,9 +60,9 @@ def add_cd4_diagnostic(task, trigger_treatment_list, event_200='Below200', event
 
     # add to the listed events
     loc_event_list = [event_200, event_350, event_500, event_above_500]
-    existing_event_list = task.get_parameter('Listed_Events')
+    existing_event_list = task.config.parameters.Listed_Events
     for event in loc_event_list:
-        if event not in existing_event_list:
+        if event not in existing_event_list and event is not None:
             existing_event_list.append(event)
 
     task.set_parameter('Listed_Events', existing_event_list)

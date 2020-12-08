@@ -65,11 +65,11 @@ def add_tb_drug_type(task, drug_name, duration, cure_proportion, death_proportio
                                  TB_Reduced_Transmit=reduced_transmit)
                  }
 
-    current_drug_params = task.get_parameter('TBHIV_Drug_Params')
-    current_drug_params.update(drug_dict)
+    current_drug_params = task.config.parameters.TBHIV_Drug_Params
+    current_drug_params.update_parameters(drug_dict)
     task.set_parameter('TBHIV_Drug_Params', current_drug_params)
 
-    current_drug_names = task.get_parameter('TBHIV_Drug_Types')
+    current_drug_names = task.config.parameters.TBHIV_Drug_Types
     current_drug_names.append(drug_name)
     task.set_parameter('TBHIV_Drug_Types', current_drug_names)
 
