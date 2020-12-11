@@ -251,7 +251,7 @@ def set_run_number(simulation, value):
 def set_hiv_slow(simulation, pro):
     # this is very breakable right now
     tmp_loc = []
-    for i, val in enumerate(simulation.task.get_parameter('parameters')['TB_CD4_Activation_Vector']):
+    for i, val in enumerate(simulation.task.config.parameters.TB_CD4_Activation_Vector):
         if i < 3:
             tmp_loc += [pro * val]
         else:
@@ -263,7 +263,7 @@ def set_hiv_slow(simulation, pro):
 def set_primary_hiv_pro(simulation, pro):
     # this is very breakable right now
     tmp_loc = []
-    for i, val in enumerate(simulation.task.get_parameter('parameters')['TB_CD4_Primary_Progression']):
+    for i, val in enumerate(simulation.task.config.parameters.TB_CD4_Primary_Progression):
         tmp_loc += [pro * val]
     simulation.task.config.parameters.TB_CD4_Primary_Progression = tmp_loc
     return {'TB_CD4_Primary_Progression': tmp_loc}
@@ -430,7 +430,8 @@ def general_sim(erad_path, ep4_scripts):
     exp_name = os.path.split(sys.argv[0])[1]
     experiment = Experiment.from_template(ts, name=exp_name)
 
-    other_assets = AssetCollection.from_id(pl.run())
+    ac = pl.run()
+    other_assets = AssetCollection.from_id(ac, as_copy=True)
     experiment.assets.add_assets(other_assets)
 
     # The last step is to call run() on the ExperimentManager to run the simulations.

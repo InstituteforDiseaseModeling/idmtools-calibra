@@ -65,14 +65,14 @@ def add_tb_drug_type(task, drug_name, duration, cure_proportion, death_proportio
                                  TB_Reduced_Transmit=reduced_transmit)
                  }
 
-    current_drug_params = task.get_parameter("parameters")['TBHIV_Drug_Params']
+    current_drug_params = task.config.parameters.TBHIV_Drug_Params
     current_drug_params[drug_name] = drug_dict[drug_name]
-    task.set_parameter('TBHIV_Drug_Params', current_drug_params)
+    task.config.parameters.TBHIV_Drug_Params = current_drug_params
 
     current_drug_names = task.config.parameters.TBHIV_Drug_Types
     if drug_name not in current_drug_names:
         current_drug_names.append(drug_name)
-        task.set_parameter('TBHIV_Drug_Types', current_drug_names)
+        task.config.parameters.TBHIV_Drug_Types = current_drug_names
 
 
 def converttorate(proportion, interval):
@@ -113,11 +113,11 @@ def add_tb_drug(task, drug_name, rate_cure=None, rate_curehiv=None, rate_curemdr
                                  TB_Drug_Primary_Decay_Time_Constant=duration, TB_Reduced_Acquire=reduced_acquire,
                                  TB_Reduced_Transmit=reduced_transmit)}
 
-    current_drug_params = task.get_parameter("parameters")['TBHIV_Drug_Params']
+    current_drug_params = task.config.parameters.TBHIV_Drug_Params
     current_drug_params[drug_name] = drug_dict[drug_name]
-    task.set_parameter('TBHIV_Drug_Params', current_drug_params)
+    task.config.parameters.TBHIV_Drug_Params = current_drug_params
 
     current_drug_names = task.config.parameters.TBHIV_Drug_Types
     if drug_name not in current_drug_names:
         current_drug_names.append(drug_name)
-        task.set_parameter('TBHIV_Drug_Types', current_drug_names)
+        task.config.parameters.TBHIV_Drug_Types = current_drug_names
