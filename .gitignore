@@ -172,4 +172,12 @@ examples/IMIS/*.log
 examples/IMIS/IMIS_simple/
 examples/IMIS/IMIS_default_config/
 examples/IMIS/IMIS_default_config_backup_*
+examples/brad_workflow_new/default_config.json
+examples/*/COMPS_ID
+examples/*/COMPS_log.log
+examples/brad_workflow_new/campaign.json
+examples/brad_workflow_new/download/Eradication
+examples/brad_workflow_new/download/schema.json
+examples/*/idmtools.log
+examples/*/requirements_updated.txt
 *buildlog

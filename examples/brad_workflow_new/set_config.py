@@ -41,9 +41,9 @@ def set_config( config, tmp_loc = [], rate= 1.0, infectivity = 1.0 ):
     config.parameters.TB_Immune_Loss_Fraction = 0
     config.parameters.TB_Inactivation_Rate = 1e-9
     config.parameters.TB_Latent_Cure_Rate = 1.0e-09
-    config.parameters.TB_Slow_Progressor_Rate = 2.8e-5
-    config.parameters.TB_Smear_Negative_Infectivity_Multiplier = 0.20
-    config.parameters.TB_Active_Presymptomatic_Infectivity_Multiplier = 0.0011
+    config.parameters.TB_Slow_Progressor_Rate = 0.007/365.0
+    config.parameters.TB_Smear_Negative_Infectivity_Multiplier = 0.34604
+    config.parameters.TB_Active_Presymptomatic_Infectivity_Multiplier = 0.34604 * 0.3318
     config.parameters.TB_Smear_Negative_Mortality_Multiplier = 0.30
     config.parameters.TB_Smear_Positive_Fraction_Adult = 0.65
     config.parameters.TB_Smear_Positive_Fraction_Child = 0.25
@@ -51,7 +51,7 @@ def set_config( config, tmp_loc = [], rate= 1.0, infectivity = 1.0 ):
     config.parameters.Transmission_Blocking_Immunity_Duration_Before_Decay = 0
     config.parameters.TB_MDR_Fitness_Multiplier = 0.5
     config.parameters.TB_Presymptomatic_Cure_Rate = 0
-    config.parameters.TB_Presymptomatic_Rate = 0.006
+    config.parameters.TB_Presymptomatic_Rate = 0.01165
     config.parameters.TB_Relapsed_to_Active_Rate = 0.012
     config.parameters.Acute_Duration_In_Months = 1
     config.parameters.CD4_Time_Step = 365
@@ -94,20 +94,10 @@ def set_config( config, tmp_loc = [], rate= 1.0, infectivity = 1.0 ):
     config.parameters.Enable_Demographics_Risk = 1
     config.parameters.Enable_Maternal_Infection_Transmission = 0
     config.parameters.Enable_Natural_Mortality = 1
-    # config.parameters.TBHIV_Drug_Types = ["ACFDOTS",
-    #   "DOTSMDR",
-    #   "PreDOTSHigh",
-    #   "PreDOTSLow",
-    #   "Universal",
-    #   "DOTSHQ",
-    #   "DOTSLQ"]
-    # config.parameters.TBHIV_Drug_Params = ["ACFDOTS",
-    #   "DOTSMDR",
-    #   "PreDOTSHigh",
-    #   "PreDOTSLow",
-    #   "Universal",
-    #   "DOTSHQ",
-    #   "DOTSLQ"]
+    #config.parameters.TBHIV_Drug_Types = ["ACFDOTS"]
+
+    config.parameters.TBHIV_Drug_Types = ["ACFDOTS", "DOTSMDR", "PreDOTSHigh", "PreDOTSLow", "Universal", "DOTSHQ", "DOTSLQ"]
+    # config.parameters.TBHIV_Drug_Params = ["ACFDOTS", "DOTSMDR", "PreDOTSHigh", "PreDOTSLow", "Universal", "DOTSHQ","DOTSLQ"]
 
     return config
 
