@@ -458,6 +458,6 @@ if __name__ == "__main__":
     # TBD: user should be allowed to specify (override default) erad_path and input_path from command line
     plan = EradicationBambooBuilds.TBHIV
     print("Retrieving Eradication and schema.json from Bamboo...")
-    # get_model_files(plan, manifest)
+    get_model_files(plan, manifest)
     print("...done.")
     run_test(manifest.eradication_path)
