@@ -57,6 +57,13 @@ def update_sim_random_seed(simulation, value):
     return {"Run_Number": value}
 
 
+def cpr_sens_spec(camp, sensCRP, specCRP):
+    import emodpy_tbhiv.interventions.active_diagnostic as ad
+    camp.add(ad.ActiveDiagnostic(camp, ['HIVTestedNegative'], sensCRP, specCRP, pos_event='CRPPosHIVNeg', start_day=params.intervention_day))
+    camp.add(ad.ActiveDiagnostic(camp, ['HIVTestedPositive'], sensCRP, specCRP, pos_event='CRPPosHIVPos', start_day=params.intervention_day))
+    return camp
+
+
 def add_drugs(simulation, resist_pro):
     add_tb_drug_type(simulation.task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
     add_tb_drug_type(simulation.task, 'DOTSLQ', 180.0, 0.5, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
@@ -222,6 +229,8 @@ def build_camp():
     camp.add(treat.TBHIVDrugTreatment(camp, ['TBMDRTestPositive'], 'DOTSMDR', start_day=params.dots_start,
                                       latent_multiplier=0))
 
+    # cpr_sens_spec(camp, params.CRP_Sensitivity, params.CRP_Specificity)
+
     return camp
 
 
@@ -339,7 +348,7 @@ def general_sim(erad_path, ep4_scripts):
 
     # Create a platform
     # Show how to dynamically set priority and node_group
-    platform = Platform("Calculon")
+    platform = Platform("CALCULON")
 
     pl = RequirementsToAssetCollection(platform, requirements_path=manifest.requirements)
 
@@ -374,7 +383,7 @@ def general_sim(erad_path, ep4_scripts):
         param_custom_cb=set_param_fn,
         demog_builder=None,
         # here we already loaded demo files to Assets and add filename to config's Demographics_Filenames
-        plugin_report=report
+        plugin_report=None
     )
     print("Adding asset dir...")
     task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
