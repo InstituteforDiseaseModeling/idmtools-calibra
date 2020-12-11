@@ -15,16 +15,13 @@ from idmtools.entities.experiment import Experiment
 from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools_platform_comps.utils.python_requirements_ac.requirements_to_asset_collection import \
     RequirementsToAssetCollection
-from idmtools_models.templated_script_task import get_script_wrapper_unix_task
 
 # emodpy
 from emodpy.emod_task import EMODTask
-import emodpy.emod_task as emod_task
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.bamboo import get_model_files
 from emodpy.reporters.custom import Report_TBHIV_ByAge
 
-import emod_api.campaign as camp
 
 import params
 import set_config
