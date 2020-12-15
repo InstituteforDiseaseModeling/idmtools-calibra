@@ -1,10 +1,10 @@
 import json
-import os
 import copy
 import pathlib
 from functools import partial
 
 import numpy as np
+from emodpy import emod_task
 from emodpy.bamboo import get_model_files
 from emodpy.emod_task import EMODTask
 from emodpy.reporters.custom import Report_TBHIV_ByAge
@@ -19,10 +19,8 @@ from examples.brad_workflow_new import manifest, set_config, params
 from examples.brad_workflow_new.analyzer_dev.CalibSites import SouthAfricaCalibSite
 
 from idmtools_calibra import calib_manager
-from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
-from idmtools_calibra.utilities.mod_fn import ModFn
 
 from tb.add_tb_drug_type import add_tb_drug_type, add_tb_drug
 
@@ -31,6 +29,7 @@ sites = [SouthAfricaCalibSite()]  # yeah its plural
 initial_pop = 10000
 verbose = False
 calibration_on = True
+
 
 # sweep Run_Number
 def update_sim_random_seed(simulation, value):
@@ -46,9 +45,11 @@ def cpr_sens_spec(camp, sensCRP, specCRP):
                                  start_day=params.intervention_day))
     return camp
 
+
 # sweep drugs
 def add_drugs(simulation, resist_pro):
     return add_drugs_calib(simulation.task, resist_pro)
+
 
 def add_drugs_calib(task, resist_pro):
     add_tb_drug_type(task, 'DOTSHQ', 180.0, 0.8, 0.03, resist_pro, 0.10, 0.02, mdr_cure_proportion=0.1)
@@ -83,8 +84,9 @@ def set_tbhiv_drup_params_from_schema(config, manifest):
 
     config.parameters.TBHIV_Drug_Params = tbhivdp_map
 
+
 # not needed, but if you want to read drug params from file, this is the way to do it
-def set_tbhiv_drup_params_from_file(config, manifest):
+def set_tbhiv_drup_params_from_file(config, my_manifest):
     import emod_api.config.default_from_schema_no_validation as dfs
 
     tbhivdp_map = {}
@@ -93,7 +95,7 @@ def set_tbhiv_drup_params_from_file(config, manifest):
         drugs_key = list(data['TBHIV_Drug_Params'])
         drugs = data['TBHIV_Drug_Params']
         for drug_key, drug_value in drugs.items():
-            tbhivdp = dfs.schema_to_config_subnode(manifest.schema_file, ["config", "TBHIV_SIM", "TBHIV_Drug_Params",
+            tbhivdp = dfs.schema_to_config_subnode(my_manifest.schema_file, ["config", "TBHIV_SIM", "TBHIV_Drug_Params",
                                                                           "<tb_drug_name_goes_here>"])
             for k, v in drug_value.items():
                 setattr(tbhivdp.parameters, k, v)
@@ -101,6 +103,7 @@ def set_tbhiv_drup_params_from_file(config, manifest):
             tbhivdp_map[drug_key] = tbhivdp.parameters
 
     config.parameters.TBHIV_Drug_Params = tbhivdp_map
+
 
 def set_param_fn(config):
     """
@@ -269,17 +272,18 @@ def build_demog():
     """
     Build a demographics input file for the DTK using emod_api.
     Right now this function creates the file and returns the filename. If calling code just needs an asset that's fine.
-    Also right now this function takes care of the config updates that are required as a result of specific demog settings. We do NOT want the emodpy-disease developers to have to know that. It needs to be done automatically in emod-api as much as possible.
+    Also right now this function takes care of the config updates that are required as a result of specific demog settings.
+    We do NOT want the emodpy-disease developers to have to know that. It needs to be done automatically in emod-api as much as possible.
     TBD: Pass the config (or a 'pointer' thereto) to the demog functions or to the demog class/module.
 
     """
     import emodpy_tbhiv.demographics.TBHIVDemographics as Demographics  # OK to call into emod-api
-    import emod_api.demographics.DemographicsTemplates as DT
 
     # demog = Demographics.fromBasicNode( lat=0, lon=0, pop=10000, name=1, forced_id=1 )
     demog = Demographics.fromData(pop=10000, filename_male=manifest.males, filename_female=manifest.females)
 
     return demog
+
 
 def set_primary_hiv_pro(task, pro):
     # this is very breakable right now
@@ -305,11 +309,11 @@ def update_more_config(task):
     else:
         task.config.parameters.Simulation_Duration = params.burn_initial + params.burn_predots + params.To_end_from_DOTS
 
-    #task.set_parameter('Base_Population_Scale_Factor', initial_pop) not in schema anymore
+    # task.set_parameter('Base_Population_Scale_Factor', initial_pop) not in schema anymore
     return task
 
 
-paramemters = [
+parameters = [
     {
         'Name': 'Base_Infectivity_Constant',
         'Dynamic': True,
@@ -471,8 +475,8 @@ paramemters = [
 ]
 
 if verbose:
-    print([a['Name'] for a in paramemters])
-    print('Number params', len(paramemters))
+    print([a['Name'] for a in parameters])
+    print('Number params', len(parameters))
 
 
 def set_slow_seek(task, duration):
@@ -548,7 +552,7 @@ def map_sample_to_model_input(simulation, sample):
     It is important to note that the sample may be shared by several isntances of this function.
     Therefore it is important to deepcopy the sample at the beginning if we intend to modify it (by calling .pop() for example).
        sample = copy.deepcopy(sample)
-    :param cb: The config builder representing the model inputs for this particular simulation
+    :param simulation: The simulation
     :param sample: The sample containing a values for all the params. e.g. {'Clinical Fever Threshold High':1, ... }
     :return: A dictionary containing the tags that will be attached to the simulation
     """
@@ -558,7 +562,7 @@ def map_sample_to_model_input(simulation, sample):
     sample = copy.deepcopy(sample)
 
     # do the simple mappings first
-    for p in paramemters:
+    for p in parameters:
         if 'MapTo' in p:
             if p['Name'] not in sample:
                 print('Warning: %s not in sample, perhaps resuming previous iteration' % p['Name'])
@@ -629,9 +633,14 @@ def map_sample_to_model_input(simulation, sample):
     tags.update(
         {
             'TB_Smear_Negative_Infectivity_Multiplier': simulation.task.config.parameters.TB_Smear_Negative_Infectivity_Multiplier})
-            #'Base_Population_Scale_Factor': simulation.task.config.parameters.Base_Population_Scale_Factor}) # not in schema
+    # 'Base_Population_Scale_Factor': simulation.task.config.parameters.Base_Population_Scale_Factor}) # not in schema
 
     return tags
+
+
+def ep4_fn(task):
+    task = emod_task.add_ep4_from_path(task, manifest.ep4_path)
+    return task
 
 
 def constrain_sample(sample):
@@ -668,7 +677,7 @@ def constrain_sample(sample):
 
 def calib_run(task):
     volume_fraction = 0.001  # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
-    num_params = len([p for p in paramemters if p['Dynamic']])
+    num_params = len([p for p in parameters if p['Dynamic']])
 
     if num_params == 0:
         warning_note = \
@@ -680,7 +689,7 @@ def calib_run(task):
 
     r = OptimTool.get_r(num_params, volume_fraction)
 
-    optimtool = OptimTool(paramemters,
+    optimtool = OptimTool(parameters,
                           constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
                           mu_r=r,
                           # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
@@ -783,7 +792,6 @@ def general_sim(erad_path, ep4_scripts):
         from idmtools.entities.experiment import Experiment
         from idmtools.builders import SimulationBuilder
 
-
         # subsample is the fixed part. If varying params that were in calibration, only fix the subsample that you wish to fix and use a separate
         # ModFn for the varying part. Don't put both though, behavior is unclear in that case.
         # Note in general can grab subsample from the CalibManager.json
@@ -809,7 +817,7 @@ def general_sim(erad_path, ep4_scripts):
 
         # Create simulation sweep with builder
         builder = SimulationBuilder()
-        builder.add_sweep_definition(update_sim_random_seed, range(0, 2) )
+        builder.add_sweep_definition(update_sim_random_seed, range(0, 2))
         builder.add_sweep_definition(add_drugs, [0.0, 1.0e-1])
         builder.add_sweep_definition(map_sample_to_model_input, [subsample])
 
@@ -834,9 +842,9 @@ def run_calib(erad_path):
 if __name__ == "__main__":
     # Create a platform
     platform = Platform("CALCULON")
-    #platform = Platform("SLURM2")
+    # platform = Platform("SLURM2")
     # bamboo plan name
     plan = EradicationBambooBuilds.TBHIV
-    #download eradication and schema from bamboo, you can comment out get_model_files once you download files to local in next run
-    #get_model_files(plan, manifest)
+    # download eradication and schema from bamboo, you can comment out get_model_files once you download files to local in next run
+    get_model_files(plan, manifest)
     run_calib(manifest.eradication_path)
