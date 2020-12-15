@@ -380,7 +380,7 @@ def general_sim(erad_path, ep4_scripts):
         param_custom_cb=set_param_fn,
         demog_builder=None,
         # here we already loaded demo files to Assets and add filename to config's Demographics_Filenames
-        plugin_report=None
+        plugin_report=report
     )
     print("Adding asset dir...")
     task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
