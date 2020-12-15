@@ -282,7 +282,7 @@ def set_coinf_death(simulation, rate):
 
 def modify_infectivity(simulation, infectivity):
     simulation.task.config.parameters.Base_Infectivity_Constant = infectivity
-    return {'Base_Infectivity': infectivity}
+    return {'Base_Infectivity_Constant': infectivity}
 
 
 def update_more_config(task):
@@ -341,14 +341,8 @@ def general_sim(erad_path, ep4_scripts):
     This function is designed to be a parameterized version of the sequence of things we do 
     every time we run an emod experiment. 
     """
-    # print_params()
 
-    # Create a platform
-    # Show how to dynamically set priority and node_group
-    platform = Platform("CALCULON")
-
-    # create EMODTask 
-    print("Creating EMODTask (from files)...")
+    # create report
     report = Report_TBHIV_ByAge()
     # we can report all following events. they are listed in console "Campaign is publishing the following events"
     report.add_report(200, 0, 0, 200, [
@@ -370,9 +364,10 @@ def general_sim(erad_path, ep4_scripts):
 
     report.asset_dir = manifest.plugins_folder
 
+    # create EMODTask
     task = EMODTask.from_default2(
         config_path='my_config.json',
-        eradication_path=manifest.eradication_path,
+        eradication_path=erad_path,
         campaign_builder=build_camp,
         schema_path=manifest.schema_file,
         param_custom_cb=set_param_fn,
@@ -400,23 +395,15 @@ def general_sim(erad_path, ep4_scripts):
             task.common_assets.add_asset(pathed_asset)
 
     # Create simulation sweep with builder
-    fs1 = [ModFn(set_run_number, value=g) for g in range(0, 10)]
-    fs2 = [ModFn(set_primary_hiv_pro, v) for v in [1.5]]
-    fs3 = [ModFn(set_hiv_slow, v) for v in [4]]
-    fs4 = [ModFn(add_drugs, d) for d in [0.0]]
-    fs5 = [ModFn(set_coinf_death, dd) for dd in [1.2e-3]]
-    fs6 = [ModFn(modify_infectivity, v) for v in [0.030]]
-
     builder = SimulationBuilder()
-    builder.sweeps.append(fs1)
-    builder.sweeps.append(fs2)
-    builder.sweeps.append(fs3)
-    builder.sweeps.append(fs4)
-    builder.sweeps.append(fs5)
-    builder.sweeps.append(fs6)
-    builder.add_sweep_definition(update_sim_random_seed, range(params.nSims))
-    builder.count = len(fs1) * len(fs2) * len(fs3) * len(fs4) * len(fs5) * len(fs6)
+    builder.add_sweep_definition(update_sim_random_seed, range(0, 10))
+    builder.add_sweep_definition(set_primary_hiv_pro, [1.5])
+    builder.add_sweep_definition(set_hiv_slow, [4])
+    builder.add_sweep_definition(add_drugs, [0.0])
+    builder.add_sweep_definition(set_coinf_death, [1.2e-3])
+    builder.add_sweep_definition(modify_infectivity, [0.030])
 
+    # create TemplatedSimulations for builder
     ts = TemplatedSimulations(base_task=task)
     ts.add_builder(builder)
 
@@ -445,16 +432,11 @@ def general_sim(erad_path, ep4_scripts):
 
     # Check result
     sys.exit(0 if experiment.succeeded else -1)
-    if not experiment.succeeded:
-        print(f"Experiment {experiment.uid} failed.\n")
-        exit()
-
     print(f"Experiment {experiment.uid} succeeded.")
 
     # Save experiment id to file
     with open("COMPS_ID", "w") as fd:
         fd.write(experiment.uid.hex)
-    print()
     print(experiment.uid.hex)
 
 
@@ -463,9 +445,10 @@ def run_test(erad_path):
 
 
 if __name__ == "__main__":
-    # TBD: user should be allowed to specify (override default) erad_path and input_path from command line
+    # Create a platform
+    platform = Platform("CALCULON")
+    # bamboo plan name
     plan = EradicationBambooBuilds.TBHIV
-    print("Retrieving Eradication and schema.json from Bamboo...")
+    #download eradication and schema from bamboo, you can comment out get_model_files once you download to local in next run
     get_model_files(plan, manifest)
-    print("...done.")
     run_test(manifest.eradication_path)

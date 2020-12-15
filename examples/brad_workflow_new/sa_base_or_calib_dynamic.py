@@ -32,12 +32,7 @@ initial_pop = 10000
 verbose = False
 calibration_on = True
 
-
-def update_sim_bic(simulation, value):
-    simulation.task.config.parameters.Base_Infectivity_Constant = value * 0.1
-    return {"Base_Infectivity": value}
-
-
+# sweep Run_Number
 def update_sim_random_seed(simulation, value):
     simulation.task.config.parameters.Run_Number = value
     return {"Run_Number": value}
@@ -51,7 +46,7 @@ def cpr_sens_spec(camp, sensCRP, specCRP):
                                  start_day=params.intervention_day))
     return camp
 
-
+# sweep drugs
 def add_drugs(simulation, resist_pro):
     return add_drugs_calib(simulation.task, resist_pro)
 
@@ -88,6 +83,24 @@ def set_tbhiv_drup_params_from_schema(config, manifest):
 
     config.parameters.TBHIV_Drug_Params = tbhivdp_map
 
+# not needed, but if you want to read drug params from file, this is the way to do it
+def set_tbhiv_drup_params_from_file(config, manifest):
+    import emod_api.config.default_from_schema_no_validation as dfs
+
+    tbhivdp_map = {}
+    with open("drug.json") as f:
+        data = json.load(f)
+        drugs_key = list(data['TBHIV_Drug_Params'])
+        drugs = data['TBHIV_Drug_Params']
+        for drug_key, drug_value in drugs.items():
+            tbhivdp = dfs.schema_to_config_subnode(manifest.schema_file, ["config", "TBHIV_SIM", "TBHIV_Drug_Params",
+                                                                          "<tb_drug_name_goes_here>"])
+            for k, v in drug_value.items():
+                setattr(tbhivdp.parameters, k, v)
+            tbhivdp.parameters.finalize()
+            tbhivdp_map[drug_key] = tbhivdp.parameters
+
+    config.parameters.TBHIV_Drug_Params = tbhivdp_map
 
 def set_param_fn(config):
     """
@@ -268,13 +281,6 @@ def build_demog():
 
     return demog
 
-
-# Parameter setting functions
-def set_run_number(simulation, value):
-    simulation.task.config.parameters.Run_Number = value
-    return {'Run_Number': value}
-
-
 def set_primary_hiv_pro(task, pro):
     # this is very breakable right now
     tmp_loc = []
@@ -285,6 +291,7 @@ def set_primary_hiv_pro(task, pro):
 
 
 def update_more_config(task):
+    # update demographics file in config
     task.config.parameters.Demographics_Filenames = ["Trial_Demog_SouthAfrica_3.json",
                                                      'Base_Overlay_SouthAfrica_ReVacc.json']
 
@@ -302,31 +309,11 @@ def update_more_config(task):
     return task
 
 
-# not needed, but if you want to read drug params from file, this is the way to do it
-def set_tbhiv_drup_params_from_file(config, manifest):
-    import emod_api.config.default_from_schema_no_validation as dfs
-
-    tbhivdp_map = {}
-    with open("drug.json") as f:
-        data = json.load(f)
-        drugs_key = list(data['TBHIV_Drug_Params'])
-        drugs = data['TBHIV_Drug_Params']
-        for drug_key, drug_value in drugs.items():
-            tbhivdp = dfs.schema_to_config_subnode(manifest.schema_file, ["config", "TBHIV_SIM", "TBHIV_Drug_Params",
-                                                                          "<tb_drug_name_goes_here>"])
-            for k, v in drug_value.items():
-                setattr(tbhivdp.parameters, k, v)
-            tbhivdp.parameters.finalize()
-            tbhivdp_map[drug_key] = tbhivdp.parameters
-
-    config.parameters.TBHIV_Drug_Params = tbhivdp_map
-
-
 paramemters = [
     {
-        'Name': 'Base_Infectivity',
+        'Name': 'Base_Infectivity_Constant',
         'Dynamic': True,
-        'MapTo': 'Base_Infectivity',
+        'MapTo': 'Base_Infectivity_Constant',
         'Guess': 0.028,
         'Min': 0.013,
         'Max': 0.035
@@ -722,9 +709,7 @@ def general_sim(erad_path, ep4_scripts):
     This function is designed to be a parameterized version of the sequence of things we do
     every time we run an emod experiment.
     """
-    platform = Platform("CALCULON")
-
-    # Add custom report
+    # Define custom report class
     report = Report_TBHIV_ByAge()
 
     # we can report all following events. they are listed in console "Campaign is publishing the following events"
@@ -744,14 +729,14 @@ def general_sim(erad_path, ep4_scripts):
         'Below350',
         'TBTestDefault',
         'TBMDRTestDefault'])
-
+    # add reporter_plugin dir for load needed reporter plugin files
     report.asset_dir = manifest.plugins_folder
 
     # create EMODTask
-    print("Creating EMODTask (from files)...")
+    print("Creating EMODTask")
     task = EMODTask.from_default2(
         config_path='my_config.json',
-        eradication_path=manifest.eradication_path,
+        eradication_path=erad_path,
         campaign_builder=build_camp,
         schema_path=manifest.schema_file,
         param_custom_cb=set_param_fn,
@@ -760,9 +745,10 @@ def general_sim(erad_path, ep4_scripts):
         plugin_report=report
     )
 
-    print("Adding asset dir...")
+    print("Adding other asset files from local Assets dir")
     task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
 
+    # update more config parameters
     update_more_config(task)
 
     # set some drug properties
@@ -772,6 +758,7 @@ def general_sim(erad_path, ep4_scripts):
     add_tb_drug_type(task, 'PreDOTSLow', 180, 0.5, 0.03, 0, 0.10, 0.02)
     add_tb_drug_type(task, 'Universal', 90, 0.8, 0.03, 0.02, 0.10, 0.02)
 
+    # if you have non default pre/post process.py, add with following code to simulation in COMPS's Assets/python dir
     if ep4_scripts is not None:
         for asset in ep4_scripts:
             pathed_asset = Asset(pathlib.PurePath.joinpath(manifest.ep4_path, asset), relative_path="python")
@@ -796,14 +783,12 @@ def general_sim(erad_path, ep4_scripts):
         from idmtools.entities.experiment import Experiment
         from idmtools.builders import SimulationBuilder
 
-        # create TemplatedSimulations for sweep
-        ts = TemplatedSimulations(base_task=task)
 
         # subsample is the fixed part. If varying params that were in calibration, only fix the subsample that you wish to fix and use a separate
         # ModFn for the varying part. Don't put both though, behavior is unclear in that case.
         # Note in general can grab subsample from the CalibManager.json
         subsample = {'ART Factor': 1.0,
-                     'Base_Infectivity': 0.032287,
+                     'Base_Infectivity_Constant': 0.032287,
                      'CD4_aq_200_300_rel': 4.434,
                      'CD4_aq_300_400_rel': 2.0,
                      'CD4_aq_400_500_rel': 1.0,
@@ -822,26 +807,20 @@ def general_sim(erad_path, ep4_scripts):
                      'TB_Fast_Progressor_Fraction_Adult': 0.15,
                      "TB_Slow_Progressor_Rate": 1.5425e-05}
 
-        fs1 = [ModFn(set_run_number, value=i) for i in range(0, 2)]  # 100
-        fs2 = [ModFn(add_drugs, resist) for resist in [0.0, 1.0e-1]]
-        fs3 = [ModFn(map_sample_to_model_input, ss) for ss in [subsample]]
-
+        # Create simulation sweep with builder
         builder = SimulationBuilder()
-        builder.sweeps.append(fs1)
-        builder.sweeps.append(fs2)
-        builder.sweeps.append(fs3)
-        builder.count = len(fs1) * len(fs2) * len(fs3)
+        builder.add_sweep_definition(update_sim_random_seed, range(0, 2) )
+        builder.add_sweep_definition(add_drugs, [0.0, 1.0e-1])
+        builder.add_sweep_definition(map_sample_to_model_input, [subsample])
+
+        # create TemplatedSimulations for builder
+        ts = TemplatedSimulations(base_task=task)
         ts.add_builder(builder)
 
         # Create Experiment
         exp_name = 'TB SA experiment'
         experiment = Experiment(name=exp_name)
 
-        # ac = '796487a2-323e-eb11-a2dd-c4346bcb7271' #emod-api -1.3 prod
-        ac = '015db7d4-913b-eb11-a2c2-f0921c167862'  # emod-api 1.3  stage
-        # other_assets = AssetCollection.from_id(ac, as_copy=True)
-        # experiment.assets.add_assets(other_assets)
-        # Add simulation using templates
         experiment.simulations = ts
 
         # run experiment
@@ -853,9 +832,11 @@ def run_calib(erad_path):
 
 
 if __name__ == "__main__":
+    # Create a platform
+    platform = Platform("CALCULON")
+    #platform = Platform("SLURM2")
+    # bamboo plan name
     plan = EradicationBambooBuilds.TBHIV
-    print("Retrieving Eradication and schema.json from Bamboo...")
-    get_model_files(plan, manifest)
-    print("...done.")
-
+    #download eradication and schema from bamboo, you can comment out get_model_files once you download files to local in next run
+    #get_model_files(plan, manifest)
     run_calib(manifest.eradication_path)
