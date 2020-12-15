@@ -347,8 +347,6 @@ def general_sim(erad_path, ep4_scripts):
     # Show how to dynamically set priority and node_group
     platform = Platform("CALCULON")
 
-    pl = RequirementsToAssetCollection(platform, requirements_path=manifest.requirements)
-
     # create EMODTask 
     print("Creating EMODTask (from files)...")
     report = Report_TBHIV_ByAge()
@@ -436,6 +434,8 @@ def general_sim(erad_path, ep4_scripts):
     exp_name = os.path.split(sys.argv[0])[1]
     experiment = Experiment.from_template(ts, name=exp_name)
 
+    # add emod-api to COMPS's Assets
+    pl = RequirementsToAssetCollection(platform, requirements_path=manifest.requirements)
     ac = pl.run()
     other_assets = AssetCollection.from_id(ac, as_copy=True)
     experiment.assets.add_assets(other_assets)
@@ -444,6 +444,7 @@ def general_sim(erad_path, ep4_scripts):
     experiment.run(wait_until_done=True, platform=platform)
 
     # Check result
+    sys.exit(0 if experiment.succeeded else -1)
     if not experiment.succeeded:
         print(f"Experiment {experiment.uid} failed.\n")
         exit()
