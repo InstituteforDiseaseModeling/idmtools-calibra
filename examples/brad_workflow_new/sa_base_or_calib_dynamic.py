@@ -638,11 +638,6 @@ def map_sample_to_model_input(simulation, sample):
     return tags
 
 
-def ep4_fn(task):
-    task = emod_task.add_ep4_from_path(task, manifest.ep4_path)
-    return task
-
-
 def constrain_sample(sample):
     """
     This function is called on every samples and allow the user to edit them before they are passed
@@ -713,7 +708,12 @@ def calib_run(task):
     calib_manager.run_calibration()
 
 
-def general_sim(erad_path, ep4_scripts):
+def ep4_fn(task):
+    task = emod_task.add_ep4_from_path(task, manifest.ep4_path)
+    return task
+
+
+def run_calib(erad_path):
     """
     This function is designed to be a parameterized version of the sequence of things we do
     every time we run an emod experiment.
@@ -749,6 +749,7 @@ def general_sim(erad_path, ep4_scripts):
         campaign_builder=build_camp,
         schema_path=manifest.schema_file,
         param_custom_cb=set_param_fn,
+        ep4_custom_cb=ep4_fn,
         demog_builder=None,
         # here we already loaded demo files to Assets and add filename to config's Demographics_Filenames
         plugin_report=report
@@ -766,12 +767,6 @@ def general_sim(erad_path, ep4_scripts):
     add_tb_drug_type(task, 'PreDOTSHigh', 180, 0.5, 0.03, 0, 0.10, 0.02)
     add_tb_drug_type(task, 'PreDOTSLow', 180, 0.5, 0.03, 0, 0.10, 0.02)
     add_tb_drug_type(task, 'Universal', 90, 0.8, 0.03, 0.02, 0.10, 0.02)
-
-    # if you have non default pre/post process.py, add with following code to simulation in COMPS's Assets/python dir
-    if ep4_scripts is not None:
-        for asset in ep4_scripts:
-            pathed_asset = Asset(pathlib.PurePath.joinpath(manifest.ep4_path, asset), relative_path="python")
-            task.common_assets.add_asset(pathed_asset)
 
     # add emod-api to COMPS's Assets
     pl = RequirementsToAssetCollection(platform, requirements_path=manifest.requirements)
@@ -833,10 +828,6 @@ def general_sim(erad_path, ep4_scripts):
 
         # run experiment
         experiment.run(platform=platform)
-
-
-def run_calib(erad_path):
-    general_sim(erad_path, manifest.my_ep4_assets)
 
 
 if __name__ == "__main__":
