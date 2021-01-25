@@ -20,6 +20,7 @@ import os
 import subprocess
 import sys
 import sphinx_rtd_theme
+from datetime import datetime
 
 
 if sys.platform in ["linux", "darwin"]:
@@ -89,7 +90,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'idmtools_calibra'
-copyright = u'2020, Bill & Melinda Gates Foundation. All rights reserved.'
+copyright = f'1999 - {datetime.today().year}, Bill & Melinda Gates Foundation. All rights reserved.'
 author = u'Institute for Disease Modeling'
 
 # The version info for the project you're documenting, acts as replacement for
