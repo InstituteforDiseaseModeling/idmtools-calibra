@@ -27,7 +27,9 @@
 
     `python .dev_scripts/bamboo_login.py -u youremail@idmod.org -p password`
  
-6. run examples
+6. run examples, ie
+   
+    `python sa_base_or_calib_dynamic.py`
 
 7. switch platform between Windows BELEGOST and Linux CALCULON in code. for example
 

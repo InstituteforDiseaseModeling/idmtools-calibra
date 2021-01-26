@@ -15,8 +15,11 @@ from idmtools.core.platform_factory import Platform
 from idmtools_platform_comps.utils.python_requirements_ac.requirements_to_asset_collection import \
     RequirementsToAssetCollection
 
-from examples.brad_workflow_new import manifest, set_config, params
-from examples.brad_workflow_new.analyzer_dev.CalibSites import SouthAfricaCalibSite
+import params
+import set_config
+import manifest
+
+from analyzer_dev.CalibSites import SouthAfricaCalibSite
 
 from idmtools_calibra import calib_manager
 from idmtools_calibra.calib_manager import CalibManager
