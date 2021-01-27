@@ -1,0 +1,2 @@
+-i https://packages.idmod.org/api/pypi/pypi-production/simple
+emodpy

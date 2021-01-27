@@ -28,6 +28,11 @@ from idmtools_calibra.utilities.display import verbose_timedelta
 logger = getLogger(__name__)
 
 
+def set_run_number(simulation, value):
+    simulation.task.set_parameter('Run_Number', value)
+    return {'Run_Number': value}
+
+
 class SampleIndexWrapper(object):
     """
     Wrapper for a SimConfigBuilder-modifying function to add metadata
@@ -53,8 +58,7 @@ class CalibManager(object):
 
     def __init__(self, task: ITask, map_sample_to_model_input_fn, sites: List[CalibSite], next_point: NextPointAlgorithm,
                  platform: Optional[IPlatform] = None, name: str = 'calib_test',
-                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None,
-                 map_replicates_callback: Union[Callable[[Simulation, Any], Dict], partial] = None):
+                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None):
 
         self.name = name
         if platform is None:
@@ -75,7 +79,6 @@ class CalibManager(object):
         self.current_iteration = None
         self.resume = False
         self.experiment_builder_function = self.default_experiment_builder_function  # if not overridden in the set method, use internally-generated func
-        self.map_replicates_callback = map_replicates_callback
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
@@ -172,19 +175,17 @@ class CalibManager(object):
         Returns:
             Simulation Builder
         """
-
         if not n_replicates:
             n_replicates = self.sim_runs_per_param_set
 
         sweeps = [[ModFn(site.setup_fn) for site in self.sites]]
-        if self.map_replicates_callback:
-            sweep = [ModFn(partial(self.map_replicates_callback, value=i + 1)) for i in range(n_replicates)]
-            if n_replicates > 1 and len(sweep) == 1:
-                sweep = sweep[0]
-            sweeps.append(sweep)
-        sweeps.append([
-            ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for index, samples in enumerate(next_params)
-        ])
+        sweep = [ModFn(set_run_number, value=i + 1) for i in range(n_replicates)]
+        if n_replicates > 1 and len(sweep) == 1:
+            sweep = sweep[0]
+        sweeps.append(sweep)
+        sweeps.append(
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+             index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
         count = None
@@ -251,6 +252,9 @@ class CalibManager(object):
                 self.create_calibration()
             elif var == "R":
                 self.resume_calibration()
+                exit()  # avoid calling self.run_iterations(**kwargs)
+            elif var == "P":
+                self.replot_calibration(iteration=None)
                 exit()  # avoid calling self.run_iterations(**kwargs)
         else:
             os.mkdir(self.name)
