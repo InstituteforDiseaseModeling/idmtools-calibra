@@ -1,0 +1,44 @@
+{
+   "Metadata": {
+      "DateCreated": "12/11/2020",
+      "Tool": "emod-api",
+      "Author": "sbuxton",
+      "IdReference": "Gridded world grump2.5arcmin",
+      "NodeCount": 1
+   },
+   "Defaults": {
+      "NodeAttributes": {
+         "Altitude": 0,
+         "Airport": 1,
+         "Region": 1,
+         "Seaport": 1,
+         "BirthRate": 9.602345281206754e-05
+      },
+      "IndividualAttributes": {
+         "RiskDist_Description": "Full risk",
+         "RiskDistributionFlag": 0,
+         "RiskDistribution1": 1,
+         "RiskDistribution2": 0,
+         "PrevalenceDist_Description": "No initial prevalence",
+         "InitialPrevalence": 0,
+         "AgeDistributionFlag": 1,
+         "AgeDistribution1": 0,
+         "AgeDistribution2": 18250,
+         "PrevalenceDistributionFlag": 0,
+         "PrevalenceDistribution1": 0.2,
+         "PrevalenceDistribution2": 0
+      }
+   },
+   "Nodes": [
+      {
+         "NodeID": 1,
+         "NodeAttributes": {
+            "Latitude": 0.0,
+            "Longitude": 0.0,
+            "InitialPopulation": 10000,
+            "Id": 1,
+            "FacilityName": 1
+         }
+      }
+   ]
+}
