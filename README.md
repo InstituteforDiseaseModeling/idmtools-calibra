@@ -59,4 +59,4 @@ From your virtualenv, install idmtools_calibra and all dependencies. Then from t
 
 To pick up docstring changes, you must re-run the setup script to include those changes in the itertool installation. Then run ``make clean`` and re-run ``make html``. 
 
-To view the private documentation on Read the Docs, go to https://docs.idmod.org/projects/idmtools_calibra/en/latest/. Scroll to "Do you have a password? Access here" and use the password "IDM2020calibra".
+Documentation on Read the Docs is available at https://docs.idmod.org/projects/idmtools_calibra/en/latest/.
