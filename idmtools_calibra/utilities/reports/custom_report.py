@@ -1,3 +1,5 @@
+from emodpy.reporters.base import BuiltInReporter
+
 def format(reports):
     reports_json = {"Use_Defaults": 1, "Reports": []}
     for r in reports:
@@ -5,7 +7,7 @@ def format(reports):
     return reports_json
 
 
-class BaseReport(object):
+class BaseReport(BuiltInReporter):
     dlls = {}
 
     def __init__(self, report_type=""):
