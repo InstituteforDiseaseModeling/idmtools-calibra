@@ -33,15 +33,64 @@ from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from emodpy.emod_task import EMODTask
 from idmtools.core.platform_factory import Platform
 
-CURRENT_DIRECTORY = os.path.dirname(__file__)
-INPUT_PATH = os.path.join('..', 'inputs')
-INPUT_PATH = os.path.abspath(INPUT_PATH)
+#
+# Run environment controls
+#
 
-locale = 'CALCULON'
-platform = Platform(locale)
+# Where to run the calibration simulations. Only CALCULON for now.
+LOCALE = 'CALCULON'
+# The asset collection id of the singularity environment to run the simulations in on Calculon.
+ENVIRONMENT_ASSET_COLLECTION_ID = '6197d2a5-f234-eb11-a2dd-c4346bcb7271'
+# This is a directory containing directories/files (executable, inputs) that will be needed by the simulations
+INPUT_DIR = os.path.join('..', '..', '..', 'idmtools', 'examples', 'python_model', 'inputs', 'lemod', 'Assets')
 
-# This is a directory containing directories/files that will be needed by the simulations
-inputs_dir = os.path.join('..', '..', '..', 'idmtools', 'examples', 'python_model', 'inputs', 'lemod', 'Assets')
+#
+# Calibration controls
+#
+
+# The number of parameter sets/samples to run in each calibration iteration
+N_SAMPLES = 3
+# number of randomly seeded simulations per parameter set/sample (dummy analyzer cannot handle > 1)
+N_REPLICATES = 1
+# the number of times the algorithm will attempt to optimize the best-guess parameterization
+N_ITERATIONS = 2
+# Calibration state/results will be kept in a directory by this name in the same directory as this file
+CALIBRATION_NAME = 'Optimtool_lemod_development'
+
+"""
+Calibration parameter specification
+
+Name: Human readable name of the parameter to utilize
+Dynamic: True/False, whether this parameter can be altered by the calibration (False still overrides input files)
+MapTo: actual model name to use. If not specified, the map_sample_to_model_input method below will have to handle
+    the (more complicated) mapping of this parameter to actual model parameter(s)
+Guess: Initial value for parameter in calibration
+Min: The minimum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
+Max: The maximum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
+"""
+CALIBRATION_PARAMETERS = [
+    {
+        'Name': "Postpartum infecund 6-11 months",
+        'Dynamic': False,
+        'MapTo': "postpartum_infecund_6-11",
+        'Guess': 0.25,
+        'Min': 0.2,
+        'Max': 0.3
+    },
+    {
+        'Name': 'Abortion probability',
+        'Dynamic': True,
+        'MapTo': 'abortion_prob',
+        'Guess': 0.1,
+        'Min': 0.05,
+        'Max': 0.15
+
+    }
+]
+
+
+
+platform = Platform(LOCALE)
 
 
 # REAL task class for overriding command generation behavior for python tasks in singularity
@@ -62,10 +111,12 @@ class TestAnalyzer(BaseCalibrationAnalyzer):
         super().__init__(reference_data=reference_data)
 
     def map(self, data, item):
+        # ck4, TODO: 1/28/2021 make the map return result depend on reference data
         import random
         return [random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)]
 
     def reduce(self, all_data):
+        # ck4, TODO: 1/28/2021 group all_data by sample, compute scores on a per-sample basis (e.g. 5 samples -> 5 result values
         result = []
         for item, value in all_data.items():
             result.append(sum(value))  # dummy operation
@@ -102,11 +153,10 @@ class FPSite(CalibSite):
         return []
 
 
-command = CommandLine("singularity exec ./Assets/fp_lemod-0.1.sif python3 Assets/run_senegal.py %s" % locale)
-ENVIRONMENT_ASSET_COLLECTION_ID = '6197d2a5-f234-eb11-a2dd-c4346bcb7271'
-assets = AssetCollection.from_directory(inputs_dir)
+command = CommandLine("singularity exec ./Assets/fp_lemod-0.1.sif python3 Assets/run_senegal.py %s" % LOCALE)
+assets = AssetCollection.from_directory(INPUT_DIR)
 assets.add_assets(AssetCollection.from_id(item_id=ENVIRONMENT_ASSET_COLLECTION_ID))
-task = SingularityJSONConfiguredPythonTask(script_path=os.path.join(inputs_dir, "run_senegal.py"),
+task = SingularityJSONConfiguredPythonTask(script_path=os.path.join(INPUT_DIR, "run_senegal.py"),
                                            common_assets=assets,
                                            provided_command=command)
 
@@ -118,37 +168,6 @@ plotters = [LikelihoodPlotter(combine_sites=True),
             SiteDataPlotter(num_to_plot=5, combine_sites=True),
             OptimToolPlotter()  # OTP must be last because it calls gc.collect()
             ]
-
-"""
-Calibration parameter specification
-
-Name: Human readable name of the parameter to utilize
-Dynamic: True/False, whether this parameter can be altered by the calibration (False still overrides input files)
-MapTo: actual model name to use. If not specified, the map_sample_to_model_input method below will have to handle
-    the (more complicated) mapping of this parameter to actual model parameter(s)
-Guess: Initial value for parameter in calibration
-Min: The minimum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
-Max: The maximum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
-"""
-params = [
-    {
-        'Name': "Postpartum infecund 6-11 months",
-        'Dynamic': False,
-        'MapTo': "postpartum_infecund_6-11",
-        'Guess': 0.25,
-        'Min': 0.2,
-        'Max': 0.3
-    },
-    {
-        'Name': 'Abortion probability',
-        'Dynamic': True,
-        'MapTo': 'abortion_prob',
-        'Guess': 0.1,
-        'Min': 0.05,
-        'Max': 0.15
-
-    }
-]
 
 
 def constrain_sample(sample):
@@ -202,7 +221,7 @@ def map_sample_to_model_input(simulation, sample):
         value = sample.pop('Clinical Fever Threshold High')
         tags.update(simulation.task.set_parameter('Clinical_Fever_Threshold_High', value))
 
-    for p in params:
+    for p in CALIBRATION_PARAMETERS:
         if 'MapTo' in p:
             if p['Name'] not in sample:
                 print('Warning: %s not in sample, perhaps resuming previous iteration' % p['Name'])
@@ -222,9 +241,9 @@ def map_sample_to_model_input(simulation, sample):
 
 # Just for fun, let the numerical derivative baseline scale with the number of dimensions
 volume_fraction = 0.01  # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
-num_params = len([p for p in params if p['Dynamic']])
+n_dynamic_parameters = len([p for p in CALIBRATION_PARAMETERS if p['Dynamic']])
 
-if num_params == 0:
+if n_dynamic_parameters == 0:
     warning_note = \
         """
         /!\\ WARNING /!\\ the OptimTool requires at least one of params with Dynamic set to True. Exiting...                  
@@ -232,28 +251,28 @@ if num_params == 0:
     print(warning_note)
     exit()
 
-r = OptimTool.get_r(num_params, volume_fraction)
+r = OptimTool.get_r(n_dynamic_parameters, volume_fraction)
 
-optimtool = OptimTool(params,
+optimtool = OptimTool(CALIBRATION_PARAMETERS,
                       constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
                       mu_r=r,
                       # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
                       sigma_r=r / 10.,  # <-- stdev of radius
                       center_repeats=1,
                       # <-- Number of times to replicate the center (current guess).  Nice to compare intrinsic to extrinsic noise
-                      samples_per_iteration=2
-                      # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of sites.
+                      samples_per_iteration=N_SAMPLES
+                      # <-- Samples per iteration, includes center repeats.  Actual number of sims run is this number times number of replicates.
                       )
 
-calib_manager = CalibManager(name='Optimtool_lemod_development',  # <-- Please customize this name
+calib_manager = CalibManager(name=CALIBRATION_NAME,  # <-- Please customize this name
                              task=task,
                              map_sample_to_model_input_fn=map_sample_to_model_input,
                              sites=sites,
                              next_point=optimtool,
-                             sim_runs_per_param_set=1,  # <-- Replicates
-                             max_iterations=3,  # <-- Iterations
-                             plotters=plotters,
-                             map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
+                             sim_runs_per_param_set=N_REPLICATES,  # <-- Replicates
+                             max_iterations=N_ITERATIONS,  # <-- Iterations
+                             plotters=plotters)#,
+                             # map_replicates_callback=partial(EMODTask.set_parameter_sweep_callback, param="Run_Number"))
 
 run_calib_args = {
     "calib_manager": calib_manager
