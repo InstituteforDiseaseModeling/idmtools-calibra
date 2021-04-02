@@ -312,174 +312,13 @@ def update_more_config(task):
     else:
         task.config.parameters.Simulation_Duration = params.burn_initial + params.burn_predots + params.To_end_from_DOTS
 
-    # task.set_parameter('Base_Population_Scale_Factor', initial_pop) not in schema anymore
+    task.config.parameters.x_Base_Population = initial_pop
     return task
 
 
-parameters = [
-    {
-        'Name': 'Base_Infectivity_Constant',
-        'Dynamic': True,
-        'MapTo': 'Base_Infectivity_Constant',
-        'Guess': 0.028,
-        'Min': 0.013,
-        'Max': 0.035
-    },
-    {
-        'Name': 'TB_Fast_Progressor_Fraction_Adult',
-        'Dynamic': True,
-        'MapTo': 'TB_Fast_Progressor_Fraction_Adult',
-        'Guess': 0.10,
-        'Min': 0.05,
-        'Max': 0.15
-    },
-    {
-        'Name': 'TB_Slow_Progressor_Rate',
-        'Dynamic': True,
-        'MapTo': 'TB_Slow_Progressor_Rate',
-        'Guess': 0.005 / 365.0,
-        'Min': 0.002 / 365.0,
-        'Max': 0.0075 / 365.0
-    },
-    {
-        'Name': 'TB Presymptomatic Duration Years',
-        'Dynamic': True,
-        # 'MapTo': 'M'
-        'Guess': 100.0 / 365.0,
-        'Min': 30.0 / 365.0,
-        'Max': 365.0 / 365.0
-    },
-    {
-        'Name': 'TB_Active_Presymptomatic_Infectivity_Multiplier',
-        'Dynamic': True,
-        'MapTo': 'TB_Active_Presymptomatic_Infectivity_Multiplier',
-        # This is based on a relative smear-negative of 0.34604 fixed (ok sig figs not withstanding) so
-        # ranging from no infectivity to equivalent to a smear negative case at best
-        'Guess': 0.34604 * 0.3318,
-        'Min': 0.0,
-        'Max': 0.34604
-    },
-    {
-        'Name': 'TBHIV Duration',
-        'Dynamic': True,
-        # constrain to less than duration without HIV
-        'Guess': 1.8,
-        'Min': 1.0,
-        'Max': 4
-    },
-    {
-        'Name': 'TB Duration',
-        'Dynamic': True,
-        # constrain to less than duration without HIV
-        'Guess': 3.5,
-        'Min': 2.5,
-        'Max': 4.5
-    },
-    {
-        'Name': 'Relative TB CD4 Infectiousness',
-        'Dynamic': True,
-        # for parsimony not CD4 or ART dependent
-        'Guess': 0.5,
-        'Min': 0.1,
-        'Max': 0.9
-    },
-
-    {
-        'Name': 'Post_Infection_Acquisition_Multiplier',
-        'Dynamic': True,
-        'MapTo': 'Post_Infection_Acquisition_Multiplier',
-        'Guess': 0.5,
-        'Min': 0.4,
-        'Max': 0.8
-    },
-    {
-        'Name': 'CD4_aq_below_200_rel',
-        'Dynamic': True,
-        # first two
-        'Guess': 36.0,
-        'Min': 4.0,
-        'Max': 60.0
-    },
-    {
-        'Name': 'CD4_aq_200_300_rel',
-        'Dynamic': True,
-        # third
-        'Guess': 14.0,
-        'Min': 3.0,
-        'Max': 50.0
-    },
-    {
-        'Name': 'CD4_aq_300_400_rel',
-        'Dynamic': True,
-        # fourth
-        'Guess': 12.0,
-        'Min': 2.0,
-        'Max': 50.0
-    },
-    {
-        'Name': 'CD4_aq_400_500_rel',
-        'Dynamic': True,
-        # fifth
-        'Guess': 2.0,
-        'Min': 1.0,
-        'Max': 23.0
-    },
-    {
-        'Name': 'CD4_aq_above_500',
-        'Dynamic': True,
-        # six and 7th (for now 7th is really superfluous in future, but for compatibility)
-        'Guess': 1.1,
-        'Min': 1.0,
-        'Max': 4.0
-    },
-    {
-        'Name': 'Primary HIV multiplier',
-        'Dynamic': True,
-        # for now
-        'Guess': 2.0,
-        'Min': 1.0,
-        'Max': 4.0
-    },
-    {
-        'Name': 'Death Fraction',
-        'Dynamic': True,
-        # for now
-        'Guess': 0.6,
-        'Min': 0.4,
-        'Max': 0.7
-    },
-    {
-        'Name': 'ART Factor',
-        'Dynamic': True,
-        # coinfection death scalar, 0 is like no HIV, 1 like HIV with no ART
-        'Guess': 0.7,
-        'Min': 0.0,
-        'Max': 1.0
-    },
-
-    {
-        'Name': 'Care Seeking Slow Duration Days',
-        'Dynamic': True,
-        # for now
-        'Guess': 250.0,
-        'Min': 90.0,
-        'Max': 725.0
-    },
-
-    {
-        'Name': 'Care Seeking Fast Duration Days',
-        'Dynamic': True,
-        # for now
-        'Guess': 90.0,
-        'Min': 30.0,
-        'Max': 180.0
-    },
-
-]
-
 if verbose:
-    print([a['Name'] for a in parameters])
-    print('Number params', len(parameters))
+    print([a['Name'] for a in params.parameters])
+    print('Number params', len(params.parameters))
 
 
 def set_slow_seek(task, duration):
@@ -565,18 +404,15 @@ def map_sample_to_model_input(simulation, sample):
     sample = copy.deepcopy(sample)
 
     # do the simple mappings first
-    for p in parameters:
+    for p in params.parameters:
         if 'MapTo' in p:
             if p['Name'] not in sample:
                 print('Warning: %s not in sample, perhaps resuming previous iteration' % p['Name'])
                 continue
             value = sample.pop(p['Name'])
-            tags.update(simulation.task.set_parameter(p['MapTo'], value))
-
+            tags.update({p['MapTo']: value})
     # Do the custom mappings (note in this case slow progression gets set before CD4 dep one which is right order)
-    # if 'TB Presymptomatic Duration Years' in sample:
-    #     value = sample.pop('TB Presymptomatic Duration Years') * 365.0
-    #     tags.update(simulation.task.update_parameters({'TB_Presymptomatic_Rate': 1.0 / value}))
+
     if 'TB Presymptomatic Duration Years' in sample:
         value = sample.pop('TB Presymptomatic Duration Years') * 365.0
         simulation.task.config.parameters.TB_Presymptomatic_Rate = 1.0 / value
@@ -636,8 +472,7 @@ def map_sample_to_model_input(simulation, sample):
     tags.update(
         {
             'TB_Smear_Negative_Infectivity_Multiplier': simulation.task.config.parameters.TB_Smear_Negative_Infectivity_Multiplier})
-    # 'Base_Population_Scale_Factor': simulation.task.config.parameters.Base_Population_Scale_Factor}) # not in schema
-
+    tags.update({'x_Base_Population': simulation.task.config.parameters.x_Base_Population})
     return tags
 
 
@@ -675,7 +510,7 @@ def constrain_sample(sample):
 
 def calib_run(task):
     volume_fraction = 0.001  # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
-    num_params = len([p for p in parameters if p['Dynamic']])
+    num_params = len([p for p in params.parameters if p['Dynamic']])
 
     if num_params == 0:
         warning_note = \
@@ -687,7 +522,7 @@ def calib_run(task):
 
     r = OptimTool.get_r(num_params, volume_fraction)
 
-    optimtool = OptimTool(parameters,
+    optimtool = OptimTool(params.parameters,
                           constrain_sample,  # <-- WILL NOT BE SAVED IN ITERATION STATE
                           mu_r=r,
                           # <-- radius for numerical derivatve.  CAREFUL not to go too small with integer parameters
