@@ -74,7 +74,7 @@ def set_geography(simulation, geography, static=False, pop_scale=1):
     The demographics can be set to static and created with the :any:`set_static_demographics` function or it can be created
     with the population scale parameter passed.
 
-    .. note:: The population scale will act on the ``x_Birth`` configuration parameter if the ``Birth_Rate_dependence`` is set to a ``FIXED_BIRTH_DATE``. It will also act on the ``Base_Population_Scale_Factor``.
+    .. note:: The population scale will act on the ``x_Birth`` configuration parameter if the ``Birth_Rate_dependence`` is set to a ``FIXED_BIRTH_DATE``. It will also act on the ``x_Base_Population``.
     Args:
         simulation: idmtools Simulation object.
         geography: The selected geography
@@ -86,13 +86,14 @@ def set_geography(simulation, geography, static=False, pop_scale=1):
     """
     params = get_converted_paths_for_geography(geography)
     # logging.debug('Geography parameters: %s' % params)
-    simulation.task.update_parameters(params)
+    for key, value in params.items():
+        setattr(simulation.task.config.parameters, key, value)
     if static:
         set_static_demographics(simulation, use_existing=True)
     if pop_scale != 1:
-        simulation.task.set_parameter('Base_Population_Scale_Factor', pop_scale * simulation.task.get_parameter('Base_Population_Scale_Factor'))
-        if simulation.task.get_parameter('Birth_Rate_Dependence') == 'FIXED_BIRTH_RATE':
-            simulation.task.set_parameter('x_Birth', pop_scale * simulation.task.get_parameter('x_Birth'))
+        simulation.task.config.parameters.x_Base_Population= pop_scale * simulation.task.config.parameters.x_Base_Population
+        if simulation.task.config.parameters.Birth_Rate_Dependence == 'FIXED_BIRTH_RATE':
+            simulation.task.config.parameters.x_Birth = pop_scale * simulation.task.config.parameters.x_Birth
 
 
 geographies = {
@@ -100,7 +101,7 @@ geographies = {
     # generic
     "Birth_Cohort": {"Geography": "Calibration",
                      "Demographics_Filenames": ["birth_cohort_demographics.compiled.json"],
-                     'Base_Population_Scale_Factor': 10,
+                     'x_Base_Population': 10,
                      'Enable_Vital_Dynamics': 0,  # No births/deaths.  Just following a birth cohort.
                      "Climate_Model": "CLIMATE_CONSTANT"  # no mosquitoes
                      },
@@ -207,7 +208,7 @@ geographies = {
     # malaria
     "Malariatherapy": {"Geography": "Calibration",
                        "Demographics_Filenames": ["Malariatherapy_demographics.compiled.json"],
-                       "Base_Population_Scale_Factor": 2,
+                       "x_Base_Population": 2,
                        "Enable_Vital_Dynamics": 0,
                        "Climate_Model": "CLIMATE_CONSTANT"  # no mosquitoes in challenge trial setting
                        },
