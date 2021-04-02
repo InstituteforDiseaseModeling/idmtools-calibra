@@ -25,7 +25,7 @@ from idmtools_calibra import calib_manager
 from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 
-from tb.add_tb_drug_type import add_tb_drug_type, add_tb_drug
+from add_tb_drug_type import add_tb_drug_type, add_tb_drug
 
 sites = [SouthAfricaCalibSite()]  # yeah its plural
 

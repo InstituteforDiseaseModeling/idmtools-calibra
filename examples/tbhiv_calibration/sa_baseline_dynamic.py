@@ -41,7 +41,7 @@ import manifest
 from examples.helper import generate_default_config_from_exe, download_reporter
 from idmtools_calibra.utilities.mod_fn import ModFn
 
-from tb.add_tb_drug_type import add_tb_drug_type, add_tb_drug
+from add_tb_drug_type import add_tb_drug_type, add_tb_drug
 
 
 def update_sim_bic(simulation, value):
