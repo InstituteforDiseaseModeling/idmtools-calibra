@@ -835,8 +835,8 @@ def run_calib(erad_path):
 
 if __name__ == "__main__":
     # Create a platform
-    #platform = Platform("CALCULON")
-    platform = Platform("SLURMStage")
+    platform = Platform("CALCULON")
+    #platform = Platform("SLURMStage")
     # bamboo plan name
     plan = EradicationBambooBuilds.TBHIV
     # download eradication and schema from bamboo, you can comment out get_model_files once you download files to local in next run
