@@ -1,3 +1,5 @@
+from idmtools.entities.simulation import Simulation
+
 params = {
 
     "Climate_Model": "CLIMATE_BY_DATA",
@@ -27,7 +29,7 @@ params = {
 }
 
 
-def set_climate_constant(simulation, **kwargs):
+def set_climate_constant(simulation: Simulation, **kwargs):
     """
     Set the climate to constant weather by changing the ``Climate_Model`` parameter to ``CLIMATE_CONSTANT``.
     Also set the extra parameters passed.
@@ -36,5 +38,6 @@ def set_climate_constant(simulation, **kwargs):
     :param kwargs: Extra parameters to change in the config file
     :return: Nothing
     """
-    simulation.task.set_parameter('Climate_Model', 'CLIMATE_CONSTANT')
-    simulation.task.update_parameter(kwargs, validate=True)
+    simulation.task.config.parameters.Climate_Model = 'CLIMATE_CONSTANT'
+    for key, value in kwargs.items():
+        setattr(simulation.task.config.parameters, key, value)

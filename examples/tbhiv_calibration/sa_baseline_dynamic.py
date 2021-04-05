@@ -41,7 +41,7 @@ import manifest
 from examples.helper import generate_default_config_from_exe, download_reporter
 from idmtools_calibra.utilities.mod_fn import ModFn
 
-from tb.add_tb_drug_type import add_tb_drug_type, add_tb_drug
+from add_tb_drug_type import add_tb_drug_type, add_tb_drug
 
 
 def update_sim_bic(simulation, value):
@@ -93,7 +93,7 @@ def set_param_fn(config):
     config.parameters.TB_Presymptomatic_Rate = 0.01165
     config.parameters.TB_Active_Presymptomatic_Infectivity_Multiplier = 0.34604 * 0.3318
 
-    # config.parameters.Base_Population_Scale_Factor =  1000  # not in schema
+    config.parameters.x_Base_Population = 1000
     config.parameters.TB_Slow_Progressor_Rate = 0.007 / 365.0
     # config.parameters.Serialization_Times = [ 365 ]
     config.parameters.pop("Serialized_Population_Filenames")
@@ -447,6 +447,7 @@ def run_test(erad_path):
 if __name__ == "__main__":
     # Create a platform
     platform = Platform("CALCULON")
+    #platform = Platform("SLURMStage")
     # bamboo plan name
     plan = EradicationBambooBuilds.TBHIV
     #download eradication and schema from bamboo, you can comment out get_model_files once you download to local in next run

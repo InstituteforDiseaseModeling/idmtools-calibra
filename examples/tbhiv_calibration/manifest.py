@@ -13,6 +13,6 @@ plugins_folder = "download/reporter_plugins"
 
 my_ep4_assets = None  # or ['dtk_post_process.py']
 ep4_path = "python_scripts"  # path to pre/post_process
-requirements = "./requirements.txt"
+requirements = "./requirements1.txt"
 # males="../data/Malawi_male_mortality.csv"
 # females="../data/Malawi_female_mortality.csv"

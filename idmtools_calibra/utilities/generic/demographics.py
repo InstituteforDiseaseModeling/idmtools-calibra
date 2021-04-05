@@ -1,5 +1,7 @@
 import json
 
+from idmtools.entities.simulation import Simulation
+
 params = {
     "Demographics_Filenames": [],
 
@@ -149,7 +151,7 @@ def set_demog_distributions(filename, distributions):
 
 # the following two methods need a refactor
 # we can have a single demographics file object and adjust attribute depending on usage
-def set_static_demographics(cb, use_existing=False):
+def set_static_demographics(simulation: Simulation, use_existing=False):
     """
     Create a static demographics based on the demographics file specified in the config file
     of the :py:class:`DTKConfigBuilder` object passed to the function.
@@ -161,17 +163,17 @@ def set_static_demographics(cb, use_existing=False):
         Make sure that the population is 1000 individuals. For now rely on the fact that the base
         demographics file will be 1000 Initial Population.
 
-    :param cb: The config builder object
+    :param simulation: The :py:class:`Simulation <idmtools.entities.simulation>` object
     :param use_existing: If ``True`` will only take the demographics file name and add the .static to it. If ``False`` will create a static demographics file based on the specified demographics file.
     :return: Nothing
     """
-    demog_filenames = cb.get_param('Demographics_Filenames')
+    demog_filenames = simulation.task.config.parameters.Demographics_Filenames
     if len(demog_filenames) != 1:
         raise Exception('Expecting only one demographics filename.')
     demog_filename = demog_filenames[0]
     static_demog_filename = demog_filename.replace("compiled.", "").replace(".json", ".static.json", 1)
-    cb.set_param("Demographics_Filenames", [static_demog_filename])
-    cb.set_param("Birth_Rate_Dependence", "FIXED_BIRTH_RATE")
+    simulation.task.config.parameters.Demographics_Filenames = [static_demog_filename]
+    simulation.task.config.parameters.Birth_Rate_Dependence = "FIXED_BIRTH_RATE"
 
     if use_existing:
         return
@@ -217,7 +219,7 @@ def set_static_demographics(cb, use_existing=False):
         output_file.write(json.dumps(demog, sort_keys=True, indent=4))
 
 
-def set_growing_demographics(cb, use_existing=False):
+def set_growing_demographics(simulation: Simulation, use_existing=False):
     """
     This function creates a growing population. It works the same way as the :any:`set_static_demographics` but with
     a birth rate more important than the death rate which leads to a growing population.
@@ -226,18 +228,18 @@ def set_growing_demographics(cb, use_existing=False):
         Make sure that the population is 1000 individuals. For now rely on the fact that the base
         demographics file will be 1000 Initial Population.
 
-    :param cb: The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` object
+    :param simulation: The :py:class:`Simulation <idmtools.entities.simulation>` object
     :param use_existing: If ``True`` will only take the demographics file name and add the .growing to it. If ``False`` will create a growing demographics file based on the specified demographics file.
     :return: Nothing
     """
 
-    demog_filenames = cb.get_param('Demographics_Filenames')
+    demog_filenames = simulation.task.config.parameters.Demographics_Filenames
     if len(demog_filenames) != 1:
         raise Exception('Expecting only one demographics filename.')
     demog_filename = demog_filenames[0]
     growing_demog_filename = demog_filename.replace("compiled.", "").replace(".json", ".growing.json", 1)
-    cb.set_param("Demographics_Filenames", [growing_demog_filename])
-    cb.set_param("Birth_Rate_Dependence", "POPULATION_DEP_RATE")
+    simulation.task.config.parameters.Demographics_Filenames = [growing_demog_filename]
+    simulation.task.config.parameters.Birth_Rate_Dependence = "POPULATION_DEP_RATE"
 
     if use_existing:
         return
