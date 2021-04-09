@@ -20,13 +20,16 @@
    `python .dev_scripts/bamboo_login.py -u youremail@idmod.org -p password`
    
 4. First time run examples, install all emodpy and emodpy-tbhiv dependency
+   
    `cd examples\tbhiv_calibra`
    `pip install -r requirements.txt`
 
 5. install dataclasses if you are using python 3.6.x
+   
    `pip install dataclasses`
 
 6. run examples, ie
+   
    `python run_calibration.py`
 
 7. switch platform between Windows BELEGOST and Linux CALCULON in code. for example
