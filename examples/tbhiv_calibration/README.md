@@ -17,7 +17,7 @@
     ```
 3. First time run examples, install all emodpy and emodpy-tbhiv dependency
 
-    `pip install -r requirements_b_example.txt`
+    `pip install -r requirements.txt`
 
 4. install dataclasses if you are using python 3.6.x
 

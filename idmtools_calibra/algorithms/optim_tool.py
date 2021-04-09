@@ -289,7 +289,7 @@ class OptimTool(NextPointAlgorithm):
         else:
             # user_logger.info('Bad R^2 (%f)'%mod_fit.rsquared)
             max_idx = np.argmax(latest_results)
-            logger.info('Stepping to argmax of %f at:' % latest_results[max_idx], latest_dynamic_samples[max_idx])
+            logger.info("Stepping to argmax of {} at: {}".format(latest_results[max_idx], latest_dynamic_samples[max_idx]))
             new_dynamic_center = latest_dynamic_samples[max_idx].tolist()
 
         new_center_dict = old_center.to_dict()  # {k:v for k,v in zip(self.get_param_names(), old_center)}

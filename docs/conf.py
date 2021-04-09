@@ -20,6 +20,7 @@ import os
 import subprocess
 import sys
 import sphinx_rtd_theme
+from datetime import datetime
 
 
 if sys.platform in ["linux", "darwin"]:
@@ -43,7 +44,8 @@ extensions = [
     'sphinxcontrib.napoleon',
     'sphinx.ext.todo',
     'plantweb.directive',
-    'sphinxcontrib.programoutput'
+    'sphinxcontrib.programoutput',
+    'sphinx.ext.intersphinx'
 ]
 
 plantuml = 'plantweb'
@@ -89,7 +91,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'idmtools_calibra'
-copyright = u'2020, Bill & Melinda Gates Foundation. All rights reserved.'
+copyright = f'1999 - {datetime.today().year}, Bill & Melinda Gates Foundation. All rights reserved.'
 author = u'Institute for Disease Modeling'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -389,4 +391,11 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-# intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'emod_api': ('https://docs.idmod.org/projects/emod-api/en/latest/', None),
+                       'emodpy': ('https://docs.idmod.org/projects/emodpy/en/latest/', None),
+                       'idmtools': ('https://docs.idmod.org/projects/idmtools/en/latest/', None),
+                       'pycomps': ('https://docs.idmod.org/projects/pycomps/en/latest/', None)
+                       }
+
+

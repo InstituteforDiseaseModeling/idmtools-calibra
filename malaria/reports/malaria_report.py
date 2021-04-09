@@ -63,9 +63,11 @@ def add_summary_report(simulation, start=0, interval=365, nreports=10000,
     if not nodes:
         nodes = {"class": "NodeSetAll"}
 
-    from emodpy.reporters.builtin import MalariaSummaryReport
+    # from emodpy.reporters.builtin import MalariaSummaryReport
+    from emodpy_malaria.reporters.builtin import MalariaSummaryReport
     summary_report = MalariaSummaryReport()
     summary_report.parameters = {
+        "class_name": "MalariaSummaryReport",
         "Age_Bins": age_bins,
         "Duration_Days": duration_days,
         "Event_Trigger_List": ['EveryUpdate'],
