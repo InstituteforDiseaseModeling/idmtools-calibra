@@ -10,27 +10,24 @@
 1. Activate your virtual environment
 
 2. Install idmtools-calibra
-    ```bash
-    pip install idmtools-calibra --index-url=https://email:password@packages.idmod.org/api/pypi/pypi-staging/simple
-    OR
-    pip install idmtools-calibra --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
-    ```
-3. First time run examples, install all emodpy and emodpy-tbhiv dependency
+   ```bash
+   pip install idmtools-calibra --index-url=https://email:password@packages.idmod.org/api/pypi/pypi-staging/simple
+   OR
+   pip install idmtools-calibra --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+   ```
+3. login to bamboo and cache your credential for download Eradication.exe, schema. etc.(need turn on IDM VPN)
 
-    `pip install -r requirements.txt`
-
-4. install dataclasses if you are using python 3.6.x
-
-    `pip install dataclasses`
-
-5. login to bamboo and cache your credential for download Eradication.exe, schema. etc.(need turn on IDM VPN)
-
-    `python .dev_scripts/bamboo_login.py -u youremail@idmod.org -p password`
- 
-6. run examples, ie
+   `python .dev_scripts/bamboo_login.py -u youremail@idmod.org -p password`
    
-    `python sa_base_or_calib_dynamic.py`
+4. First time run examples, install all emodpy and emodpy-tbhiv dependency
+   `cd examples\tbhiv_calibra`
+   `pip install -r requirements.txt`
+
+5. install dataclasses if you are using python 3.6.x
+   `pip install dataclasses`
+
+6. run examples, ie
+   `python run_calibration.py`
 
 7. switch platform between Windows BELEGOST and Linux CALCULON in code. for example
-
-    `platform = Platform('CALCULON')`
+   `platform = Platform('CALCULON')`
