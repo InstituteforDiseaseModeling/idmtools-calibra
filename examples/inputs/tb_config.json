@@ -246,7 +246,7 @@
       20000
     ],
     "Python_script_Path": "",
-    "TB_Active_Period_Distribution": "EXPONENTIAL_DURATION",
+    "TB_Active_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
     "TB_Drug_Efficacy_Multiplier_Failed": 1,
     "TB_Drug_Efficacy_Multiplier_Relapsed": 1,
     "TB_Drug_Efficacy_Multiplier_MDR": 1,
