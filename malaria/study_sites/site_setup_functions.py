@@ -19,15 +19,17 @@ class update_params:
         self.params = params
 
     def __call__(self, simulation):
-        return simulation.task.update_parameters(self.params)
+        for key, value in self.params.items():
+            setattr(simulation.task.config.parameters, key , value)
 
 class config_setup_fn:
     def __init__(self, duration=21915):
         self.duration = duration
 
     def __call__(self, simulation):
-        return simulation.task.update_parameters({'Simulation_Duration': self.duration,
-                            'Infection_Updates_Per_Timestep': 8})
+        simulation.task.config.parameters.Simulation_Duration = self.duration
+        simulation.task.config.parameters.Infection_Updates_Per_Timestep = 8
+        return {'Simulation_Duration': self.duration, 'Infection_Updates_Per_Timestep': 8}
 
 # reporters
 class summary_report_fn:
@@ -271,7 +273,7 @@ class add_treatment_fn:
         add_health_seeking(simulation, start_day=self.start, drug=self.drug, targets=self.targets, nodeIDs=self.nodes,
                            drug_ineligibility_duration=self.durg_ineligibility_duration,
                            node_property_restrictions=self.node_property_restrictions)
-        simulation.task.update_parameters({'PKPD_Model': 'CONCENTRATION_VERSUS_TIME'})
+        simulation.task.config.parameters.PKPD_Model = 'CONCENTRATION_VERSUS_TIME'
 
 
 # health-seeking from nodeid-coverage specified in json

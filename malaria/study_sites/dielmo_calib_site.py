@@ -11,7 +11,9 @@ class update_params:
         self.params = params
 
     def __call__(self, simulation):
-        return simulation.task.update_parameters(self.params)
+        for key, value in self.params.items():
+            setattr(simulation.task.config.parameters, key, value)
+        return self.params
 
 class DielmoCalibSite(IncidenceCalibSite):
 

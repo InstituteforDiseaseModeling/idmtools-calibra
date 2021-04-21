@@ -91,7 +91,7 @@ def set_geography(simulation, geography, static=False, pop_scale=1):
     if static:
         set_static_demographics(simulation, use_existing=True)
     if pop_scale != 1:
-        simulation.task.config.parameters.x_Base_Population= pop_scale * simulation.task.config.parameters.x_Base_Population
+        simulation.task.config.parameters.x_Base_Population = pop_scale * simulation.task.config.parameters.x_Base_Population
         if simulation.task.config.parameters.Birth_Rate_Dependence == 'FIXED_BIRTH_RATE':
             simulation.task.config.parameters.x_Birth = pop_scale * simulation.task.config.parameters.x_Birth
 
