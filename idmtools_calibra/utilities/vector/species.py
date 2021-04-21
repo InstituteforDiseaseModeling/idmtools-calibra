@@ -408,14 +408,14 @@ def update_species_param(simulation, species, parameter, value, overwrite=True):
 def get_species_param(simulation, species, parameter):
     block = get_species_param_block(simulation, species)
     try:
-        return simulation.task.get_parameter("Vector_Species_Params")[block][parameter]
+        return simulation.task.config.parameters.Vector_Species_Params[block][parameter]
     except:
         print('Unable to get parameter %s for species %s' % (parameter, species))
         return None
 
 
 def scale_all_habitats(simulation, scale):
-    for species_params in simulation.task.get_parameter("Vector_Species_Params"):
+    for species_params in simulation.task.config.parameters.Vector_Species_Params:
         habitats = species_params["Larval_Habitat_Types"]
         scaled_habitats = {h: scale * v for (h, v) in habitats.items()}
         species_params["Larval_Habitat_Types"] = scaled_habitats

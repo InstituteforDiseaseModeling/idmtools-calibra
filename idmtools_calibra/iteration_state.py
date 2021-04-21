@@ -11,10 +11,6 @@ from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hoo
 from idmtools_calibra.utilities.display import verbose_timedelta
 
 
-def param_update(simulation, param, value):
-    return simulation.task.set_parameter(param, value)
-
-
 logger = getLogger("Calibration")
 
 
