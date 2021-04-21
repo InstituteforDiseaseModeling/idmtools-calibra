@@ -53,7 +53,7 @@ def geography_from_site(site):
 
 
 def set_habitat_scale(simulation, scale):
-    simulation.task.set_parameter('x_Temporary_Larval_Habitat', scale)
+    simulation.task.config.parameters.x_Temporary_Larval_Habitat = scale
 
 
 def configure_magude(simulation):
