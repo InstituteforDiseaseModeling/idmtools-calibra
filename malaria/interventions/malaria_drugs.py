@@ -10,8 +10,7 @@ def drug_configs_from_code(simulation, drug_code: str = None):
     to the configuration file and will return a dictionary containing a Full Treatment course for those 3 drugs.
 
     Args:
-        cb:  The :py:class:`DTKConfigBuilder <dtk.utils.core.DTKConfigBuilder>` that will receive the drug configuration
-        drug_code:  Code of the drug to add
+        simulation:  ifmtools Simulation
         # drug_ineligibility_duration: used as a flag, if anything is present, we add ["DrugStatus:RecentDrug"]
             as Disqualifying_Properties
 
@@ -39,7 +38,7 @@ def drug_configs_from_code(simulation, drug_code: str = None):
                         "\"Vehicle\": Vehicle.\n")
     drug_array = drug_cfg[drug_code]
 
-    simulation.task.set_parameter("PKPD_Model", "CONCENTRATION_VERSUS_TIME")
+    simulation.task.config.parameters.PKPD_Model = "CONCENTRATION_VERSUS_TIME"
 
     drug_configs = []
     for drug in drug_array:

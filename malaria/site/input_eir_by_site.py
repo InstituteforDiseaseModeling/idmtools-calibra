@@ -45,18 +45,18 @@ def configure_site_EIR(simulation, site, habitat=1, circular_shift=0, birth_coho
     # but with a downscaling to account for maternal immunity levels
     # Here, we'll keep the CONSTANT model and downscale as a function of annual EIR
     annual_EIR = sum(EIRs)
-    mAb = simulation.task.get_parameter('Maternal_Antibody_Protection') * mAb_vs_EIR(annual_EIR)
+    mAb = simulation.task.config.parameters.Maternal_Antibody_Protection * mAb_vs_EIR(annual_EIR)
 
     if birth_cohort:
         set_geography(simulation, "Birth_Cohort")
     elif set_site_geography:
         geo = geography_from_site(site)
         set_geography(simulation, geo, **geo_kwargs)
-    simulation.task.update_parameters({'Config_Name': site,
-                       'Vector_Species_Names': [], # no mosquitoes
-                       'Maternal_Antibodies_Type': 'CONSTANT_INITIAL_IMMUNITY',
-                       'Maternal_Antibody_Protection': mAb
-                       })
+
+    simulation.task.config.parameters.Config_Name = site
+    # simulation.task.config.parameters.Vector_Species_Names = []     # [TODO]: not found 'Vector_Species_Names'
+    simulation.task.config.parameters.Maternal_Antibodies_Type = 'CONSTANT_INITIAL_IMMUNITY'
+    simulation.task.config.parameters.Maternal_Antibody_Protection = mAb
     simulation.name = site
     # Shift order of months according to circular_shift argument
     EIR_deque = deque(EIRs)

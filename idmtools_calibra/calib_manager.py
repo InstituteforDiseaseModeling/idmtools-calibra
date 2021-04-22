@@ -29,7 +29,7 @@ logger = getLogger(__name__)
 
 
 def set_run_number(simulation, value):
-    simulation.task.set_parameter('Run_Number', value)
+    simulation.task.config.parameters.Run_Number = value
     return {'Run_Number': value}
 
 
@@ -45,7 +45,8 @@ class SampleIndexWrapper(object):
 
     def __call__(self, simulation, idx, *args, **kwargs):
         params_dict = self.map_sample_to_model_input_fn(simulation, *args, **kwargs)
-        params_dict.update(simulation.task.set_parameter('__sample_index__', idx))
+        simulation.task.config.parameters["__sample_index__"] = idx  # [TODO]: temp fix for not found __sample_index__
+        params_dict.update({'__sample_index__': idx})
         return params_dict
 
 
