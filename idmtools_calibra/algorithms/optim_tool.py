@@ -211,6 +211,10 @@ class OptimTool(NextPointAlgorithm):
         latest_dynamic_samples = self.data.loc[iteration - 1, dynamic_params].values
         latest_results = self.data.loc[iteration - 1, 'Results'].values
 
+        # Make sure both have 'float' type
+        latest_dynamic_samples = latest_dynamic_samples.astype(np.float64)
+        latest_results = latest_results.astype(np.float64)
+
         mod = sm.OLS(latest_results, sm.add_constant(latest_dynamic_samples))
 
         retry = 0
