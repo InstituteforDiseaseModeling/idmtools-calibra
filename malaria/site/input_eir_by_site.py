@@ -54,7 +54,7 @@ def configure_site_EIR(simulation, site, habitat=1, circular_shift=0, birth_coho
         set_geography(simulation, geo, **geo_kwargs)
 
     simulation.task.config.parameters.Config_Name = site
-    # simulation.task.config.parameters.Vector_Species_Names = []     # [TODO]: not found 'Vector_Species_Names'
+    # simulation.task.config.parameters.Vector_Species_Names = []     # Note: not found 'Vector_Species_Names'
     simulation.task.config.parameters.Maternal_Antibodies_Type = 'CONSTANT_INITIAL_IMMUNITY'
     simulation.task.config.parameters.Maternal_Antibody_Protection = mAb
     simulation.name = site
@@ -62,7 +62,11 @@ def configure_site_EIR(simulation, site, habitat=1, circular_shift=0, birth_coho
     EIR_deque = deque(EIRs)
     EIR_deque.rotate(circular_shift)
     monthlyEIRs=list(EIR_deque)
-    add_InputEIR(simulation, monthlyEIRs=monthlyEIRs)
+
+    import emod_api.campaign as camp
+    import emodpy_malaria.interventions.inputeir as eir
+    simulation.task.campaign.add_event(
+        eir.InputEIR(camp, eir=monthlyEIRs, start_day=0, age_dep="SURFACE_AREA_DEPENDENT"))
 
     return {'monthlyEIRs': monthlyEIRs}
 
