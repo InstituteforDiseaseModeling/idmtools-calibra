@@ -20,7 +20,7 @@ from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
 from idmtools_calibra.calib_site import CalibSite
 from idmtools_calibra.iteration_state import IterationState
 from idmtools_calibra.plotters.base_plotter import BasePlotter
-from idmtools_calibra.utils import StatusPoint
+from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.mod_fn import ModFn
 from idmtools_calibra.utilities.helper import validate_exp_name
 from idmtools_calibra.utilities.display import verbose_timedelta

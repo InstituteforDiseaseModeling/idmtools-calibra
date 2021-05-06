@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg', force=True)
 import matplotlib.pyplot as plt
 import seaborn as sns
-from idmtools_calibra.utils import StatusPoint
+from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.plotters.base_plotter import BasePlotter
 
 sns.set_style('white')
