@@ -1,4 +1,3 @@
-from typing import Optional, List
 import os
 import re
 import json
@@ -7,10 +6,14 @@ import pandas as pd
 from datetime import datetime
 from logging import getLogger
 
+from functools import partial
+from typing import Optional, Any, Dict, List
+
 from idmtools.builders import SimulationBuilder
 from idmtools.core.context import get_current_platform
 from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.itask import ITask
+from idmtools.entities.simulation import Simulation
 from idmtools.utils.json import IDMJSONEncoder
 from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
 from idmtools_calibra.calib_site import CalibSite
@@ -24,9 +27,23 @@ from idmtools_calibra.utilities.display import verbose_timedelta
 logger = getLogger(__name__)
 
 
-def set_run_number(simulation, value):
-    simulation.task.config.parameters.Run_Number = value
-    return {'Run_Number': value}
+def set_parameter_sweep_callback(simulation: Simulation, param: str, value: Any) -> Dict[str, Any]:
+    """
+    Convenience callback for sweeps
+
+    Args:
+        simulation: Simulation we are updating
+        param: Parameter
+        value: Value
+
+    Returns:
+        Tags to set on simulation
+    """
+    if not hasattr(simulation.task, 'set_parameter'):
+        raise ValueError("update_task_with_set_parameter can only be used on tasks with a set_parameter")
+    # setattr(simulation.task.config.parameters, param, value)
+    simulation.task.config.parameters[param] = value
+    return {param: value}
 
 
 class SampleIndexWrapper(object):
@@ -53,9 +70,11 @@ class CalibManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, task: ITask, map_sample_to_model_input_fn, sites: List[CalibSite], next_point: NextPointAlgorithm,
+    def __init__(self, task: ITask, map_sample_to_model_input_fn, sites: List[CalibSite],
+                 next_point: NextPointAlgorithm,
                  platform: Optional[IPlatform] = None, name: str = 'calib_test',
-                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None):
+                 sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None,
+                 map_replicates_callback=None):
 
         self.name = name
         if platform is None:
@@ -76,10 +95,13 @@ class CalibManager(object):
         self.current_iteration = None
         self.resume = False
         self.experiment_builder_function = self.default_experiment_builder_function  # if not overridden in the set method, use internally-generated func
+        self.map_replicates_callback = map_replicates_callback if map_replicates_callback else partial(
+            set_parameter_sweep_callback, param="Run_Number")
 
     @classmethod
     def open_for_reading(cls, calibration_directory):
-        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None, name=calibration_directory)
+        return cls(task=None, map_sample_to_model_input_fn=None, sites=None, next_point=None,
+                   name=calibration_directory)
 
     @property
     def suite_id(self):
@@ -176,7 +198,7 @@ class CalibManager(object):
             n_replicates = self.sim_runs_per_param_set
 
         sweeps = [[ModFn(site.setup_fn) for site in self.sites]]
-        sweep = [ModFn(set_run_number, value=i + 1) for i in range(n_replicates)]
+        sweep = [ModFn(self.map_replicates_callback, value=i + 1) for i in range(n_replicates)]
         if n_replicates > 1 and len(sweep) == 1:
             sweep = sweep[0]
         sweeps.append(sweep)
