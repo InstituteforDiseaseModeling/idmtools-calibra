@@ -217,7 +217,7 @@ class CalibManager(object):
 
     def create_iteration_state(self, iteration):
         """
-        Create iteation state
+        Create iteration state
         Args:
             iteration: the # of the iteration
 

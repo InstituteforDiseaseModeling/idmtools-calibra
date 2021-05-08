@@ -17,6 +17,7 @@ def validate_exp_name(exp_name):
     else:
         return True
 
+
 def json_to_pandas(channel_data, bins, channel=None):
     """
     A function to convert nested array channel data from a json file to
