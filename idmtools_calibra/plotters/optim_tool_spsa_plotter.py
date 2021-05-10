@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from idmtools_calibra.plotters.base_plotter import BasePlotter
-from idmtools_calibra.utils import StatusPoint
+from idmtools_calibra.process_state import StatusPoint
 
 logger = logging.getLogger(__name__)
 

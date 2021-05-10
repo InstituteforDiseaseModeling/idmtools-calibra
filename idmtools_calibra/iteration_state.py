@@ -5,8 +5,8 @@ import pandas as pd
 from datetime import datetime
 from logging import getLogger
 from idmtools.analysis.analyze_manager import AnalyzeManager
-from idmtools_calibra.parameter_set import ParameterSet
-from idmtools_calibra.utils import StatusPoint
+from idmtools_calibra.utilities.parameter_set import ParameterSet
+from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
 from idmtools_calibra.utilities.display import verbose_timedelta
 

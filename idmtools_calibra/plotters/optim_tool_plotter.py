@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import cm
 from idmtools_calibra.plotters.base_plotter import BasePlotter
-from idmtools_calibra.utils import StatusPoint
+from idmtools_calibra.process_state import StatusPoint
 import matplotlib
 matplotlib.use('Agg', force=True)
 import matplotlib.pyplot as plt
