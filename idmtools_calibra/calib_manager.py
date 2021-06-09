@@ -42,7 +42,7 @@ def set_parameter_sweep_callback(simulation: Simulation, param: str, value: Any)
     if not hasattr(simulation.task, 'set_parameter'):
         raise ValueError("update_task_with_set_parameter can only be used on tasks with a set_parameter")
     # setattr(simulation.task.config.parameters, param, value)
-    simulation.task.config.parameters[param] = value
+    simulation.task.parameters[param] = value
     return {param: value}
 
 
@@ -58,7 +58,7 @@ class SampleIndexWrapper(object):
 
     def __call__(self, simulation, idx, *args, **kwargs):
         params_dict = self.map_sample_to_model_input_fn(simulation, *args, **kwargs)
-        simulation.task.config.parameters["__sample_index__"] = idx  # [TODO]: temp fix for not found __sample_index__
+        simulation.task.parameters["__sample_index__"] = idx  # [TODO]: temp fix for not found __sample_index__
         params_dict.update({'__sample_index__': idx})
         return params_dict
 
