@@ -150,12 +150,8 @@ class CalibManager(object):
         Returns: None
         """
         self.calibration_start = datetime.now().replace(microsecond=0)
-
         if not max_iterations:
             max_iterations = self.max_iterations
-
-        if max_iterations < iteration:
-            max_iterations = iteration
 
         # normal run
         for i in range(iteration, max_iterations):
@@ -359,7 +355,7 @@ class CalibManager(object):
         iteration = kwargs.get('iteration', None)
         iter_step = kwargs.get('iter_step', None)
         loop = kwargs.get('loop', True)
-        max_iterations = kwargs.get('max_iterations', True)
+        max_iterations = kwargs.get('max_iterations', None)
 
         from idmtools_calibra.utilities.resume_manager import ResumeManager
         resume_manager = ResumeManager(self, iteration, iter_step, max_iterations, loop)
