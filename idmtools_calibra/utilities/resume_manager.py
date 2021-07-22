@@ -4,6 +4,7 @@ from idmtools.core.context import get_current_platform
 from idmtools.entities.iplatform import IPlatform
 from idmtools_calibra.cli.utils import read_calib_data
 from idmtools_calibra.process_state import StatusPoint
+from idmtools_calibra.iteration_state import IterationState
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -30,48 +31,41 @@ class ResumeManager(object):
         self.initialize()
 
     def initialize(self):
+        """
+        prepare calib_manager and iteration state for resume
+         - restore calib_manager
+         - restore iteration state
+         - validate iteration
+         - validate iter_step
+        """
         self.iter_step = None if self.iter_step is None else StatusPoint[self.iter_step]
         if self.iter_step:
             if self.iter_step.name not in ['commission', 'analyze', 'plot', 'next_point']:
                 print(f"Invalid iter_step '{self.iter_step.name}', ignored.")
                 exit()
 
-        # self.calib_manager = get_calib_manager(self.config_name)
-        # self.name = self.calib_manager.name
+        # 1. restore calib_manager
+        self.restore_calib_manager()
 
-        self.calib_data = read_calib_data(self.calib_manager.calibration_path)
-        self.calib_manager.suites = self.calib_data['suites']
-        # self.calib_manager.latest_iteration = int(self.calib_data.get('iteration', 0))
-
-        # step 4: load all_results
-        results = self.calib_data.get('results')
-        if isinstance(results, dict):
-            self.calib_manager.all_results = pd.DataFrame.from_dict(results, orient='columns')
-        elif isinstance(results, list):
-            self.calib_manager.all_results = results
-
+        # 2. validate iteration
         self.adjust_iteration()
+
+        # 3. validate iter_step
         self.adjust_iteration_step()
 
-        # self.calib_manager.current_iteration = IterationState.restore_state(self.iteration_directory)
-        # self.calib_manager.current_iteration = self.calib_manager.state_for_iteration(self.iteration)
-        it = self.calib_manager.state_for_iteration(self.iteration)
-        it.platform = self.calib_manager.platform
-        self.calib_manager.current_iteration = it
-
-        # step 5: update required objects for resume
-        self.calib_manager.current_iteration.update(**self.calib_manager.required_components)
-
-        # Resume the iteration
-        self.calib_manager.current_iteration.resume(self.iter_step)
+        # 3. restore iteration state
+        self.restore_iteration_state()
 
     def resume(self):
-        self.calib_manager.resume = True  # [TODO]: may have done before already
+        """
+        Call calib_manager.run_iterations to start resume action
+        """
+        self.calib_manager.resume = True
 
-        # print("Iteration: ", self.iteration)
-        # print("iter_step: ", self.iter_step)
-        # print("Status: ", self.calib_manager.current_iteration.status)
-        # print("Loop: ", self.loop)
+        print('Resume will start with:')
+        print(f' - iteration = {self.iteration}')
+        print(
+            f' - status = {self.calib_manager.current_iteration.status.name if self.calib_manager.current_iteration.status else None}')
 
         # resume from a given iteration
         self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
@@ -85,21 +79,29 @@ class ResumeManager(object):
         # Get latest iteration #
         latest_iteration = self.calib_data.get('iteration', None)
 
-        # Handle special case
+        # handle special case
         if latest_iteration is None:
             self.iteration = 0
 
-        # If no iteration passed in, take latest_iteration as instead
+        # if no iteration passed in, take latest_iteration as instead
         if self.iteration is None:
             self.iteration = latest_iteration
 
-        # Adjust input iteration
+        # adjust input iteration
         if latest_iteration < self.iteration:
             self.iteration = latest_iteration
 
+        if not self.max_iterations:
+            self.max_iterations = self.calib_manager.max_iterations
+
+        if self.max_iterations <= self.iteration:
+            self.max_iterations = self.iteration + 1
+
     def adjust_iteration_step(self):
-        # validate input iter_step
-        # it = IterationState.restore_state(self.iteration_directory)
+        """
+        Validate iter_step
+        """
+
         it = self.calib_manager.state_for_iteration(iteration=self.iteration)
         latest_step = it.status if isinstance(it.status, StatusPoint) else StatusPoint[it.status]
 
@@ -116,40 +118,69 @@ class ResumeManager(object):
         if self.iter_step == StatusPoint.done:
             self.iter_step = StatusPoint.next_point
 
-        # finally check user input location and experiment location and provide options for resume
-        # [TODO]: how in idmtools?
-        # self.check_location(it)
-
-    def check_location(self, iteration_state):
+    def restore_calib_manager(self):
         """
-        - Handle the case: process got interrupted but it still runs on remote
-        - Handle location change case: may resume from commission instead
+        Restore calib_manager
         """
-        # Step 1: Checking possible location changes
-        exp_id = iteration_state.experiment_id
-        if not exp_id and iteration_state.status == StatusPoint.iteration_start:
-            return
+        self.calib_data = read_calib_data(self.calib_manager.calibration_path)
+        self.calib_manager.suites = self.calib_data['suites']
 
-        exp = self.retrieve_experiment(exp_id)
+        # step 4: load all_results
+        results = self.calib_data.get('results')
+        if isinstance(results, dict):
+            self.calib_manager.all_results = pd.DataFrame.from_dict(results, orient='columns')
+        elif isinstance(results, list):
+            self.calib_manager.all_results = results
 
-        if not exp:
-            var = input(
-                "Cannot restore Experiment 'exp_id: %s'. Force to resume from commission... Continue ? [Y/N]" % exp_id if exp_id else 'None')
-            # force to resume from commission
-            if var.upper() == 'Y':
-                iteration_state.resume_point = StatusPoint.commission
-            else:
-                logger.info(f"Answer is '{var.upper()}'. Exiting...")
-                exit()
+    def restore_iteration_state(self):
+        """
+        Restore IterationState
+        """
+        # restore initial iteration state
+        it = self.calib_manager.state_for_iteration(self.iteration)
+        it.platform = self.calib_manager.platform
 
-        # If location has been changed, will double check user for a special case before proceed...
-        if self.location != exp.location:
-            location = SetupParser.get('type')
-            var = input(
-                "Location has been changed from '%s' to '%s'. Resume will start from commission instead, do you want to continue? [Y/N]:  " % (
-                    exp.location, location))
-            if var.upper() == 'Y':
-                self.current_iteration.resume_point = StatusPoint.commission
-            else:
-                logger.info(f"Answer is '{var.upper()}'. Exiting...")
-                exit()
+        # update required objects for resume
+        it.update(**self.calib_manager.required_components)
+
+        # step 1: If we know we are running -> recreate the exp_manager
+        # [TODO]
+        if self.iter_step.value >= StatusPoint.running.value:
+            pass
+
+        # step 2: restore next_point
+        if self.iter_step not in (
+                StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
+            if self.iter_step == StatusPoint.commission or self.iter_step == StatusPoint.iteration_start:
+                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration - 1)
+                it.next_point_algo.set_state(iteration_state.next_point, self.iteration - 1)
+            elif self.iter_step == StatusPoint.analyze:
+                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration)
+                it.next_point_algo.set_state(iteration_state.next_point, self.iteration)
+
+                # For IMIS ONLY!
+                it.next_point_algo.restore(IterationState.restore_state(it.calibration_name, self.iteration - 1))
+        else:
+            it.next_point_algo.set_state(it.next_point, self.iteration)
+
+        # step 3: restore Calibration results
+        if self.iteration > 0 and self.iter_step.value < StatusPoint.plot.value:
+            # it will combine current results with previous results
+            it.restore_results(self.iteration - 1)
+        else:
+            # it will use the current results and resume from next iteration
+            it.restore_results(self.iteration)
+
+        # step 4: prepare resume states
+        if self.iter_step.value <= StatusPoint.commission.value:
+            # need to run simulations
+            it.simulations = {}
+
+        if self.iter_step.value <= StatusPoint.analyze.value:
+            # just need to calculate the results
+            it.results = {}
+
+        # finally update current status
+        it._status = StatusPoint(self.iter_step.value - 1) if self.iter_step.value > 0 else None
+
+        self.calib_manager.current_iteration = it
