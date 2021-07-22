@@ -94,7 +94,7 @@ class ResampleManager:
         calib_data = self.calibration_manager.read_calib_data()
 
         iteration = self.calibration_manager.get_last_iteration()
-        iteration_data = self.calibration_manager.read_iteration_data(iteration=iteration)
+        iteration_data = self.calibration_manager.state_for_iteration(iteration=iteration)
 
         final_samples = calib_data['final_samples']
         iteration_metadata = iteration_data.next_point['params']
