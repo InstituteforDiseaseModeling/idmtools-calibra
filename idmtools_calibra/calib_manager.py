@@ -125,10 +125,6 @@ class CalibManager(object):
         """
         resume = kwargs.get('resume', False)
         if resume:
-            # iteration = kwargs.get('iteration', None)
-            # iter_step = kwargs.get('iter_step', None)
-            # loop = kwargs.get('loop', False)
-            # self.resume_calibration(iteration, iter_step)
             self.resume_calibration(**kwargs)
         else:
             # Check experiment name as early as possible
@@ -139,13 +135,13 @@ class CalibManager(object):
 
             self.run_iterations()
 
-    def run_iterations(self, iteration=0, max_iterations=None, loop=True):
+    def run_iterations(self, iteration: int = 0, max_iterations: int = None, loop: bool = True):
         """
         Run iterations in a loop
         Args:
-            iteration: the # of iteration
+            iteration: the # of iterations
             max_iterations: max iterations
-            loop: if continue iteration loop
+            loop: if or not continue iteration loop
 
         Returns: None
         """
@@ -265,9 +261,6 @@ class CalibManager(object):
         if os.path.exists(self.name):
             logger.info("Calibration with name %s already exists in current directory" % self.name)
             var = ""
-            # while var not in ('R', 'B', 'C', 'P', 'A'):
-            #     var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, Re-[P]lot, [A]bort:  ')
-            #     var = var.upper()
             while var not in ('R', 'B', 'C', 'A'):
                 var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, [A]bort:  ')
                 var = var.upper()
@@ -284,9 +277,6 @@ class CalibManager(object):
                 self.create_calibration()
             elif var == "R":
                 self.resume_calibration()
-                exit()  # avoid calling self.run_iterations(**kwargs)
-            elif var == "P":
-                self.replot_calibration(iteration=None)
                 exit()  # avoid calling self.run_iterations(**kwargs)
         else:
             os.mkdir(self.name)
@@ -350,8 +340,6 @@ class CalibManager(object):
         return data.to_dict(orient='list')
 
     def resume_calibration(self, **kwargs):
-        self.resume = True
-
         iteration = kwargs.get('iteration', None)
         iter_step = kwargs.get('iter_step', None)
         loop = kwargs.get('loop', True)

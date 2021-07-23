@@ -25,7 +25,6 @@ class ResumeManager(object):
         self.iter_step = iter_step
         self.max_iterations = max_iterations
         self.loop = loop
-        # self.name = None
         self.calib_data = None
 
         self.initialize()
@@ -62,10 +61,12 @@ class ResumeManager(object):
         """
         self.calib_manager.resume = True
 
-        print('Resume will start with:')
+        it = self.calib_manager.current_iteration
+        print('\nResume will start with:')
         print(f' - iteration = {self.iteration}')
-        print(
-            f' - status = {self.calib_manager.current_iteration.status.name if self.calib_manager.current_iteration.status else None}')
+        print(f' - status = {it.status.name if it.status else None}')
+        print(f' - loop = {self.loop}')
+        print(f' - max_iterations = {self.max_iterations}')
 
         # resume from a given iteration
         self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
@@ -91,6 +92,7 @@ class ResumeManager(object):
         if latest_iteration < self.iteration:
             self.iteration = latest_iteration
 
+        # adjust max_iterations based on input max_iterations
         if not self.max_iterations:
             self.max_iterations = self.calib_manager.max_iterations
 
@@ -143,12 +145,7 @@ class ResumeManager(object):
         # update required objects for resume
         it.update(**self.calib_manager.required_components)
 
-        # step 1: If we know we are running -> recreate the exp_manager
-        # [TODO]
-        if self.iter_step.value >= StatusPoint.running.value:
-            pass
-
-        # step 2: restore next_point
+        # step 1: restore next_point
         if self.iter_step not in (
                 StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
             if self.iter_step == StatusPoint.commission or self.iter_step == StatusPoint.iteration_start:
@@ -163,7 +160,7 @@ class ResumeManager(object):
         else:
             it.next_point_algo.set_state(it.next_point, self.iteration)
 
-        # step 3: restore Calibration results
+        # step 2: restore Calibration results
         if self.iteration > 0 and self.iter_step.value < StatusPoint.plot.value:
             # it will combine current results with previous results
             it.restore_results(self.iteration - 1)
@@ -171,7 +168,7 @@ class ResumeManager(object):
             # it will use the current results and resume from next iteration
             it.restore_results(self.iteration)
 
-        # step 4: prepare resume states
+        # step 3: prepare resume states
         if self.iter_step.value <= StatusPoint.commission.value:
             # need to run simulations
             it.simulations = {}
