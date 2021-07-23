@@ -12,6 +12,23 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
+def status_to_iter_step(status: StatusPoint):
+    if status is None:
+        return None
+    elif status == StatusPoint.iteration_start:
+        return StatusPoint.commission
+    elif status == StatusPoint.commission:
+        return StatusPoint.analyze
+    elif status == StatusPoint.running:
+        return StatusPoint.analyze
+    elif status == StatusPoint.analyze:
+        return StatusPoint.plot
+    elif status == StatusPoint.plot:
+        return StatusPoint.next_point
+    elif status == StatusPoint.next_point:
+        return StatusPoint.next_point
+
+
 class ResumeManager(object):
     """
     Manages the creation, execution, and resumption of multi-iteration a calibration suite.
@@ -70,7 +87,7 @@ class ResumeManager(object):
         it = self.calib_manager.current_iteration
         print('\nResume will start with:')
         print(f' - iteration = {self.iteration}')
-        print(f' - status = {it.status.name if it.status else None}')
+        print(f' - iter_step = {status_to_iter_step(it.status).name}')
         print(f' - loop = {self.loop}')
         print(f' - max_iterations = {self.max_iterations}')
 
