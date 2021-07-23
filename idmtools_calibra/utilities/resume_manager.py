@@ -29,6 +29,7 @@ class ResumeManager(object):
         self.backup = backup
         self.dry = dry
         self.calib_data = None
+        self.location = None
 
         self.initialize()
 
@@ -46,16 +47,16 @@ class ResumeManager(object):
                 print(f"Invalid iter_step '{self.iter_step.name}', ignored.")
                 exit()
 
-        # 1. restore calib_manager
+        # restore calib_manager
         self.restore_calib_manager()
 
-        # 2. validate iteration
+        # validate iteration
         self.adjust_iteration()
 
-        # 3. validate iter_step
+        # validate iter_step
         self.adjust_iteration_step()
 
-        # 3. restore iteration state
+        # restore iteration state
         self.restore_iteration_state()
 
     def resume(self):
@@ -76,6 +77,27 @@ class ResumeManager(object):
         # resume from a given iteration
         if not self.dry:
             self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
+
+    def check_location(self):
+        """
+        - Handle the case: resume on different environments
+        - Handle environment change case: may resume from commission instead
+        """
+        # restore iteration state
+        it = self.calib_manager.state_for_iteration(iteration=self.iteration)
+
+        # If location has been changed, will double check user for a special case before proceed...
+        if self.calib_manager.platform._config_block != it.location:
+            var = input(
+                "\n/!\\ WARNING /!\\ Environment has been changed from '%s' to '%s'. Resume will start from 'commission' instead, do you want to continue? [Y/N]:  " % (
+                    self.calib_manager.platform._config_block, it.location))
+            if var.upper() == 'Y':
+                logger.info(f"Answer is '{var.upper()}'. Continue...")
+                self.calib_manager.suites = []  # will re-generate suite_id in commission_iteration step
+                self.iter_step = StatusPoint.commission
+            else:
+                logger.info(f"Answer is '{var.upper()}'. Exiting...")
+                exit()
 
     def adjust_iteration(self):
         """
@@ -105,6 +127,9 @@ class ResumeManager(object):
         if self.max_iterations <= self.iteration:
             self.max_iterations = self.iteration + 1
 
+        # check environment
+        self.check_location()
+
     def adjust_iteration_step(self):
         """
         Validate iter_step
@@ -133,7 +158,10 @@ class ResumeManager(object):
         self.calib_data = read_calib_data(self.calib_manager.calibration_path)
         self.calib_manager.suites = self.calib_data['suites']
 
-        # step 4: load all_results
+        # restore last time location
+        self.location = self.calib_data['location']
+
+        # load all_results
         results = self.calib_data.get('results')
         if isinstance(results, dict):
             self.calib_manager.all_results = pd.DataFrame.from_dict(results, orient='columns')
@@ -147,6 +175,11 @@ class ResumeManager(object):
         # restore initial iteration state
         it = self.calib_manager.state_for_iteration(self.iteration)
         it.platform = self.calib_manager.platform
+
+        # in case environment has been changed and new suite_id & suites are generated
+        if not self.calib_manager.suites:
+            it.suite_id = self.calib_manager.suite_id
+            it.suites = self.calib_manager.suites
 
         # update required objects for resume
         it.update(**self.calib_manager.required_components)

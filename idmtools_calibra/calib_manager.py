@@ -331,8 +331,12 @@ class CalibManager(object):
         if not isinstance(self.all_results, pd.DataFrame):
             return self.all_results
 
-        self.all_results.index.name = 'sample'
-        data = self.all_results.reset_index()
+        # handle resume case: restored self.all_results already has 'sample' column
+        if 'sample' not in self.all_results.columns:
+            self.all_results.index.name = 'sample'
+            data = self.all_results.reset_index()
+        else:
+            data = self.all_results
 
         data.iteration = data.iteration.astype(int)
         data['sample'] = data['sample'].astype(int)
