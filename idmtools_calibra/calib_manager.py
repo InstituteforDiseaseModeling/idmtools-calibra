@@ -303,7 +303,6 @@ class CalibManager(object):
 
         Returns: None
         """
-        from idmtools import IdmConfigParser
         state = {'name': self.name,
                  'location': self.platform._config_block,
                  'suites': self.suites,
@@ -409,7 +408,6 @@ class CalibManager(object):
                 raise Exception('Unable to find metadata in %s/CalibManager.json' % self.name)
             else:
                 return None
-
 
     @property
     def calibration_path(self):
