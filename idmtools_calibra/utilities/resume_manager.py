@@ -1,10 +1,12 @@
+import os
+import re
+import shutil
+from datetime import datetime
 import pandas as pd
-from typing import Optional, Any, Dict, List
-from idmtools.core.context import get_current_platform
-from idmtools.entities.iplatform import IPlatform
-from idmtools_calibra.cli.utils import read_calib_data
-from idmtools_calibra.process_state import StatusPoint
+from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.iteration_state import IterationState
+from idmtools_calibra.process_state import StatusPoint
+from idmtools_calibra.cli.utils import read_calib_data
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -17,14 +19,15 @@ class ResumeManager(object):
     or HPC simulations for a set of random seeds, sample points, and site configurations.
     """
 
-    def __init__(self, calib_manager, iteration: int = None, iter_step: str = None, max_iterations: int = None,
-                 loop=True, platform: Optional[IPlatform] = None):
-        self.platform = platform if platform else get_current_platform()
+    def __init__(self, calib_manager: CalibManager, iteration: int = None, iter_step: str = None,
+                 max_iterations: int = None, loop: bool = True, backup: bool = False, dry: bool = False):
         self.calib_manager = calib_manager
         self.iteration = iteration
         self.iter_step = iter_step
         self.max_iterations = max_iterations
         self.loop = loop
+        self.backup = backup
+        self.dry = dry
         self.calib_data = None
 
         self.initialize()
@@ -60,6 +63,8 @@ class ResumeManager(object):
         Call calib_manager.run_iterations to start resume action
         """
         self.calib_manager.resume = True
+        if self.backup:
+            self.backup_calibration()
 
         it = self.calib_manager.current_iteration
         print('\nResume will start with:')
@@ -69,7 +74,8 @@ class ResumeManager(object):
         print(f' - max_iterations = {self.max_iterations}')
 
         # resume from a given iteration
-        self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
+        if not self.dry:
+            self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
 
     def adjust_iteration(self):
         """
@@ -181,3 +187,13 @@ class ResumeManager(object):
         it._status = StatusPoint(self.iter_step.value - 1) if self.iter_step.value > 0 else None
 
         self.calib_manager.current_iteration = it
+
+    def backup_calibration(self):
+        """
+        Backup CalibManager.json for resume action
+        """
+        # calibration_path = os.path.join(self.calib_manager.name, 'CalibManager.json')
+        calibration_path = self.calib_manager.calibration_path
+        if os.path.exists(calibration_path):
+            backup_id = 'backup_' + re.sub('[ :.-]', '_', str(datetime.now().replace(microsecond=0)))
+            shutil.copy(calibration_path, os.path.join(self.calib_manager.name, 'CalibManager_%s.json' % backup_id))
