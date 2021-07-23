@@ -2,24 +2,24 @@ import click
 from typing import Optional
 
 
-@click.group(short_help="Calibration Related Commands")
+@click.group(help="[TODO]: Calibration Related Commands")
 def calibra():
     pass
 
 
-@calibra.command()
+@calibra.command(help="[TODO]: Calibration Run")
 def run():
     print('To be implemented...')
     exit()
 
 
-@calibra.command()
+@calibra.command(help="[TODO]: Calibration Cleanup")
 def cleanup():
     print('To be implemented...')
     exit()
 
 
-@calibra.command()
+@calibra.command(help="[TODO]: Calibration Resume")
 @click.option('--config_name', required=True, help="Calibration Script")
 @click.option('--iteration', default=None, help="Iteration")
 @click.option('--iter_step', default=None, help="Iteration Step")
