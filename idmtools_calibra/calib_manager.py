@@ -349,10 +349,10 @@ class CalibManager(object):
         loop = kwargs.get('loop', True)
         max_iterations = kwargs.get('max_iterations', None)
         backup = kwargs.get('backup', False)    # backup Calibration.json
-        dry = kwargs.get('dry', False)  # show final parameters only
+        dry_run = kwargs.get('dry_run', False)  # show final parameters only
 
         from idmtools_calibra.utilities.resume_manager import ResumeManager
-        resume_manager = ResumeManager(self, iteration, iter_step, max_iterations, loop, backup, dry)
+        resume_manager = ResumeManager(self, iteration, iter_step, max_iterations, loop, backup, dry_run)
         resume_manager.resume()
 
     def kill(self):

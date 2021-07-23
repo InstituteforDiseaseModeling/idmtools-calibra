@@ -37,14 +37,14 @@ class ResumeManager(object):
     """
 
     def __init__(self, calib_manager: CalibManager, iteration: int = None, iter_step: str = None,
-                 max_iterations: int = None, loop: bool = True, backup: bool = False, dry: bool = False):
+                 max_iterations: int = None, loop: bool = True, backup: bool = False, dry_run: bool = False):
         self.calib_manager = calib_manager
         self.iteration = iteration
         self.iter_step = iter_step
         self.max_iterations = max_iterations
         self.loop = loop
         self.backup = backup
-        self.dry = dry
+        self.dry_run = dry_run
         self.calib_data = None
         self.location = None
 
@@ -92,7 +92,7 @@ class ResumeManager(object):
         print(f' - max_iterations = {self.max_iterations}')
 
         # resume from a given iteration
-        if not self.dry:
+        if not self.dry_run:
             self.calib_manager.run_iterations(self.iteration, self.max_iterations, loop=self.loop)
 
     def check_location(self):
