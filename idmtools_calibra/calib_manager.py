@@ -125,6 +125,9 @@ class CalibManager(object):
         """
         resume = kwargs.get('resume', False)
         if resume:
+            if not os.path.exists(self.name):
+                print(f"\n/!\\ WARNING /!\\ This is a brand new run for calibration '{self.name}', can't resume.")
+                exit()
             self.resume_calibration(**kwargs)
         else:
             # Check experiment name as early as possible
