@@ -107,7 +107,7 @@ class ResumeManager(object):
         if self.calib_manager.platform._config_block != it.location:
             var = input(
                 "\n/!\\ WARNING /!\\ Environment has been changed from '%s' to '%s'. Resume will start from 'commission' instead, do you want to continue? [Y/N]:  " % (
-                    self.calib_manager.platform._config_block, it.location))
+                    it.location, self.calib_manager.platform._config_block))
             if var.upper() == 'Y':
                 logger.info(f"Answer is '{var.upper()}'. Continue...")
                 self.calib_manager.suites = []  # will re-generate suite_id in commission_iteration step
