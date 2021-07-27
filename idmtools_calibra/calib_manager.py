@@ -122,6 +122,17 @@ class CalibManager(object):
     def run_calibration(self, **kwargs):
         """
         Create and run a complete multi-iteration calibration suite.
+        kwargs supports the following optional parameters:
+        Args:
+            resume: bool, default=False, flag required for calibration resume
+            iteration: int, default=None, default=None, from which iteration to resume
+            iter_step: str, default=None, default=None, from which calibration step to resume
+            loop: bool, default=True, if like to continue to next iteration
+            max_iterations, int, default=None, user can override the max_iterations defined in calib_manager
+            backup: bool, default=False, if like to backup Calibration.json
+            dry_run: bool, default=False, if like to really execute resume action
+
+        Returns: None
         """
         resume = kwargs.get('resume', False)
         if resume:
