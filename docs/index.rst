@@ -9,6 +9,9 @@ at :doc:`idmtools:index`.
 
 .. _GitHub: https://github.com/InstituteforDiseaseModeling/idmtools_calibra
 
+See :doc:`idmtools:index` for a diagram showing how |IT_s| and each of the
+related packages are used in an end-to-end workflow using |EMOD_s| as the
+disease transmission model.
 
 
 .. toctree::
