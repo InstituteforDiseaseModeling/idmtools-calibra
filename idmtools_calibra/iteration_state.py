@@ -102,9 +102,6 @@ class IterationState:
         elif isinstance(self.all_results, list):
             self.all_results = self.all_results[iteration]
 
-    def resume(self, iter_step):
-        pass
-
     def run(self):
         # START_STEP
         if not self.status:
@@ -345,7 +342,9 @@ class IterationState:
             return cls(**json.load(f, object_hook=json_numpy_obj_hook))
 
     def to_file(self):
-        state = dict(status=self.status.name, samples_for_this_iteration=self.samples_for_this_iteration,
+        state = dict(status=self.status.name,
+                     location=self.platform._config_block,
+                     samples_for_this_iteration=self.samples_for_this_iteration,
                      analyzers=self.analyzers,
                      iteration=self.iteration, iteration_start=self.iteration_start, results=self.results,
                      calibration_name=self.calibration_name, experiment_id=self.experiment_id,

@@ -119,33 +119,57 @@ class CalibManager(object):
     def iteration(self):
         return self.current_iteration.iteration if self.current_iteration else 0
 
-    def run_calibration(self):
+    def run_calibration(self, **kwargs):
         """
         Create and run a complete multi-iteration calibration suite.
+        kwargs supports the following optional parameters:
+        Args:
+            resume: bool, default=False, flag required for calibration resume
+            iteration: int, default=None, default=None, from which iteration to resume
+            iter_step: str, default=None, default=None, from which calibration step to resume
+            loop: bool, default=True, if like to continue to next iteration
+            max_iterations, int, default=None, user can override the max_iterations defined in calib_manager
+            backup: bool, default=False, if like to backup Calibration.json
+            dry_run: bool, default=False, if like to really execute resume action
+
+        Returns: None
         """
-        # Check experiment name as early as possible
-        if not validate_exp_name(self.name):
-            exit()
+        resume = kwargs.get('resume', False)
+        if resume:
+            if not os.path.exists(self.name):
+                print(f"\n/!\\ WARNING /!\\ This is a brand new run for calibration '{self.name}', can't resume.")
+                exit()
+            self.resume_calibration(**kwargs)
+        else:
+            # Check experiment name as early as possible
+            if not validate_exp_name(self.name):
+                exit()
 
-        self.create_calibration()
+            self.create_calibration()
 
-        self.run_iterations()
+            self.run_iterations()
 
-    def run_iterations(self, iteration=0):
+    def run_iterations(self, iteration: int = 0, max_iterations: int = None, loop: bool = True):
         """
         Run iterations in a loop
         Args:
-            iteration: the # of iteration
+            iteration: the # of iterations
+            max_iterations: max iterations
+            loop: if or not continue iteration loop
 
         Returns: None
         """
         self.calibration_start = datetime.now().replace(microsecond=0)
+        if not max_iterations:
+            max_iterations = self.max_iterations
 
         # normal run
-        for i in range(iteration, self.max_iterations):
+        for i in range(iteration, max_iterations):
             self.current_iteration = self.create_iteration_state(i)
             self.current_iteration.run()
             self.post_iteration()
+            if not loop:
+                break
         self.finalize_calibration()
 
         # Print the calibration finish time
@@ -251,11 +275,8 @@ class CalibManager(object):
         if os.path.exists(self.name):
             logger.info("Calibration with name %s already exists in current directory" % self.name)
             var = ""
-            # while var not in ('R', 'B', 'C', 'P', 'A'):
-            #     var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, Re-[P]lot, [A]bort:  ')
-            #     var = var.upper()
-            while var not in ('B', 'C', 'A'):
-                var = input('Do you want to [B]ackup + run, [C]leanup + run, [A]bort:  ')
+            while var not in ('R', 'B', 'C', 'A'):
+                var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, [A]bort:  ')
                 var = var.upper()
 
             # Abort
@@ -270,9 +291,6 @@ class CalibManager(object):
                 self.create_calibration()
             elif var == "R":
                 self.resume_calibration()
-                exit()  # avoid calling self.run_iterations(**kwargs)
-            elif var == "P":
-                self.replot_calibration(iteration=None)
                 exit()  # avoid calling self.run_iterations(**kwargs)
         else:
             os.mkdir(self.name)
@@ -300,6 +318,7 @@ class CalibManager(object):
         Returns: None
         """
         state = {'name': self.name,
+                 'location': self.platform._config_block,
                  'suites': self.suites,
                  'iteration': self.iteration,
                  'param_names': self.param_names(),
@@ -325,16 +344,29 @@ class CalibManager(object):
         if not isinstance(self.all_results, pd.DataFrame):
             return self.all_results
 
-        self.all_results.index.name = 'sample'
-        data = self.all_results.reset_index()
+        # handle resume case: restored self.all_results already has 'sample' column
+        if 'sample' not in self.all_results.columns:
+            self.all_results.index.name = 'sample'
+            data = self.all_results.reset_index()
+        else:
+            data = self.all_results
 
         data.iteration = data.iteration.astype(int)
         data['sample'] = data['sample'].astype(int)
 
         return data.to_dict(orient='list')
 
-    def resume_calibration(self, iteration=None, iter_step=None):
-        pass
+    def resume_calibration(self, **kwargs):
+        iteration = kwargs.get('iteration', None)
+        iter_step = kwargs.get('iter_step', None)
+        loop = kwargs.get('loop', True)
+        max_iterations = kwargs.get('max_iterations', None)
+        backup = kwargs.get('backup', False)    # backup Calibration.json
+        dry_run = kwargs.get('dry_run', False)  # show final parameters only
+
+        from idmtools_calibra.utilities.resume_manager import ResumeManager
+        resume_manager = ResumeManager(self, iteration, iter_step, max_iterations, loop, backup, dry_run)
+        resume_manager.resume()
 
     def kill(self):
         from idmtools.core import ItemType
@@ -391,10 +423,6 @@ class CalibManager(object):
             else:
                 return None
 
-    def read_iteration_data(self, iteration):
-        iteration_cache = os.path.join(self.name, 'iter%d' % iteration, 'IterationState.json')
-        return IterationState.from_file(iteration_cache)
-
     @property
     def calibration_path(self):
         return os.path.join(self.name, 'CalibManager.json')
@@ -428,8 +456,10 @@ class CalibManager(object):
         return os.path.join(self.name, 'iter%d' % self.iteration)
 
     def state_for_iteration(self, iteration):
-        iter_directory = os.path.join(self.name, 'iter%d' % iteration)
-        return IterationState.from_file(os.path.join(iter_directory, 'IterationState.json'))
+        iter_directory = os.path.join(self.name, f'iter{iteration}')
+        it = IterationState.from_file(os.path.join(iter_directory, 'IterationState.json'))
+        it.platform = self.platform
+        return it
 
     def param_names(self):
         return self.next_point.get_param_names()
