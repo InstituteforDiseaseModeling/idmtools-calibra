@@ -2,7 +2,7 @@
 Welcome to |calibra|
 =====================
 
-|calibra| s a collection of Python scripts and utilities to aid in model
+|calibra| is a collection of Python scripts and utilities to aid in model
 calibration. The |IT_s| package  should be used for streamlining the process
 of running disease modeling simulations. Additional information can be found
 at :doc:`idmtools:index`. 
