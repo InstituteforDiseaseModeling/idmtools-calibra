@@ -3,3 +3,4 @@ sphinxcontrib-napoleon~=0.7
 sphinx~=3.2.0
 plantweb~=1.2.1
 sphinxcontrib-programoutput~=0.16
+click~=8.0.1
