@@ -238,7 +238,6 @@ class SiteDataPlotter(BasePlotter):
             return ",".join(paths)
 
         join_results_df['outputs'] = join_results_df['simid'].apply(find_path)
-        del join_results_df['simid']
 
         # Concatenate with any existing data from previous iterations and dump to file
         csv_path = os.path.join(self.directory, 'LL_all.csv')
