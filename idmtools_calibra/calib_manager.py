@@ -39,10 +39,15 @@ def set_parameter_sweep_callback(simulation: Simulation, param: str, value: Any)
     Returns:
         Tags to set on simulation
     """
-    if not hasattr(simulation.task, 'set_parameter'):
-        raise ValueError("update_task_with_set_parameter can only be used on tasks with a set_parameter")
-    # setattr(simulation.task.config.parameters, param, value)
-    simulation.task.config.parameters[param] = value
+    if hasattr(simulation.task, 'config') and hasattr(simulation.task.config, 'parameters'):
+        # For example: EMODTask
+        simulation.task.config.parameters[param] = value
+    elif not hasattr(simulation.task, 'config') and hasattr(simulation.task, 'parameters'):
+        # For example: JSONConfiguredTask, JSONConfiguredPythonTask, JSONConfiguredRTask
+        simulation.task.parameters[param] = value
+    else:
+        raise Exception("Support task with 'config' or 'parameters' only.")
+
     return {param: value}
 
 
