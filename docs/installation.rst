@@ -67,7 +67,7 @@ Installation instructions
 
 #.  Install |calibra| packages::
 
-        pip install calibra
+        pip install idmtools_calibra
 
     If you are on Python 3.6, also run::
 
