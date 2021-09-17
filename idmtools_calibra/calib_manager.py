@@ -231,7 +231,7 @@ class CalibManager(object):
             sweep = sweep[0]
         sweeps.append(sweep)
         sweeps.append(
-            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples) for
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples.copy()) for
              index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
