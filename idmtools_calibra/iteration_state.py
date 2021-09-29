@@ -26,6 +26,7 @@ class IterationState:
     def __init__(self, **kwargs):
         self.iteration = 0
         self.calibration_name = None
+        self.calibration_directory = None
         self.platform = None
         self.task = None
         self.sites = []
@@ -270,6 +271,7 @@ class IterationState:
             calibration_time_elapsed = current_time - self.calibration_start
 
             logger.info('\n\nCalibration: %s' % self.calibration_name)
+            logger.info('Calibration path: %s' % self.calibration_directory)
             logger.info('Calibration started: %s' % self.calibration_start)
             logger.info('Current iteration: Iteration %s' % self.iteration)
             logger.info('Current Iteration Started: %s' % self.iteration_start)
@@ -322,7 +324,7 @@ class IterationState:
 
     @property
     def iteration_directory(self):
-        return os.path.join(self.calibration_name, 'iter%d' % self.iteration)
+        return os.path.join(self.calibration_directory, 'iter%d' % self.iteration)
 
     @property
     def iteration_file(self):
@@ -348,6 +350,7 @@ class IterationState:
                      analyzers=self.analyzers,
                      iteration=self.iteration, iteration_start=self.iteration_start, results=self.results,
                      calibration_name=self.calibration_name, experiment_id=self.experiment_id,
+                     calibration_directory=self.calibration_directory,
                      simulations=self.simulations,
                      next_point=self.next_point_algo.get_state(), suite_id=self.suite_id)
 

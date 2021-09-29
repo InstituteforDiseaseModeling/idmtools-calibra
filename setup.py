@@ -3,12 +3,25 @@
 
 """The setup script for the itertool"""
 from setuptools import setup, find_packages
+import sys
+
+with open('requirements.txt') as requirements_file:
+    lines = requirements_file.read().strip().split("\n")
+requirements = []
+arguments = []
+develop_install = 'develop' in sys.argv
+for line in lines:
+    if line[0] == '-':
+        # we have a flag to handle on the command line
+        arguments.extend(line.split(' '))
+    else:
+        # we have an actual package requirement
+        requirements.append(line)
+if develop_install:
+    sys.argv.extend(arguments)
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
-
-with open('requirements.txt') as requirements_file:
-    requirements = [line for line in requirements_file.read().split("\n") if "-i" not in line]
 
 with open('history_matching_requirements.txt') as requirements_file:
     history_matching_requirements = requirements_file.read().split("\n")

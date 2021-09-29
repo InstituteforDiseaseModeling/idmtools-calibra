@@ -78,9 +78,11 @@ class CalibManager(object):
                  next_point: NextPointAlgorithm,
                  platform: Optional[IPlatform] = None, name: str = 'calib_test',
                  sim_runs_per_param_set: int = 1, max_iterations: int = 5, plotters: List[BasePlotter] = None,
-                 map_replicates_callback=None):
+                 map_replicates_callback=None,
+                 directory='.'):
 
         self.name = name
+        self.directory = os.path.join(directory, name)  # path to root calib dir
         if platform is None:
             platform = get_current_platform()
         self.platform = platform
@@ -141,7 +143,7 @@ class CalibManager(object):
         """
         resume = kwargs.get('resume', False)
         if resume:
-            if not os.path.exists(self.name):
+            if not os.path.exists(self.directory):
                 print(f"\n/!\\ WARNING /!\\ This is a brand new run for calibration '{self.name}', can't resume.")
                 exit()
             self.resume_calibration(**kwargs)
@@ -258,6 +260,7 @@ class CalibManager(object):
 
         return IterationState(iteration=iteration,
                               calibration_name=self.name,
+                              calibration_directory=self.directory,
                               platform=self.platform,
                               sites=self.sites,
                               suite_id=self.suite_id,
@@ -277,8 +280,8 @@ class CalibManager(object):
         Create the working directory for a new calibration.
         Cache the relevant suite-level information to allow re-initializing this instance.
         """
-        if os.path.exists(self.name):
-            logger.info("Calibration with name %s already exists in current directory" % self.name)
+        if os.path.exists(self.directory):
+            logger.info("Calibration with name %s already exists at directory %s" % (self.name, self.directory))
             var = ""
             while var not in ('R', 'B', 'C', 'A'):
                 var = input('Do you want to [R]esume, [B]ackup + run, [C]leanup + run, [A]bort:  ')
@@ -289,7 +292,7 @@ class CalibManager(object):
                 exit()
             elif var == 'B':
                 tstamp = re.sub('[ :.-]', '_', str(datetime.now()))
-                shutil.move(self.name, "%s_backup_%s" % (self.name, tstamp))
+                shutil.move(self.directory, "%s_backup_%s" % (self.directory, tstamp))
                 self.create_calibration()
             elif var == "C":
                 self.cleanup()
@@ -298,7 +301,7 @@ class CalibManager(object):
                 self.resume_calibration()
                 exit()  # avoid calling self.run_iterations(**kwargs)
         else:
-            os.mkdir(self.name)
+            os.makedirs(self.directory)
             self.cache_calibration()
 
     def finalize_calibration(self):
@@ -323,6 +326,7 @@ class CalibManager(object):
         Returns: None
         """
         state = {'name': self.name,
+                 'directory': self.directory,
                  'location': self.platform._config_block,
                  'suites': self.suites,
                  'iteration': self.iteration,
@@ -331,16 +335,16 @@ class CalibManager(object):
                  'results': self.serialize_results(),
                  'calibration_start': self.calibration_start}
         state.update(kwargs)
-        json.dump(state, open(os.path.join(self.name, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
+        json.dump(state, open(os.path.join(self.directory, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
 
     def backup_calibration(self):
         """
         Backup CalibManager.json for resume action
         """
-        calibration_path = os.path.join(self.name, 'CalibManager.json')
+        calibration_path = os.path.join(self.directory, 'CalibManager.json')
         if os.path.exists(calibration_path):
             backup_id = 'backup_' + re.sub('[ :.-]', '_', str(datetime.now().replace(microsecond=0)))
-            shutil.copy(calibration_path, os.path.join(self.name, 'CalibManager_%s.json' % backup_id))
+            shutil.copy(calibration_path, os.path.join(self.directory, 'CalibManager_%s.json' % backup_id))
 
     def serialize_results(self):
         if self.all_results is None:
@@ -411,7 +415,7 @@ class CalibManager(object):
         self.kill()
 
         # Then delete the whole directory
-        calib_dir = os.path.abspath(self.name)
+        calib_dir = os.path.abspath(self.directory)
         if os.path.exists(calib_dir):
             try:
                 shutil.rmtree(calib_dir)
@@ -421,16 +425,16 @@ class CalibManager(object):
 
     def read_calib_data(self, force=False):
         try:
-            return json.load(open(os.path.join(self.name, 'CalibManager.json'), 'rb'))
+            return json.load(open(os.path.join(self.directory, 'CalibManager.json'), 'rb'))
         except IOError:
             if not force:
-                raise Exception('Unable to find metadata in %s/CalibManager.json' % self.name)
+                raise Exception('Unable to find metadata in %s/CalibManager.json' % self.directory)
             else:
                 return None
 
     @property
     def calibration_path(self):
-        return os.path.join(self.name, 'CalibManager.json')
+        return os.path.join(self.directory, 'CalibManager.json')
 
     @property
     def analyzer_list(self):
@@ -458,10 +462,10 @@ class CalibManager(object):
         return kwargs
 
     def iteration_directory(self):
-        return os.path.join(self.name, 'iter%d' % self.iteration)
+        return os.path.join(self.directory, 'iter%d' % self.iteration)
 
     def state_for_iteration(self, iteration):
-        iter_directory = os.path.join(self.name, f'iter{iteration}')
+        iter_directory = os.path.join(self.directory, f'iter{iteration}')
         it = IterationState.from_file(os.path.join(iter_directory, 'IterationState.json'))
         it.platform = self.platform
         return it
