@@ -138,9 +138,14 @@ class CalibManager(object):
             max_iterations, int, default=None, user can override the max_iterations defined in calib_manager
             backup: bool, default=False, if like to backup Calibration.json
             dry_run: bool, default=False, if like to really execute resume action
+            directory: str, default=None, calibration directory
 
         Returns: None
         """
+        directory = kwargs.get('directory', None)
+        if directory:
+            self.directory = os.path.join(directory, self.name)  # path to root calib dir
+
         resume = kwargs.get('resume', False)
         if resume:
             if not os.path.exists(self.directory):
