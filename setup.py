@@ -19,8 +19,6 @@ for line in lines:
         requirements.append(line)
 if develop_install:
     sys.argv.extend(arguments)
-    # for some reason, things are installed in reverse requirements.txt order
-    requirements.reverse()
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
