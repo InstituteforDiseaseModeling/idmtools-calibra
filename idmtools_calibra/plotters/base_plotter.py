@@ -17,10 +17,10 @@ class BasePlotter:
         return self.iteration_state.iteration_directory
 
     def get_plot_directory(self):
-        plot_dir = os.path.join(self.iteration_state.calibration_name, '_plots')
+        plot_dir = os.path.join(self.iteration_state.calibration_directory, '_plots')
         os.makedirs(plot_dir, exist_ok=True)
 
-        return os.path.join(self.iteration_state.calibration_name, '_plots')
+        return os.path.join(self.iteration_state.calibration_directory, '_plots')
 
     @property
     def all_results(self):
