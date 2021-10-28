@@ -142,6 +142,13 @@ class CalibManager(object):
 
         Returns: None
         """
+        ll_all = kwargs.get('ll_all', False)
+        if ll_all:
+            from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+            print("Generating ll_all.csv file...")
+            generate_ll_all(self)
+            exit(0)
+
         directory = kwargs.get('directory', None)
         if directory:
             self.directory = os.path.join(directory, self.name)  # path to root calib dir
