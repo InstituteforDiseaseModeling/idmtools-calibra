@@ -20,9 +20,10 @@ def generate_ll_all(calib_manager, num_to_plot=5):
         # raise ModuleNotFoundError("Calibration is missing SiteDataPlotter!")
 
     # build ll_all.csv
+    ll_all_name = "ll_all_final.csv"
     for i in range(max_iteration):
         rm = ResumeManager(calib_manager, iteration=i, iter_step='plot')
         it = rm.calib_manager.current_iteration
         sp = SiteDataPlotter(num_to_plot=5, combine_sites=True)
         sp.iteration_state = it
-        sp.write_LL_csv()
+        sp.write_LL_csv(ll_all_name=ll_all_name)
