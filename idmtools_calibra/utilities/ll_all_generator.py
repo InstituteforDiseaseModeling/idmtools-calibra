@@ -4,7 +4,6 @@ from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 
 def generate_ll_all(calib_manager, num_to_plot=5):
     # retrieve the latest iteration
-    # max_iteration = calib_manager.max_iterations
     rm = ResumeManager(calib_manager, iter_step='plot')
     latest_iteration = rm.calib_manager.current_iteration.iteration
     max_iteration = latest_iteration + 1
@@ -17,7 +16,6 @@ def generate_ll_all(calib_manager, num_to_plot=5):
             break
     if sp is None:
         sp = SiteDataPlotter(num_to_plot=num_to_plot, combine_sites=True)
-        # raise ModuleNotFoundError("Calibration is missing SiteDataPlotter!")
 
     # build ll_all.csv
     ll_all_name = "ll_all_final.csv"

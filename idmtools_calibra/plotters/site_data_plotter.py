@@ -187,10 +187,12 @@ class SiteDataPlotter(BasePlotter):
             except OSError:
                 logger.error("Failed to delete %s" % plot_path)
 
-    def write_LL_csv(self):
+    def write_LL_csv(self, ll_all_name: str = None):
         """
         Write the LL_summary.csv with what is in the CalibManager
         """
+        if ll_all_name:
+            self.ll_all_name = ll_all_name
         # Data needed for the LL_CSV
         # location = self.iteration_state.exp_manager.experiment.location
         iteration_state = self.iteration_state
