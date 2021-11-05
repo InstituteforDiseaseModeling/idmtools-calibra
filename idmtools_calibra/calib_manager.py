@@ -61,8 +61,9 @@ class SampleIndexWrapper(object):
     def __init__(self, map_sample_to_model_input_fn):
         self.map_sample_to_model_input_fn = map_sample_to_model_input_fn
 
-    def __call__(self, simulation, idx, *args, **kwargs):
-        params_dict = self.map_sample_to_model_input_fn(simulation, *args, **kwargs)
+    def __call__(self, simulation, idx, sample, *args, **kwargs):
+        # because this sample might be reused for replicate sims of this one, we need to make sure to not modify it
+        params_dict = self.map_sample_to_model_input_fn(simulation, sample.copy(), *args, **kwargs)
         params_dict.update({'__sample_index__': idx})
         return params_dict
 
@@ -238,8 +239,7 @@ class CalibManager(object):
             sweep = sweep[0]
         sweeps.append(sweep)
         sweeps.append(
-            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy() if n_replicates > 1 else samples.copy()) for
-             index, samples in enumerate(next_params)])
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy()) for index, samples in enumerate(next_params)])
 
         builder = SimulationBuilder()
         count = None
