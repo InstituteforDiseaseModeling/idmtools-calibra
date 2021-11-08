@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class SiteDataPlotter(BasePlotter):
-    def __init__(self, combine_sites=True, num_to_plot=5):
+    def __init__(self, combine_sites=True, num_to_plot=5, ll_all_name: str = 'LL_all.csv'):
         super(SiteDataPlotter, self).__init__(combine_sites)
         self.num_to_plot = num_to_plot
+        self.ll_all_name = ll_all_name
 
     @property
     def directory(self):
@@ -186,10 +187,12 @@ class SiteDataPlotter(BasePlotter):
             except OSError:
                 logger.error("Failed to delete %s" % plot_path)
 
-    def write_LL_csv(self):
+    def write_LL_csv(self, ll_all_name: str = None):
         """
         Write the LL_summary.csv with what is in the CalibManager
         """
+        if ll_all_name:
+            self.ll_all_name = ll_all_name
         # Data needed for the LL_CSV
         # location = self.iteration_state.exp_manager.experiment.location
         iteration_state = self.iteration_state
@@ -240,7 +243,7 @@ class SiteDataPlotter(BasePlotter):
         join_results_df['outputs'] = join_results_df['simid'].apply(find_path)
 
         # Concatenate with any existing data from previous iterations and dump to file
-        csv_path = os.path.join(self.directory, 'LL_all.csv')
+        csv_path = os.path.join(self.directory, self.ll_all_name)
         if os.path.exists(csv_path):
             current = pd.read_csv(csv_path, index_col=['iteration', 'sample'])
             final_results_df = pd.concat([current, join_results_df])
