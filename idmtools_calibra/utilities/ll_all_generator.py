@@ -2,10 +2,13 @@ from idmtools_calibra.utilities.resume_manager import ResumeManager
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 
 
-def generate_ll_all(calib_manager, num_to_plot=5):
+def generate_ll_all(calib_manager, num_to_plot=5, iteration=None):
     # retrieve the latest iteration
     rm = ResumeManager(calib_manager, iter_step='plot')
-    latest_iteration = rm.calib_manager.current_iteration.iteration
+    if iteration is None:
+        latest_iteration = rm.calib_manager.current_iteration.iteration
+    else:
+        latest_iteration = iteration
     max_iteration = latest_iteration + 1
 
     # get SiteDataPlotter

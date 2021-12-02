@@ -150,8 +150,9 @@ class CalibManager(object):
         ll_all = kwargs.get('ll_all', False)
         if ll_all:
             from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+            iteration = kwargs.get('iteration', None)
             print("Generating ll_all.csv file...")
-            generate_ll_all(self)
+            generate_ll_all(self, iteration=iteration)
             exit(0)
 
         resume = kwargs.get('resume', False)
