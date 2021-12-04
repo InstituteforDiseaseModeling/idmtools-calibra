@@ -76,6 +76,9 @@ class ResumeManager(object):
         # restore iteration state
         self.restore_iteration_state()
 
+        # restore LL_all.csv
+        self.restore_ll_all()
+
     def resume(self):
         """
         Call calib_manager.run_iterations to start resume action
@@ -205,14 +208,14 @@ class ResumeManager(object):
         if self.iter_step not in (
                 StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
             if self.iter_step == StatusPoint.commission or self.iter_step == StatusPoint.iteration_start:
-                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration - 1)
+                iteration_state = IterationState.restore_state(self.iteration - 1)
                 it.next_point_algo.set_state(iteration_state.next_point, self.iteration - 1)
             elif self.iter_step == StatusPoint.analyze:
-                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration)
+                iteration_state = IterationState.restore_state(self.iteration)
                 it.next_point_algo.set_state(iteration_state.next_point, self.iteration)
 
                 # For IMIS ONLY!
-                it.next_point_algo.restore(IterationState.restore_state(it.calibration_name, self.iteration - 1))
+                it.next_point_algo.restore(IterationState.restore_state(self.iteration - 1))
         else:
             it.next_point_algo.set_state(it.next_point, self.iteration)
 
@@ -223,6 +226,10 @@ class ResumeManager(object):
         else:
             # it will use the current results and resume from next iteration
             it.restore_results(self.iteration)
+
+        # it.all_results.reset_index(inplace=True)
+        if it.iteration == 0 and self.iter_step.value < StatusPoint.plot.value:
+            it.all_results = None
 
         # step 3: prepare resume states
         if self.iter_step.value <= StatusPoint.commission.value:
@@ -236,7 +243,17 @@ class ResumeManager(object):
         # finally update current status
         it._status = StatusPoint(self.iter_step.value - 1) if self.iter_step.value > 0 else None
 
+        it.resume = True
         self.calib_manager.current_iteration = it
+
+    def restore_ll_all(self):
+        ll_all_name = 'LL_all.csv'
+        ll_all_path = os.path.join(self.calib_manager.directory, '_plots', ll_all_name)
+        if os.path.exists(ll_all_path):
+            os.remove(ll_all_path)
+        if self.iteration > 0:
+            from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+            generate_ll_all(self.calib_manager, iteration=self.iteration - 1, ll_all_name=ll_all_name)
 
     def backup_calibration(self):
         """

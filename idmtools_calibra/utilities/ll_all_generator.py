@@ -1,15 +1,29 @@
-from idmtools_calibra.utilities.resume_manager import ResumeManager
+import os
+import pandas as pd
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 
 
-def generate_ll_all(calib_manager, num_to_plot=5, iteration=None):
-    # retrieve the latest iteration
-    rm = ResumeManager(calib_manager, iter_step='plot')
+def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=None):
+    from idmtools_calibra.cli.utils import read_calib_data
+    calib_data = read_calib_data(calib_manager.calibration_path)
+    # in case environment has been changed and new suite_id & suites are generated
+
+    # load all_results
+    results = calib_data.get('results')
+    all_results = pd.DataFrame()
+    if isinstance(results, dict):
+        all_results = pd.DataFrame.from_dict(results, orient='columns')
+
+    all_results.reset_index(inplace=True, drop=True)
+    top_columns = ['iteration', 'sample', 'total']
+    all_results = all_results.reindex(
+        columns=(top_columns + list([a for a in all_results.columns if a not in top_columns])))
+
+    # restore last time location
     if iteration is None:
-        latest_iteration = rm.calib_manager.current_iteration.iteration
+        current_iteration = calib_data['iteration']
     else:
-        latest_iteration = iteration
-    max_iteration = latest_iteration + 1
+        current_iteration = iteration
 
     # get SiteDataPlotter
     sp = None
@@ -21,10 +35,20 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None):
         sp = SiteDataPlotter(num_to_plot=num_to_plot, combine_sites=True)
 
     # build ll_all.csv
-    ll_all_name = "ll_all_final.csv"
-    for i in range(max_iteration):
-        rm = ResumeManager(calib_manager, iteration=i, iter_step='plot')
-        it = rm.calib_manager.current_iteration
+    if ll_all_name is None:
+        ll_all_name = "ll_all_final.csv"
+
+    # clean existing one
+    ll_all_path = os.path.join(calib_manager.directory, '_plots', ll_all_name)
+    if os.path.exists(ll_all_path):
+        os.remove(ll_all_path)
+
+    for iteration in range(current_iteration + 1):
+        it = calib_manager.state_for_iteration(iteration)
+        it.all_results = all_results.copy(deep=True)
+        it.all_results = all_results[all_results.iteration <= iteration]
+        it.all_results.set_index('sample', inplace=True)  # important to keep the same format as original
+
         sp = SiteDataPlotter(num_to_plot=5, combine_sites=True)
         sp.iteration_state = it
         sp.write_LL_csv(ll_all_name=ll_all_name)

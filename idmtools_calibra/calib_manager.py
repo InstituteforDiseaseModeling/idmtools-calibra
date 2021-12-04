@@ -338,6 +338,9 @@ class CalibManager(object):
 
         Returns: None
         """
+        if self.current_iteration.resume:
+            return
+
         state = {'name': self.name,
                  'directory': self.directory,
                  'location': self.platform._config_block,
