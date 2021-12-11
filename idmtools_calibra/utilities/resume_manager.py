@@ -205,14 +205,14 @@ class ResumeManager(object):
         if self.iter_step not in (
                 StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
             if self.iter_step == StatusPoint.commission or self.iter_step == StatusPoint.iteration_start:
-                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration - 1)
+                iteration_state = IterationState.restore_state(it.calibration_directory, self.iteration - 1)
                 it.next_point_algo.set_state(iteration_state.next_point, self.iteration - 1)
             elif self.iter_step == StatusPoint.analyze:
-                iteration_state = IterationState.restore_state(it.calibration_name, self.iteration)
+                iteration_state = IterationState.restore_state(it.calibration_directory, self.iteration)
                 it.next_point_algo.set_state(iteration_state.next_point, self.iteration)
 
                 # For IMIS ONLY!
-                it.next_point_algo.restore(IterationState.restore_state(it.calibration_name, self.iteration - 1))
+                it.next_point_algo.restore(IterationState.restore_state(it.calibration_directory, self.iteration - 1))
         else:
             it.next_point_algo.set_state(it.next_point, self.iteration)
 

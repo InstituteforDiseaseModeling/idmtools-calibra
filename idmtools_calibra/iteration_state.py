@@ -358,11 +358,11 @@ class IterationState:
             json.dump(state, f, indent=4, cls=NumpyEncoder)
 
     @classmethod
-    def restore_state(cls, exp_name, iteration):
+    def restore_state(cls, calibration_directory, iteration):
         """
         Restore IterationState
         """
-        iter_directory = os.path.join(exp_name, 'iter%d' % iteration)
+        iter_directory = os.path.join(calibration_directory, 'iter%d' % iteration)
         iter_file = os.path.join(iter_directory, 'IterationState.json')
         return cls.from_file(iter_file)
 
