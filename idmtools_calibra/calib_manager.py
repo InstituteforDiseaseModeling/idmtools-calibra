@@ -339,7 +339,8 @@ class CalibManager(object):
 
         Returns: None
         """
-        if self.current_iteration.resume:
+        it = getattr(self, 'current_iteration', None)
+        if it and it.resume:
             return
 
         state = {'name': self.name,
