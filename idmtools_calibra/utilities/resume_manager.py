@@ -247,13 +247,17 @@ class ResumeManager(object):
         self.calib_manager.current_iteration = it
 
     def restore_ll_all(self):
+        from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+
         ll_all_name = 'LL_all.csv'
         ll_all_path = os.path.join(self.calib_manager.directory, '_plots', ll_all_name)
         if os.path.exists(ll_all_path):
             os.remove(ll_all_path)
-        if self.iteration > 0:
-            from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+
+        if self.iteration > 0 and self.iter_step.value < StatusPoint.plot.value:
             generate_ll_all(self.calib_manager, iteration=self.iteration - 1, ll_all_name=ll_all_name)
+        else:
+            generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
 
     def backup_calibration(self):
         """
