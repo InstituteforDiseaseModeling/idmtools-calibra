@@ -2,6 +2,10 @@ from copy import deepcopy
 import numpy as np
 
 
+class NaNDetectedError(ValueError):
+    pass
+
+
 class ParameterSet:
 
     def __init__(self, param_dict, iteration_number=None, run_number=None, sim_id=None, likelihood=None):
@@ -35,6 +39,10 @@ class ParameterSet:
 
     @classmethod
     def from_dict(cls, source_dict):
+        # first verify that no values in the source dict are nan, (e.g. read in from blank row of a csv file)
+        if np.nan in source_dict.values():
+            raise NaNDetectedError('At least one nan found in parameter set dict.')
+
         items_to_get = ['iteration_number', 'run_number', 'sim_id', 'likelihood', 'parameterization_id']
         items_dict = cls._get_items(items_to_get, source_dict)
         parameterization_id = items_dict.pop('parameterization_id')
