@@ -133,8 +133,8 @@ class CalibManager(object):
         kwargs supports the following optional parameters:
         Args:
             resume: bool, default=False, flag required for calibration resume
-            iteration: int, default=None, default=None, from which iteration to resume
-            iter_step: str, default=None, default=None, from which calibration step to resume
+            iteration: int, default=None, from which iteration to resume
+            iter_step: str, default=None, from which calibration step to resume. support values: 'commission', 'analyze', plot' and 'next_point'
             loop: bool, default=True, if like to continue to next iteration
             max_iterations, int, default=None, user can override the max_iterations defined in calib_manager
             backup: bool, default=False, if like to backup Calibration.json
@@ -150,8 +150,9 @@ class CalibManager(object):
         ll_all = kwargs.get('ll_all', False)
         if ll_all:
             from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+            iteration = kwargs.get('iteration', None)
             print("Generating ll_all.csv file...")
-            generate_ll_all(self)
+            generate_ll_all(self, iteration=iteration)
             exit(0)
 
         resume = kwargs.get('resume', False)
@@ -246,7 +247,8 @@ class CalibManager(object):
             sweep = sweep[0]
         sweeps.append(sweep)
         sweeps.append(
-            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy()) for index, samples in enumerate(next_params)])
+            [ModFn(self.map_sample_to_model_input_fn, index, samples.copy()) for index, samples in
+             enumerate(next_params)])
 
         builder = SimulationBuilder()
         count = None
@@ -337,6 +339,10 @@ class CalibManager(object):
 
         Returns: None
         """
+        it = getattr(self, 'current_iteration', None)
+        if it and it.resume:
+            return
+
         state = {'name': self.name,
                  'directory': self.directory,
                  'location': self.platform._config_block,
@@ -382,7 +388,7 @@ class CalibManager(object):
         iter_step = kwargs.get('iter_step', None)
         loop = kwargs.get('loop', True)
         max_iterations = kwargs.get('max_iterations', None)
-        backup = kwargs.get('backup', False)    # backup Calibration.json
+        backup = kwargs.get('backup', False)  # backup Calibration.json
         dry_run = kwargs.get('dry_run', False)  # show final parameters only
 
         from idmtools_calibra.utilities.resume_manager import ResumeManager

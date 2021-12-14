@@ -33,15 +33,15 @@ class SiteDataPlotter(BasePlotter):
         for site, analyzers in self.site_analyzer_names.items():
             if site_name != site:
                 continue
-            site_analyzer = '%s_%s' % (site_name, analyzer_name)
+            site_analyzer = f'{site_name}_{analyzer_name}'
             for analyzer in self.iteration_state.analyzer_list:
                 if site_analyzer == analyzer.uid:
                     return analyzer
-        raise Exception('Unable to find analyzer=%s for site=%s' % (analyzer_name, site_name))
+        raise Exception(f'Unable to find analyzer={analyzer_name} for site={site_name}')
 
     def get_analyzer_data(self, iteration, site_name, analyzer_name):
         site_analyzer = '%s_%s' % (site_name, analyzer_name)
-        return IterationState.restore_state(self.iteration_state.calibration_name, iteration).analyzers[site_analyzer]
+        return IterationState.restore_state(iteration).analyzers[site_analyzer]
 
     def visualize(self, iteration_state):
         self.iteration_state = iteration_state
@@ -57,7 +57,7 @@ class SiteDataPlotter(BasePlotter):
             else:
                 for site_name, analyzer_names in self.site_analyzer_names.items():
                     self.combine_by_site(site_name, analyzer_names, self.all_results)
-                    sorted_results = self.all_results.sort_values(by='%s_total' % site_name,
+                    sorted_results = self.all_results.sort_values(by=f'{site_name}_total',
                                                                   ascending=False).reset_index()
                     # self.plot_analyzers(site_name, analyzer_names, sorted_results)
         except Exception as e:
@@ -91,7 +91,7 @@ class SiteDataPlotter(BasePlotter):
             analyzer_data = self.get_analyzer_data(iteration, site_name, analyzer_name)
 
             for rank, sample in iter_samples['sample'].iteritems():  # index is rank
-                fname = os.path.join(self.directory, '%s_%s' % (site_name, analyzer_name), 'rank%d' % rank)
+                fname = os.path.join(self.directory, f'{site_name}_{analyzer_name}', f'rank{rank:d}')
                 fig = plt.figure(fname, figsize=(8, 6))
 
                 analyzer.plot_comparison(fig, analyzer_data['samples'][sample], fmt='-o', color='#CB5FA4', alpha=1,
@@ -108,7 +108,7 @@ class SiteDataPlotter(BasePlotter):
 
         analyzer = self.get_site_analyzer(site_name, analyzer_name)
 
-        fname = os.path.join(self.directory, '%s_%s_all' % (site_name, analyzer_name))
+        fname = os.path.join(self.directory, f'{site_name}_{analyzer_name}_all')
         fig = plt.figure(fname, figsize=(4, 3))
         cmin, cmax = clim
 
@@ -149,7 +149,7 @@ class SiteDataPlotter(BasePlotter):
         """
         best_samples = samples.iloc[:self.num_to_plot]
         for analyzer in analyzers:
-            site_analyzer = '%s_%s' % (site, analyzer)
+            site_analyzer = f'{site}_{analyzer}'
             self.cleanup_plot_for_best(site_analyzer, best_samples)
             self.cleanup_plot_for_all(site_analyzer)
 
@@ -170,7 +170,7 @@ class SiteDataPlotter(BasePlotter):
                         os.remove(plot_path)
                         pass
                     except OSError:
-                        logger.error("Failed to delete %s" % plot_path)
+                        logger.error(f"Failed to delete {plot_path}")
 
     def cleanup_plot_for_all(self, site_analyzer):
         """
@@ -178,14 +178,14 @@ class SiteDataPlotter(BasePlotter):
         :param site_analyzer:
         :return:
         """
-        fname = os.path.join(self.directory, '%s_all' % site_analyzer)
+        fname = os.path.join(self.directory, f'{site_analyzer}_all')
         plot_path = fname + '.pdf'
         if os.path.exists(plot_path):
             try:
                 # logger.info("Try to delete %s" % plot_path)
                 os.remove(plot_path)
             except OSError:
-                logger.error("Failed to delete %s" % plot_path)
+                logger.error(f"Failed to delete {plot_path}")
 
     def write_LL_csv(self, ll_all_name: str = None):
         """
@@ -200,7 +200,7 @@ class SiteDataPlotter(BasePlotter):
         suite_id = iteration_state.suite_id
 
         # Deep copy all_results ato not disturb the calibration
-        all_results = self.all_results.copy(True)
+        all_results = self.all_results.copy()
 
         # Index the likelihood-results DataFrame on (iteration, sample) to join with simulation info
         results_df = all_results.reset_index().set_index(['iteration', 'sample'])

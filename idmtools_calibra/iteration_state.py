@@ -48,6 +48,7 @@ class IterationState:
         self.summary_table = None
         self.iteration_start = None
         self.calibration_start = None
+        self.resume = False
 
         if 'calibration_start' in kwargs:
             cs = kwargs.pop('calibration_start') or datetime.now().replace(microsecond=0)
@@ -95,9 +96,14 @@ class IterationState:
         """
         # Depending on the type of results (lists or dicts), handle differently how we treat the results
         # This should be refactor to take care of both cases at once
-        if len(self.all_results) == 0:
-            self.all_results = None
-        elif isinstance(self.all_results, pd.DataFrame):
+        # if iteration == 0:
+        #     self.all_results = None
+        #     # self.all_results = pd.DataFrame()
+        #     # self.all_results = self.all_results.head(0)     # keep columns and type
+        # elif len(self.all_results) == 0:
+        #     self.all_results = None
+        # el
+        if isinstance(self.all_results, pd.DataFrame):
             self.all_results.set_index('sample', inplace=True)
             self.all_results = self.all_results[self.all_results.iteration <= iteration]
         elif isinstance(self.all_results, list):
@@ -193,7 +199,7 @@ class IterationState:
         builder = self.experiment_builder_function(next_params)
         ts.add_builder(builder)
 
-        exp_name = '%s_iter%d' % (self.calibration_name, self.iteration)
+        exp_name = f'{self.calibration_name}_iter{self.iteration}'
         experiment = Experiment(name=exp_name)
 
         # create mixed experiment from two templates
@@ -253,6 +259,12 @@ class IterationState:
 
         # Update the summary table and all the results
         self.all_results, self.summary_table = self.next_point_algo.update_summary_table(self, self.all_results)
+
+        # re-order columns
+        top_columns = ['iteration', 'total']
+        self.all_results = self.all_results.reindex(
+            columns=(top_columns + list([a for a in self.all_results.columns if a not in top_columns])))
+
         logger.info(self.summary_table)
         print(self.summary_table)
 
@@ -358,11 +370,11 @@ class IterationState:
             json.dump(state, f, indent=4, cls=NumpyEncoder)
 
     @classmethod
-    def restore_state(cls, exp_name, iteration):
+    def restore_state(cls, iteration):
         """
         Restore IterationState
         """
-        iter_directory = os.path.join(exp_name, 'iter%d' % iteration)
+        iter_directory = os.path.join(cls.calibration_directory, 'iter%d' % iteration)
         iter_file = os.path.join(iter_directory, 'IterationState.json')
         return cls.from_file(iter_file)
 
