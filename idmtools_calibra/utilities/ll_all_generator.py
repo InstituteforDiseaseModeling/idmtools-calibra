@@ -4,6 +4,7 @@ from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 
 
 def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=None):
+    from idmtools_calibra.process_state import StatusPoint
     from idmtools_calibra.cli.utils import read_calib_data
     calib_data = read_calib_data(calib_manager.calibration_path)
     # in case environment has been changed and new suite_id & suites are generated
@@ -24,6 +25,13 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=No
         current_iteration = calib_data['iteration']
     else:
         current_iteration = iteration
+
+    # validate current iteration status
+    it = calib_manager.state_for_iteration(current_iteration)
+    latest_step = it.status if isinstance(it.status, StatusPoint) else StatusPoint[it.status]
+
+    if latest_step is None or latest_step.value < StatusPoint.done.value:
+        raise Exception(f"LL_all for iteration = {current_iteration} is not available!")
 
     # get SiteDataPlotter
     sp = None
