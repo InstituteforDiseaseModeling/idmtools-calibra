@@ -254,10 +254,14 @@ class ResumeManager(object):
         if os.path.exists(ll_all_path):
             os.remove(ll_all_path)
 
-        if self.iteration > 0 and self.iter_step.value < StatusPoint.plot.value:
-            generate_ll_all(self.calib_manager, iteration=self.iteration - 1, ll_all_name=ll_all_name)
+        if self.iteration > 0:
+            if self.iter_step.value < StatusPoint.plot.value:
+                generate_ll_all(self.calib_manager, iteration=self.iteration - 1, ll_all_name=ll_all_name)
+            else:
+                generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
         else:
-            generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
+            if self.iter_step.value >= StatusPoint.plot.value:
+                generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
 
     def backup_calibration(self):
         """
