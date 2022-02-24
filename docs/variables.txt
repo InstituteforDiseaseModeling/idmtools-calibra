@@ -18,7 +18,7 @@
 .. |calibra| replace:: idmtools_calibra
 .. |EMOD_l| replace:: Epidemiological MODeling software (EMOD)
 .. |EMOD_s| replace:: EMOD
-.. |Python_supp| replace:: Python 3.6 64-bit
+.. |Python_supp| replace:: Python 3.6.2 or 3.7 64-bit
 .. |IT_s| replace:: idmtools
 
 .. _GitHub repository: https://github.com/InstituteforDiseaseModeling/idmtools_calibra
