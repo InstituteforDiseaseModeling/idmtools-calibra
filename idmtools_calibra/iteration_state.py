@@ -144,21 +144,21 @@ class IterationState:
         next_params = self.next_point_algo.get_samples_for_iteration(self.iteration)
         self.set_samples_for_iteration(next_params, self.next_point_algo)
 
-        # Then commission
-        self.commission_iteration(next_params)
-
         # Ready for commissioning
         self.status = StatusPoint.commission
+
+        # Then commission
+        self.commission_iteration(next_params)
 
         # Call the plot for post commission plots
         self.plot_iteration()
 
     def analyze_step(self):
-        # Analyze the iteration
-        self.analyze_iteration()
-
         # Ready for analyzing
         self.status = StatusPoint.analyze
+
+        # Analyze the iteration
+        self.analyze_iteration()
 
     def plotting_step(self):
         # Ready for plotting
