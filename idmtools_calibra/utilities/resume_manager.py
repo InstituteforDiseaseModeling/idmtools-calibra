@@ -206,6 +206,9 @@ class ResumeManager(object):
         # update required objects for resume
         it.update(**self.calib_manager.required_components)
 
+        # set calibration_directory
+        IterationState.calibration_directory = self.calib_manager.directory
+
         # step 1: restore next_point
         if self.iter_step not in (
                 StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
