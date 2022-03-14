@@ -270,7 +270,7 @@ class ResumeManager(object):
             else:
                 generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
         else:
-            if self.iter_step.value >= StatusPoint.plot.value:
+            if self.iter_step.value > StatusPoint.plot.value:
                 generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
 
     def backup_calibration(self):
