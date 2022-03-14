@@ -354,9 +354,10 @@ class CalibManager(object):
         json.dump(state, open(os.path.join(self.directory, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
         # save backup to current iteration
         if it:
+            iteration = kwargs.get('iteration') - 1 if 'iteration' in kwargs else self.iteration
+            state['iteration'] = iteration
             json.dump(state, open(os.path.join(it.iteration_directory, f'CalibManager_{it.iteration}.json'), 'w'),
-                      indent=4,
-                      cls=IDMJSONEncoder)
+                      indent=4, cls=IDMJSONEncoder)
 
     def backup_calibration(self):
         """

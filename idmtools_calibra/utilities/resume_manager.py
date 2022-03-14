@@ -232,6 +232,10 @@ class ResumeManager(object):
             else:
                 # it will use the current results and resume from next iteration
                 it.restore_results(self.iteration)
+        else:
+            if self.iter_step.value >= StatusPoint.plot.value:
+                # it will combine current results with previous results
+                it.restore_results(self.iteration)
 
         # it.all_results.reset_index(inplace=True)
         if it.iteration == 0 and self.iter_step.value < StatusPoint.plot.value:
