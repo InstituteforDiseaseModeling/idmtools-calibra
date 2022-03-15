@@ -94,15 +94,6 @@ class IterationState:
         Returns:
 
         """
-        # Depending on the type of results (lists or dicts), handle differently how we treat the results
-        # This should be refactor to take care of both cases at once
-        # if iteration == 0:
-        #     self.all_results = None
-        #     # self.all_results = pd.DataFrame()
-        #     # self.all_results = self.all_results.head(0)     # keep columns and type
-        # elif len(self.all_results) == 0:
-        #     self.all_results = None
-        # el
         if isinstance(self.all_results, pd.DataFrame):
             self.all_results.set_index('sample', inplace=True)
             self.all_results = self.all_results[self.all_results.iteration <= iteration]
@@ -153,21 +144,21 @@ class IterationState:
         next_params = self.next_point_algo.get_samples_for_iteration(self.iteration)
         self.set_samples_for_iteration(next_params, self.next_point_algo)
 
-        # Then commission
-        self.commission_iteration(next_params)
-
         # Ready for commissioning
         self.status = StatusPoint.commission
+
+        # Then commission
+        self.commission_iteration(next_params)
 
         # Call the plot for post commission plots
         self.plot_iteration()
 
     def analyze_step(self):
-        # Analyze the iteration
-        self.analyze_iteration()
-
         # Ready for analyzing
         self.status = StatusPoint.analyze
+
+        # Analyze the iteration
+        self.analyze_iteration()
 
     def plotting_step(self):
         # Ready for plotting
