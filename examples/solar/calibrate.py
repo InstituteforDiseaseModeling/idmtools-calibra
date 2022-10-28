@@ -13,6 +13,10 @@ from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools.core.platform_factory import Platform
 from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
+import matplotlib
+matplotlib.use( "TkAgg" )
+import matplotlib.pyplot as plt
+import plot
 
 sys.path.append(os.getcwd())
 from solar_site import SolarSite
@@ -202,3 +206,4 @@ if __name__ == "__main__":
     # Here we actually execute the calibration
     calib_manager.platform = platform
     calib_manager.run_calibration()
+    plot.plot(CALIBRATION_NAME)
