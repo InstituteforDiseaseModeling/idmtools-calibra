@@ -1,0 +1,4 @@
+calibrate.py is the main run script of this example. Please refer to it for example information
+
+calibrate.py is run via:
+python calibrate.py
