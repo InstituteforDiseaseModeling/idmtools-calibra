@@ -1,3 +1,16 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Welcome to the Hello World of idmtools-calibra.](#welcome-to-the-hello-world-of-idmtools-calibra)
+      - [Explanation](#explanation)
+        - [Reference Data](#reference-data)
+        - [Model](#model)
+        - [Settings](#settings)
+        - [To Run](#to-run)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Welcome to the Hello World of idmtools-calibra.
 #### Explanation
 We start with some real-world data from a solar panel. We have measured mw-hours of energy produced each day for 200 days. Plot is TBD. Our goal is to create a simple linear model of the principal component of this dataset. We use calibra to solve this. To be specific, we are trying to discover a line, and since lines are described as 
