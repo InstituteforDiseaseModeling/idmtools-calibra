@@ -1,14 +1,7 @@
-# silly nonsense to get around non-gui backend
-import matplotlib
-matplotlib.use( "TkAgg" )
-import matplotlib.pyplot as plt
-# local imports
-
 import os
 import sys
 
 sys.path.append(os.getcwd())
-import plot
 import calib_app
 from solar_site import SolarSite 
 
@@ -31,7 +24,7 @@ class Settings:
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 1 # 10
+    N_ITERATIONS = 10
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'solar_optimtool_linear_model'
 
@@ -76,6 +69,9 @@ class Settings:
 settings = Settings()
 
 if __name__ == "__main__":
+    import matplotlib
+    matplotlib.use( "TkAgg" )
+    import plot
     # site we want to calibrate on - a core organization object for calibra
     site = SolarSite(
         name='solar_site',
