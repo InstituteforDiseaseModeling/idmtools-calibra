@@ -11,9 +11,11 @@ if os.path.exists( "config.json" ):
     with open( "config.json" ) as f:
         config = json.loads( f.read() )
     beta, gamma = config["a"], config["b"]
-#beta = 0.6610390725402524
-#gamma = 0.32868497027848076
-
+elif os.path.exists( "sir/CalibManager.json" ):
+    with open( "sir/CalibManager.json" ) as f:
+        config = json.loads( f.read() )
+    beta, gamma = config["final_samples"]["beta"][-1], config["final_samples"]["gamma"][-1]
+    
 # Initial conditions
 # Total population, N.
 N = 1000
@@ -69,6 +71,11 @@ def write_output( S, I, R ):
     with open(output_path, 'w') as f:
         f.write(lines_str)
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument( "-v", "--visualize", action='store_true', default=False, help="Plot to screen instead of write to disk." )
+args = parser.parse_args()
+
 # Initial conditions vector
 y0 = S0, I0, R0
 # Integrate the SIR equations over the time grid, t.
@@ -76,5 +83,7 @@ ret = odeint(deriv, y0, t, args=(N, beta, gamma))
 S, I, R = ret.T
 
 print( S[-1]/N, I[-1]/N, R[-1]/N )
-visualize( S, I, R )
-#write_output( S, I, R )
+if args.visualize:
+    visualize( S, I, R )
+else:
+    write_output( S, I, R )

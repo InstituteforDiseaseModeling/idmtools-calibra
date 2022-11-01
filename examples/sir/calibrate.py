@@ -74,7 +74,6 @@ settings = Settings()
 if __name__ == "__main__":
     import matplotlib
     matplotlib.use( "TkAgg" )
-    import plot
     # site we want to calibrate on - a core organization object for calibra
     site = RMSESite(
         name='rmse_site',
