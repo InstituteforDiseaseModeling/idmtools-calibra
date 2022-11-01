@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Welcome to the Super-Simple SIR Demo of idmtools-calibra.](#welcome-to-the-hello-world-of-idmtools-calibra)
+- [Welcome to the Super-Simple SIR Demo of idmtools-calibra.](#welcome-to-the-super-simple-sir-demo-of-idmtools-calibra)
       - [Explanation](#explanation)
         - [Reference Data](#reference-data)
         - [Model](#model)
