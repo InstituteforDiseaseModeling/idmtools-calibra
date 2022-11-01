@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.getcwd())
 import calib_app
-from solar_site import SolarSite 
+from rmse_site import RMSESite 
 
 class Settings:
     #
@@ -46,7 +46,6 @@ class Settings:
     Max: The maximum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
 
     The model in this example has two parameters, 'a' and 'b'. a -> beta in SIR and b->gamme in SIR.
-    solar power production.
     Trying to rediscover values of: beta = 0.2, gamma = 0.1
     """
     CALIBRATION_PARAMETERS = [
@@ -77,8 +76,8 @@ if __name__ == "__main__":
     matplotlib.use( "TkAgg" )
     import plot
     # site we want to calibrate on - a core organization object for calibra
-    site = SolarSite(
-        name='solar_site',
+    site = RMSESite(
+        name='rmse_site',
         reference_sources={'production': os.path.join(settings.REFERENCE_DATA_DIR, 'production.csv')}
     )
     calib_man = calib_app.init( settings, site )
