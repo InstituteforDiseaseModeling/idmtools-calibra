@@ -9,12 +9,11 @@ class Settings:
     # Run environment controls
     #
     LOCALE = 'CALCULON'
-    MODEL_DRIVER = os.path.join('bin', 'sir2.py')
+    MODEL_DRIVER = os.path.join('bin', 'sir.py')
     CONFIG_FILENAME = 'config.json'
-    REFERENCE_DATA_DIR = 'reference2'
+    REFERENCE_DATA_DIR = 'reference'
     INPUT_DIRS = []
     SIF = "0f228554-04c4-eb11-a9ec-b88303911bc1" # 'dtk_centos.id'
-    #SIF = "a91a45d2-46a2-ec11-a9f5-9440c9be2c51"
     SIF_FILENAME = "dtk_centos.sif"
 
     #
@@ -28,7 +27,7 @@ class Settings:
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
     N_ITERATIONS = 20
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
-    CALIBRATION_NAME = 'sir2'
+    CALIBRATION_NAME = 'sir'
 
     """
     Calibration parameter specification

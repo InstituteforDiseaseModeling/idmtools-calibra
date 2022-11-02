@@ -9,7 +9,7 @@ from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
-from singularity_json_python_task import SingularityJSONConfiguredPythonTask
+from idmtools_calibra.singularity_json_python_task import SingularityJSONConfiguredPythonTask
 
 params = None  # hack block
 
