@@ -11,8 +11,8 @@ if os.path.exists( "config.json" ):
     with open( "config.json" ) as f:
         config = json.loads( f.read() )
     beta, gamma = config["a"], config["b"]
-elif os.path.exists( "sir/CalibManager.json" ):
-    with open( "sir/CalibManager.json" ) as f:
+elif os.path.exists( "sir2/CalibManager.json" ):
+    with open( "sir2/CalibManager.json" ) as f:
         config = json.loads( f.read() )
     beta, gamma = config["final_samples"]["beta"][-1], config["final_samples"]["gamma"][-1]
     
@@ -58,12 +58,14 @@ def visualize( S, I, R):
 
 def write_output( S, I, R ):
     # write results
-    lines = ["channel,final_value"]
+    lines = ["timestep,prevalence"]
     #for i in range(len(model_results)):
     #    lines.append(f"{independent_values[i]},{model_results[i]}")
-    lines.append(f"S,{S[-1]/N}")
-    lines.append(f"I,{I[-1]/N}")
-    lines.append(f"R,{R[-1]/N}")
+    #lines.append(f"S,{S[-1]/N}")
+    #lines.append(f"I,{I[-1]/N}")
+    #lines.append(f"R,{R[-1]/N}")
+    for t in range(0,len(I),30):
+        lines.append(f"{t},{I[t]/N}")
 
     lines_str = '\n'.join(lines)
     output_path = Path('output', 'output.csv')

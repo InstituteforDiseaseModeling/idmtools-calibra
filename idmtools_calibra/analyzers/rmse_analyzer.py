@@ -6,12 +6,13 @@ from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibration
 class RMSEAnalyzer(BaseCalibrationAnalyzer):
 
     # Setting up the reference data for use in the analyzer and identifying the model output file to compare against
-    def __init__(self, site, dependent_column, independent_column):
-        self.model_output_filename = '/'.join(['output', f'{dependent_column}.csv'])
+    def __init__(self, site, dependent_column, independent_column, output_filename="output.csv"):
+        #self.model_output_filename = '/'.join(['output', f'{dependent_column}.csv'])
+        self.model_output_filename = '/'.join(['output', f'{output_filename}'])
 
         self.independent_column = independent_column  # 'date'
         self.dependent_column = dependent_column  # 'production'
-        self.reference = site.get_reference_data(reference_type=dependent_column)
+        self.reference = site.get_reference_data(reference_type='production') # TBD, let's not hardcode this
 
         # rename reference data column to NOT conflict with model data column; it happens to have the same column
         # name in this example
