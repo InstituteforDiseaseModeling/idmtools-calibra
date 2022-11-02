@@ -9,9 +9,8 @@ from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools.core.platform_factory import Platform
-#from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
+from idmtools.entities import CommandLine
 from singularity_json_python_task import SingularityJSONConfiguredPythonTask
-from utils import generate_command
 
 params = None # hack block
 sif_filename="dtk_centos.sif"
@@ -78,20 +77,13 @@ def init( settings, site ):
 
     assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
 
-    command = generate_command(
-        locale=settings.LOCALE,
-        model_driver=settings.MODEL_DRIVER,
-        sif_filename=settings.SIF_Filename,
-        config_file=settings.CONFIG_FILENAME
-        )
+    command = CommandLine(f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}")
 
     # The task object defines what to run, how, and what assets will be associated with an experiment of simulations
     # Each calibration iteration will run one experiment (group of simulations)
-    #task = JSONConfiguredPythonTask(
     task = SingularityJSONConfiguredPythonTask(
         provided_command=command,
         script_path=str(settings.MODEL_DRIVER),
-        #script_path=str(os.path.join( "singularity", "exec", f"Assets/{sif_filename}", settings.MODEL_DRIVER )),
         common_assets=assets,
         config_file_name=settings.CONFIG_FILENAME
     )

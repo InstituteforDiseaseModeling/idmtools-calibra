@@ -16,7 +16,7 @@ class Settings:
     INPUT_DIRS = []
     SIF = "0f228554-04c4-eb11-a9ec-b88303911bc1" # 'dtk_centos.id'
     #SIF = "a91a45d2-46a2-ec11-a9f5-9440c9be2c51"
-    SIF_Filename = "dtk_centos.sif"
+    SIF_FILENAME = "dtk_centos.sif"
 
     #
     # Calibration controls

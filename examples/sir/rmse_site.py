@@ -3,10 +3,7 @@ import pandas as pd
 import sys
 
 from idmtools_calibra.calib_site import CalibSite
-
-sys.path.append(os.getcwd())
-from rmse_analyzer import RMSEAnalyzer
-
+from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer
 
 # The main task of a site object in calibra is to identify reference data sources, load them, and determine what
 # analyzers will be used for scoring our calibration simulations.
