@@ -1,9 +1,8 @@
 import os
 import sys
 
-sys.path.append(os.getcwd())
-import calib_app
-from rmse_site import RMSESite 
+from idmtools_calibra.rmse_site import RMSESite 
+from idmtools_calibra import calib_base_app as calib_app
 
 class Settings:
     #
@@ -27,7 +26,7 @@ class Settings:
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 10
+    N_ITERATIONS = 5 # 10
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'sir'
 
@@ -80,6 +79,8 @@ if __name__ == "__main__":
         reference_sources={'production': os.path.join(settings.REFERENCE_DATA_DIR, 'production.csv')}
     )
     calib_man = calib_app.init( settings, site )
+    from idmtools.core.platform_factory import Platform
+    calib_man.platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="Highest")
 
     # Required variable/dict in calibration scripts
     run_calib_args = {

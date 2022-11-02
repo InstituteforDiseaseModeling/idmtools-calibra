@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import sys
 
 from idmtools.assets import AssetCollection
 from idmtools_calibra.calib_manager import CalibManager
@@ -13,7 +12,7 @@ from idmtools.entities import CommandLine
 from singularity_json_python_task import SingularityJSONConfiguredPythonTask
 
 params = None # hack block
-sif_filename="dtk_centos.sif"
+
 def constrain_sample(sample):
     """
     This function is called on every samples and allow the user to edit them before they are passed
