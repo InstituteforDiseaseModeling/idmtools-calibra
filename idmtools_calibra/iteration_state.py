@@ -390,6 +390,7 @@ class IterationState:
 
     def get_parameter_sets_with_likelihoods(self):
         likelihoods = self.results['total']  # an ordered list of likelihood floats
+        all_sublikelihoods = {k: v for k, v in self.results.items() if k != 'total'}
         param_dicts = self.samples_for_this_iteration  # an ordered list of input input parameters (user knobs)
         if len(likelihoods) != len(param_dicts):
             raise Exception('Inconsistent iteration data. \'total\' and \'samples_for_this_iteration\' '
@@ -400,6 +401,7 @@ class IterationState:
         for sample_index in range(len(param_dicts)):
             param_dict = param_dicts[sample_index]
             likelihood = likelihoods[sample_index]
+            sublikelihoods = {k: v[sample_index] for k, v in all_sublikelihoods.items()}
 
             replicates_dict = {sim_id: sim_dict for sim_id, sim_dict in self.simulations.items()
                                if sim_dict['__sample_index__'] == sample_index}
@@ -411,6 +413,7 @@ class IterationState:
             for sim_id, replicate_dict in replicates_dict.items():
                 run_number = replicate_dict['Run_Number']
                 parameter_set = ParameterSet(param_dict=param_dict, likelihood=likelihood,
+                                             sublikelihoods=sublikelihoods,
                                              iteration_number=self.iteration, sim_id=sim_id, run_number=run_number)
                 parameter_sets.append(parameter_set)
 
