@@ -11,7 +11,8 @@ from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
 from singularity_json_python_task import SingularityJSONConfiguredPythonTask
 
-params = None # hack block
+params = None  # hack block
+
 
 def constrain_sample(sample):
     """
@@ -48,22 +49,28 @@ def map_sample_to_model_input(simulation, sample):
     tags = {}
     global params
     for p in params.CALIBRATION_PARAMETERS:
-        if 'MapTo' not in p:
-            raise Exception('Calibration parameter dicts must include a MapTo (model param name) entry. Missing from parameter: %s' % p['Name'])
-        if p['Name'] not in sample:
-            print('Warning: %s not in sample, perhaps resuming previous iteration' % p['Name'])
+        if "MapTo" not in p:
+            raise Exception(
+                "Calibration parameter dicts must include a MapTo (model param name) entry. Missing from parameter: %s"
+                % p["Name"]
+            )
+        if p["Name"] not in sample:
+            print(
+                "Warning: %s not in sample, perhaps resuming previous iteration"
+                % p["Name"]
+            )
             continue
-        value = sample.pop(p['Name'])
-        tags.update(simulation.task.set_parameter(p['MapTo'], value))
+        value = sample.pop(p["Name"])
+        tags.update(simulation.task.set_parameter(p["MapTo"], value))
 
     for name, value in sample.items():
-        print('UNUSED PARAMETER:' + name)
-    assert (len(sample) == 0)  # All params used
+        print("UNUSED PARAMETER:" + name)
+    assert len(sample) == 0  # All params used
 
     return tags
 
 
-def init( settings, site ):
+def init(settings, site):
     # the object representing the resource we will use for running simulations
     global params
     params = settings
@@ -76,7 +83,9 @@ def init( settings, site ):
 
     assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
 
-    command = CommandLine(f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}")
+    command = CommandLine(
+        f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}"
+    )
 
     # The task object defines what to run, how, and what assets will be associated with an experiment of simulations
     # Each calibration iteration will run one experiment (group of simulations)
@@ -84,22 +93,23 @@ def init( settings, site ):
         provided_command=command,
         script_path=str(settings.MODEL_DRIVER),
         common_assets=assets,
-        config_file_name=settings.CONFIG_FILENAME
+        config_file_name=settings.CONFIG_FILENAME,
     )
 
-
     # The default plotters used in an Optimization with OptimTool
-    plotters = [LikelihoodPlotter(combine_sites=True),
-                SiteDataPlotter(num_to_plot=settings.num_to_plot, combine_sites=True),
-                OptimToolPlotter()  # OTP must be last because it calls gc.collect()
-                ]
+    plotters = [
+        LikelihoodPlotter(combine_sites=True),
+        SiteDataPlotter(num_to_plot=settings.num_to_plot, combine_sites=True),
+        OptimToolPlotter(),  # OTP must be last because it calls gc.collect()
+    ]
 
     # desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
-    n_dynamic_parameters = len([p for p in settings.CALIBRATION_PARAMETERS if p['Dynamic']])
+    n_dynamic_parameters = len(
+        [p for p in settings.CALIBRATION_PARAMETERS if p["Dynamic"]]
+    )
 
     if n_dynamic_parameters == 0:
-        warning_note = \
-            """
+        warning_note = """
             /!\\ WARNING /!\\ OptimTool requires at least one dynamic parameter ('Dynamic' set to True). Exiting ...                  
             """
         print(warning_note)
@@ -109,33 +119,34 @@ def init( settings, site ):
 
     # Here we combine all the inputs above to configure OptimTool (our next point algorithm) and the CalibManager
     # (the object that will drive the calibration).
-    optimtool = OptimTool(settings.CALIBRATION_PARAMETERS,
-                          constrain_sample,
-                          rsquared_thresh=0.81,
-                          mu_r=r,  # <-- radius for numerical derivatve. CAREFUL not to go too small with integer parameters
-                          sigma_r=r / 10.,  # <-- stdev of radius
+    optimtool = OptimTool(
+        settings.CALIBRATION_PARAMETERS,
+        constrain_sample,
+        rsquared_thresh=0.81,
+        mu_r=r,  # <-- radius for numerical derivatve. CAREFUL not to go too small with integer parameters
+        sigma_r=r / 10.0,  # <-- stdev of radius
+        # this many samples will be repetitions of the existing best-sample (with
+        # different run numbers)
+        center_repeats=2,
+        # Samples per iteration, includes center repeats.
+        # Actual number of sims run is this number times number of replicates.
+        samples_per_iteration=settings.N_SAMPLES,
+    )
 
-                          # this many samples will be repetitions of the existing best-sample (with
-                          # different run numbers)
-                          center_repeats=2,
-
-                          # Samples per iteration, includes center repeats.
-                          # Actual number of sims run is this number times number of replicates.
-                          samples_per_iteration=settings.N_SAMPLES
-                          )
-
-    calib_manager = CalibManager(name=settings.CALIBRATION_NAME,
-                                 task=task,
-                                 map_sample_to_model_input_fn=map_sample_to_model_input,
-                                 sites=[site],
-                                 next_point=optimtool,
-                                 sim_runs_per_param_set=settings.N_REPLICATES,
-                                 # <-- Number of times to replicate the center (current guess). For comparing intrinsic and extrinsic variability.
-                                 max_iterations=settings.N_ITERATIONS,  # <-- number of iterations to run
-                                 plotters=plotters)
+    calib_manager = CalibManager(
+        name=settings.CALIBRATION_NAME,
+        task=task,
+        map_sample_to_model_input_fn=map_sample_to_model_input,
+        sites=[site],
+        next_point=optimtool,
+        sim_runs_per_param_set=settings.N_REPLICATES,
+        # <-- Number of times to replicate the center (current guess). For comparing intrinsic and extrinsic variability.
+        max_iterations=settings.N_ITERATIONS,  # <-- number of iterations to run
+        plotters=plotters,
+    )
     calib_manager.platform = platform
-    return calib_manager 
+    return calib_manager
 
-def go( calib_manager ):
+
+def go(calib_manager):
     calib_manager.run_calibration()
-

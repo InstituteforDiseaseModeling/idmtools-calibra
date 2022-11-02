@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 
 from idmtools_calibra.calib_site import CalibSite
@@ -19,7 +18,13 @@ class RMSESite(CalibSite):
         return self.reference_dict[reference_type]
 
     def get_analyzers(self):
-        return [RMSEAnalyzer(site=self, dependent_column=self.dep_col, independent_column=self.ind_col)]
+        return [
+            RMSEAnalyzer(
+                site=self,
+                dependent_column=self.dep_col,
+                independent_column=self.ind_col,
+            )
+        ]
 
     def get_setup_functions(self):
         return super().get_setup_functions()
