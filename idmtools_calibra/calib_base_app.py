@@ -9,7 +9,7 @@ from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
-from idmtools_calibra.singularity_json_python_task import SingularityJSONConfiguredPythonTask
+from idmtools_calibra.singularity_json_python_task import SingularityJSONConfiguredPythonTask as Task
 
 params = None  # hack block
 
@@ -70,7 +70,7 @@ def map_sample_to_model_input(simulation, sample):
     return tags
 
 
-def init(settings, site):
+def init(settings, site, task=None):
     # the object representing the resource we will use for running simulations
     global params
     params = settings
@@ -81,20 +81,21 @@ def init(settings, site):
     for directory in settings.INPUT_DIRS:
         assets.add_directory(directory, relative_path=os.path.basename(directory))
 
-    assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
+    if task is None:
+        assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
 
-    command = CommandLine(
-        f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}"
-    )
+        command = CommandLine(
+            f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}"
+        )
 
-    # The task object defines what to run, how, and what assets will be associated with an experiment of simulations
-    # Each calibration iteration will run one experiment (group of simulations)
-    task = SingularityJSONConfiguredPythonTask(
-        provided_command=command,
-        script_path=str(settings.MODEL_DRIVER),
-        common_assets=assets,
-        config_file_name=settings.CONFIG_FILENAME,
-    )
+        # The task object defines what to run, how, and what assets will be associated with an experiment of simulations
+        # Each calibration iteration will run one experiment (group of simulations)
+        task = Task(
+            provided_command=command,
+            script_path=str(settings.MODEL_DRIVER),
+            common_assets=assets,
+            config_file_name=settings.CONFIG_FILENAME,
+        )
 
     # The default plotters used in an Optimization with OptimTool
     plotters = [
