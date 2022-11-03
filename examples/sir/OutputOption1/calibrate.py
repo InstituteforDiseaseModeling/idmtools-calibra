@@ -14,7 +14,6 @@ class Settings:
     REFERENCE_DATA_DIR = 'reference'
     INPUT_DIRS = []
     SIF = "0f228554-04c4-eb11-a9ec-b88303911bc1" # 'dtk_centos.id'
-    #SIF = "a91a45d2-46a2-ec11-a9f5-9440c9be2c51"
     SIF_FILENAME = "dtk_centos.sif"
 
     #
@@ -26,7 +25,7 @@ class Settings:
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 20
+    N_ITERATIONS = 12
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'sir'
 
@@ -87,3 +86,6 @@ if __name__ == "__main__":
         "calib_manager": calib_man
     }
     calib_app.go( calib_man )
+
+    import bin.sir as sir
+    sir.run_compare()

@@ -86,3 +86,5 @@ if __name__ == "__main__":
         "calib_manager": calib_man
     }
     calib_app.go( calib_man )
+    import bin.sir as sir
+    sir.run_compare()
