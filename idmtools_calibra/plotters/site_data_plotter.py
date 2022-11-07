@@ -12,7 +12,6 @@ from idmtools.core.enums import ItemType
 from idmtools_calibra.iteration_state import IterationState
 from idmtools_calibra.plotters.base_plotter import BasePlotter
 from idmtools_calibra.process_state import StatusPoint
-from idmtools_calibra.output.output_parser import CompsOutputParser
 
 sns.set_style('white', {'axes.linewidth': 0.5})
 
