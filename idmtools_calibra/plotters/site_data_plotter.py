@@ -8,10 +8,10 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from idmtools.core.enums import ItemType
 from idmtools_calibra.iteration_state import IterationState
 from idmtools_calibra.plotters.base_plotter import BasePlotter
 from idmtools_calibra.process_state import StatusPoint
-from idmtools_calibra.output.output_parser import CompsOutputParser
 
 sns.set_style('white', {'axes.linewidth': 0.5})
 
@@ -215,20 +215,8 @@ class SiteDataPlotter(BasePlotter):
         grouped_simids_df = siminfo_df.groupby(['iteration', 'sample']).simid.agg(lambda x: tuple(x))
         join_results_df = results_df.join(grouped_simids_df, how='right')  # right: only this iteration with new sim info
 
-        # TODO: merge in parameter values also from siminfo_df (sample points and simulation tags need not be the same)
-
-        # Retrieve the mapping between simID and output file path
-        from idmtools_platform_comps.comps_platform import COMPSPlatform
-        if isinstance(self.iteration_state.platform, COMPSPlatform):
-            sims_paths = CompsOutputParser.create_sim_directory_map(suite_id=suite_id, save=False)
-        else:
-            # sims_paths = {sim.id: os.path.join(experiment.get_path(), sim.id) for sim in experiment.simulations}
-            warning_note = \
-                """
-                /!\\ WARNING /!\\ currently write_LL_csv only supports COMPSPlatform...                  
-                """
-            print(warning_note)
-            return
+        platform = self.iteration_state.platform
+        sims_paths = platform.create_sim_directory_map(item_id=suite_id, item_type=ItemType.SUITE)
 
         # Transform the ids in actual paths
         def find_path(el):
