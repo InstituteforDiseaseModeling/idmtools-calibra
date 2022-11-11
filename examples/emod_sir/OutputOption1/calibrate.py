@@ -12,12 +12,9 @@ class Settings:
     #
     LOCALE = 'CALCULON'
     MODEL_DRIVER = manifest.eradication_path
-    #CONFIG_FILENAME = 'config.json'
     REFERENCE_DATA_DIR = manifest.REFERENCE_DATA_DIR 
     INPUT_DIRS = []
-    #SIF = "0f228554-04c4-eb11-a9ec-b88303911bc1" # 'dtk_centos.id'
     SIF = manifest.sif
-    #SIF_FILENAME = "dtk_centos.sif"
     SIF_FILENAME = manifest.sif_filename
 
     #
@@ -27,9 +24,9 @@ class Settings:
     # The number of parameter sets/samples to run in each calibration iteration
     N_SAMPLES = 125
     # number of randomly seeded simulations per parameter set/sample
-    N_REPLICATES = 5
+    N_REPLICATES = 1 # 5
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 100
+    N_ITERATIONS = 10
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'emod-sir'
 
@@ -64,7 +61,7 @@ class Settings:
             'Dynamic': True,
             'MapTo': 'Infectious_Period_Exponential',
             'Guess': 5,
-            'Min': 0,
+            'Min': 0.1,
             'Max': 10
         },
         {
@@ -91,12 +88,13 @@ if __name__ == "__main__":
     )
     from emodpy.emod_task import EMODTask
     def set_param_fn( config ):
-        config.parameters.Simulation_Duration = 365.0
+        #config.parameters.Simulation_Duration = 365.0
+        config.parameters.Simulation_Duration = 181.0
         config.parameters.Base_Infectivity_Constant = 3.5 
         config.parameters.Enable_Demographics_Reporting = 0 
         config.parameters.Incubation_Period_Constant = 0
         config.parameters.Infectious_Period_Exponential = 4.0 
-        config.parameters.Minimum_End_Time = 90
+        #config.parameters.Minimum_End_Time = 90
 
         return config
 
@@ -116,7 +114,7 @@ if __name__ == "__main__":
     import emod_generic.bootstrap as dtk
     dtk.setup( manifest.model_dl_dir )
     from idmtools.core.platform_factory import Platform
-    platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="Highest")
+    platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
     task = EMODTask.from_default2(
         config_path="config.json",
         eradication_path=settings.MODEL_DRIVER,
@@ -136,5 +134,4 @@ if __name__ == "__main__":
     }
     calib_app.go( calib_man )
 
-    #import bin.sir as sir
-    #sir.run_compare()
+    # TBD: run model with selected params and plot!
