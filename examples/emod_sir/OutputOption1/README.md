@@ -16,26 +16,21 @@
 #### Explanation
 This is the third example/demo. Here, we have a very simple SIR model (in EMOD). It also has 3 parameters:
 ```
-Base_Infectivity_Constant (how infectious?)
-Infectious_Period_Exponential (how long infectious?)
-Incubation_Period_Constant (how long latent?)
+* Base_Infectivity_Constant (how infectious?)
+* Infectious_Period_Exponential (how long infectious?)
+* Incubation_Period_Constant (how long latent?)
 ```
 These 3 params ought to be able to get us to almost any regular SIR set of curves.
 
  
 ##### Reference Data
-The reference data is sparse prevalence values, every 30 days. For example:
+The reference data is a single scalar: The timestep of peak prevalence.
 ```
-0,  0.001
-30, 0.019
-60, 0.141
-90, 0.084
-120,0.017
-150,0.003
-180,0
+metric,value
+t_max,59.999
 ```
 
-So we have the epidemic peeking at around day 70, below 20%. The plot is TBD.
+So we have the epidemic peeking at t=60. (We use 59.999 to avoid a divide by zero error which occurs with 60.0.)
 
 ##### Model
 The model is EMOD-generic. This should get installed by doing:
@@ -50,22 +45,19 @@ pip3 install emod-generic
 ##### Settings
 * N_SAMPLES = 125 (5 samples, 3 'axes')
 * N_REPLICATES = 1 (with so many samples we hopefully don't need to worry about replicates for now)
-* N_ITERATIONS = 20 (let's stop before too long and see how we're doing)
+* N_ITERATIONS = 10 (let's stop before too long and see how we're doing)
 
 ##### To Run
 calibrate.py is the main run script of this example. Please refer to it for example information
 
 calibrate.py is run via:
 ```
-python calibrate.py
+python3.9 calibrate.py && python3.9 test_and_plot.py
+
 ```
+Replace 'python3.9' as appropriate for your machine.
 
 ##### Output
-Option 1) In the first case, we let calibra run for 20 iterations using the same sparse prevalence values we used in py-sir/OutputOption2.
+Option 1) In the first case, we let calibra run for 10 iterations.
 
-Option 2) In the second case, eveyrything is similar except our reference output is actually taken from an EMOD run, just in case that matters. 
-
-We are expecting to have the tool 'rediscover' input values of ~: 
-* Base_Infectivity_Constant: ~1.0
-* Infectious_Period_Exponential: ~4.0
-* Incubation_Period_Constant: ~7.8
+test_and_plot.py runs a sweep over 10 Run_Number values using the best values found for the 3 parameters.
