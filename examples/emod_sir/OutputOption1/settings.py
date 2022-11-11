@@ -20,7 +20,7 @@ class Settings:
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1 # 5
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 5
+    N_ITERATIONS = 7
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'emod-sir'
 
