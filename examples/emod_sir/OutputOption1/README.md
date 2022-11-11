@@ -60,4 +60,5 @@ Replace 'python3.9' as appropriate for your machine.
 ##### Output
 Option 1) In the first case, we let calibra run for 10 iterations.
 
-test_and_plot.py runs a sweep over 10 Run_Number values using the best values found for the 3 parameters.
+test_and_plot.py runs a sweep over 10 Run_Number values using the best values found for the 3 parameters. It should look something like this:
+![](results_sweep.png)
