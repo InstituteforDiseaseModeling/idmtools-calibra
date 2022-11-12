@@ -14,7 +14,7 @@
 
 # Welcome to the EMOD SIS Demo of idmtools-calibra.
 #### Explanation
-This is the third example/demo. Here, we have a very simple SIS model (in EMOD). It has 5 parameters:
+This is the fourth example/demo. Here, we have a very simple SIS model (in EMOD). It has 5 parameters:
 ```
 * Base_Infectivity_Constant (how infectious?)
 * Infectious_Period_Exponential (how long infectious?)
