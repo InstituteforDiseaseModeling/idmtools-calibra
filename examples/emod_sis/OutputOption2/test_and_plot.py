@@ -8,6 +8,7 @@ from settings import Settings
 
 settings = Settings()
 
+# NOTE: Any campaign parameter you want to calibrate must be in the build_camp param list
 def build_camp( eff=1.0, dur=3650 ):
     """
     Build a campaign input file for the DTK using emod_api. 
@@ -16,13 +17,17 @@ def build_camp( eff=1.0, dur=3650 ):
     import emod_api.interventions.outbreak as ob 
 
     camp.set_schema( manifest.schema_file )
-    
+
+    # Seed the outbreak
     event = ob.new_intervention( camp, timestep=1, cases=1 )
     camp.add( event )
+
+    # Distribute vaccine
     import emod_api.interventions.simple_vaccine as vac
     vac.schema_path = camp.schema_path
     event = vac.new_intervention( timestep=366, v_type="Acquire", efficacy=eff, waning_duration=dur )
     camp.add( event )
+
     return camp
 
 def get_task( build_camp_fn=None ):
@@ -47,7 +52,7 @@ def get_task( build_camp_fn=None ):
     task = EMODTask.from_default2(
         config_path="config.json",
         eradication_path=settings.MODEL_DRIVER,
-        campaign_builder=build_camp,
+        campaign_builder=build_camp_fn,
         demog_builder=None,
         schema_path=manifest.schema_file,
         param_custom_cb=set_param_fn,
@@ -68,6 +73,7 @@ def test_and_plot():
         e = finals["e"][0]
         f = finals["f"][0]
 
+
     builder = SimulationBuilder()
     def update_sim_random_seed(simulation, value):
         simulation.task.config.parameters.Run_Number = value
@@ -82,6 +88,7 @@ def test_and_plot():
     from functools import partial
     build_camp_actual = partial( build_camp, eff=f ) 
     task, platform = get_task( build_camp_fn=build_camp_actual )
+
     # create experiment from builder
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sis sweep") 
     experiment.run(wait_until_done=True, platform=platform)
