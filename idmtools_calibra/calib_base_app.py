@@ -12,7 +12,7 @@ from idmtools.entities import CommandLine
 from idmtools_calibra.singularity_json_python_task import SingularityJSONConfiguredPythonTask as Task
 
 params = None  # hack block
-
+campaign_builder_fn = None
 
 def constrain_sample(sample):
     """
@@ -48,6 +48,8 @@ def map_sample_to_model_input(simulation, sample):
 
     tags = {}
     global params
+    from functools import partial
+    build_camp_actual = partial( campaign_builder_fn )
     for p in params.CALIBRATION_PARAMETERS:
         if "MapTo" not in p:
             raise Exception(
@@ -61,11 +63,25 @@ def map_sample_to_model_input(simulation, sample):
             )
             continue
         value = sample.pop(p["Name"])
-        tags.update(simulation.task.set_parameter(p["MapTo"], value))
+        mapto_key = p["MapTo"]
+        if mapto_key.startswith( "campaign:" ):
+            camp_fn_param = mapto_key.split( ":" )[1]
+            if camp_fn_param == "eff":
+                build_camp_actual = partial( build_camp_actual, eff=value )
+            elif camp_fn_param == "dur":
+                build_camp_actual = partial( build_camp_actual, dur=value )
+            else:
+                raise ValueError( f"{camp_fn_param} is not a valid calibration target." )
+            tags[mapto_key] = f"{value}"
+        else:
+            tags.update(simulation.task.set_parameter(mapto_key, value))
 
     for name, value in sample.items():
         print("UNUSED PARAMETER:" + name)
     assert len(sample) == 0  # All params used
+
+    #build_camp_actual = partial( campaign_builder_fn )
+    simulation.task.create_campaign_from_callback( builder=build_camp_actual )
 
     return tags
 
