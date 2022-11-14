@@ -21,18 +21,20 @@ This is the fourth example/demo. Here, we have a very simple SIS model (in EMOD)
 * Incubation_Period_Constant (how long latent?)
 * Acquisition_Blocking_Immunity_Decay_Rate (how fast immunity decays)
 * Acquisition_Blocking_Immunity_Duration_Before_Decay (how long before immunity decays)
+* Vaccine Efficacy
 ```
-These 5 params ought to be able to get us to almost any regular SIS set of curves.
+This is the same as EMOD-Generic SIS Output Option 1 except we've added a campaign component for the first time. Our campaign consists of an acquisition-blocking vaccine given to everyone at the 1 year mark. Our sim now lasts for 2 years. (The efficacy lasts 10 years -- beyond the reach of our sim.)
 
  
 ##### Reference Data
-The reference data is a single scalar: The mean prevalence over the last 60 days of the sim.
+The reference data is two scalars:
+1) The mean prevalence over the last 60 days of the first year.
+2) The mean prevalence over the last month of the second year.
 ```
 metric,value
-mean_prev,0.5
+mean_prev_y1,0.2
+mean_prev_y2,0.05
 ```
-
-So we have the epidemic peeking at t=60. (We use 59.999 to avoid a divide by zero error which occurs with 60.0.)
 
 ##### Model
 The model is EMOD-generic. This should get installed by doing:
@@ -60,7 +62,7 @@ python3.9 calibrate.py
 Replace 'python3.9' as appropriate for your machine.
 
 ##### Output
-Option 1) In the first case, we let calibra run for 10 iterations.
+Option 2) In this second SIS dem, we let calibra run for 10 iterations again.
 
-test_and_plot.py runs a sweep over 10 Run_Number values using the best values found for the 5 parameters. It should look something like this:
+test_and_plot.py runs a sweep over 10 Run_Number values using the best values found for the 6 parameters. It should look something like this:
 ![](results_sweep.png)
