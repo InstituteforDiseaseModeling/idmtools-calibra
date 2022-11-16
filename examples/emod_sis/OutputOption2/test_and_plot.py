@@ -72,7 +72,13 @@ def test_and_plot():
         d = finals["d"][0]
         e = finals["e"][0]
         f = finals["f"][0]
-
+        # print param names and values
+        for param in settings.CALIBRATION_PARAMETERS:
+            internal_name = param["Name"]
+            model_name = param["MapTo"]
+            value = finals[internal_name][0]
+            format_value = "{:.3f}".format( value )
+            print( f"{model_name} = {format_value}" )
 
     builder = SimulationBuilder()
     def update_sim_random_seed(simulation, value):
