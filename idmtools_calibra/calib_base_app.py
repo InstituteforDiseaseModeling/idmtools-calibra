@@ -47,6 +47,7 @@ def map_sample_to_model_input(simulation, sample):
     Returns: A dictionary containing the tags that will be attached to the simulation
     """
 
+    build_camp_actual = None
     tags = {}
     global params
     from functools import partial
@@ -78,7 +79,8 @@ def map_sample_to_model_input(simulation, sample):
         print("UNUSED PARAMETER:" + name)
     assert len(sample) == 0  # All params used
 
-    simulation.task.create_campaign_from_callback( builder=build_camp_actual )
+    if build_camp_actual:
+        simulation.task.create_campaign_from_callback( builder=build_camp_actual )
 
     return tags
 
