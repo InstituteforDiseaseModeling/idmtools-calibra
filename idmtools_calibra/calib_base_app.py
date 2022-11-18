@@ -33,6 +33,7 @@ def constrain_sample(sample):
     """
     return sample
 
+campaign_mapper = None
 
 def map_sample_to_model_input(simulation, sample):
     """
@@ -65,13 +66,9 @@ def map_sample_to_model_input(simulation, sample):
         value = sample.pop(p["Name"])
         mapto_key = p["MapTo"]
         if mapto_key.startswith( "campaign:" ):
-            camp_fn_param = mapto_key.split( ":" )[1]
-            if camp_fn_param == "eff":
-                build_camp_actual = partial( build_camp_actual, eff=value )
-            elif camp_fn_param == "dur":
-                build_camp_actual = partial( build_camp_actual, dur=value )
-            else:
-                raise ValueError( f"{camp_fn_param} is not a valid calibration target." )
+            if not campaign_mapper:
+                raise ValueError( "No campaign mapper function defined." )
+            build_campaign_actual = campaign_mapper( build_camp_actual, mapto_key, value )
             tags[mapto_key] = f"{value}"
         else:
             tags.update(simulation.task.set_parameter(mapto_key, value))
