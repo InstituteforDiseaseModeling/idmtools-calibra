@@ -50,7 +50,8 @@ def map_sample_to_model_input(simulation, sample):
     tags = {}
     global params
     from functools import partial
-    build_camp_actual = partial( campaign_builder_fn )
+    if campaign_builder_fn:
+        build_camp_actual = partial( campaign_builder_fn )
     for p in params.CALIBRATION_PARAMETERS:
         if "MapTo" not in p:
             raise Exception(
@@ -77,7 +78,6 @@ def map_sample_to_model_input(simulation, sample):
         print("UNUSED PARAMETER:" + name)
     assert len(sample) == 0  # All params used
 
-    #build_camp_actual = partial( campaign_builder_fn )
     simulation.task.create_campaign_from_callback( builder=build_camp_actual )
 
     return tags
