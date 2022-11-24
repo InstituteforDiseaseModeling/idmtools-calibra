@@ -70,7 +70,7 @@ def map_sample_to_model_input(simulation, sample):
         if mapto_key.startswith( "campaign:" ):
             if not campaign_mapper:
                 raise ValueError( "No campaign mapper function defined." )
-            build_campaign_actual = campaign_mapper( build_camp_actual, mapto_key, value )
+            build_camp_actual = campaign_mapper( build_camp_actual, mapto_key, value )
             tags[mapto_key] = f"{value}"
         else:
             tags.update(simulation.task.set_parameter(mapto_key, value))
