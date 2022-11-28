@@ -13,6 +13,7 @@ from idmtools_calibra.singularity_json_python_task import SingularityJSONConfigu
 
 params = None  # hack block
 campaign_builder_fn = None
+demog_builder_fn = None
 
 def constrain_sample(sample):
     """
@@ -34,6 +35,7 @@ def constrain_sample(sample):
     return sample
 
 campaign_mapper = None
+demog_mapper = None
 
 def map_sample_to_model_input(simulation, sample):
     """
@@ -47,12 +49,17 @@ def map_sample_to_model_input(simulation, sample):
     Returns: A dictionary containing the tags that will be attached to the simulation
     """
 
-    build_camp_actual = None
     tags = {}
     global params
     from functools import partial
+
+    build_camp_actual = None
     if campaign_builder_fn:
         build_camp_actual = partial( campaign_builder_fn )
+    build_demog_actual = None
+    if demog_builder_fn:
+        build_demog_actual = partial( demog_builder_fn )
+
     for p in params.CALIBRATION_PARAMETERS:
         if "MapTo" not in p:
             raise Exception(
@@ -72,6 +79,11 @@ def map_sample_to_model_input(simulation, sample):
                 raise ValueError( "No campaign mapper function defined." )
             build_camp_actual = campaign_mapper( build_camp_actual, mapto_key, value )
             tags[mapto_key] = f"{value}"
+        elif mapto_key.startswith( "demog:" ):
+            if not demog_mapper:
+                raise ValueError( "No demog mapper function defined." )
+            build_demog_actual = demog_mapper( build_demog_actual, mapto_key, value )
+            tags[mapto_key] = f"{value}"
         else:
             tags.update(simulation.task.set_parameter(mapto_key, value))
 
@@ -81,6 +93,9 @@ def map_sample_to_model_input(simulation, sample):
 
     if build_camp_actual:
         simulation.task.create_campaign_from_callback( builder=build_camp_actual )
+
+    if build_demog_actual:
+        simulation.task.create_demog_from_callback( builder=build_demog_actual, from_sweep=True )
 
     return tags
 
