@@ -402,8 +402,9 @@ class CalibManager(object):
         if not calib_data:
             return
 
-        suite_ids = calib_data.get('suites')
-        for suite_id in suite_ids:
+        suite_list = calib_data.get('suites')
+        for suite_dict in suite_list:
+            suite_id = suite_dict['id']
             self.platform._suites.platform_delete(suite_id)
 
         # Print confirmation
