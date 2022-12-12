@@ -11,6 +11,7 @@ from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hoo
 from idmtools_calibra.utilities.display import verbose_timedelta
 
 logger = getLogger("Calibration")
+user_logger = getLogger('user')
 
 
 class IterationState:
@@ -305,12 +306,8 @@ class IterationState:
     def cancel(self):
         self.platform._experiments.platform_cancel(self.experiment_id)
 
-        logger.info("Waiting to complete cancellation...")
-        self.wait_for_finished()
-
         # Print confirmation
-        logger.info("Calibration %s successfully cancelled!" % self.calibration_name)
-        print("Calibration %s successfully cancelled!" % self.calibration_name)
+        user_logger.info("Have submitted cancellation for Calibration %s" % self.calibration_name)
 
     @property
     def iteration_directory(self):
