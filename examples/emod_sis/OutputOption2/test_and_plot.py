@@ -48,7 +48,8 @@ def get_task( build_camp_fn=None ):
     import emod_generic.bootstrap as dtk
     dtk.setup( manifest.model_dl_dir )
     from idmtools.core.platform_factory import Platform
-    platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
+    #platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
+    platform = Platform(settings.LOCALE, missing_ok=True, default_missing=dict(type='TestExecute'))
     task = EMODTask.from_default2(
         config_path="config.json",
         eradication_path=settings.MODEL_DRIVER,

@@ -54,7 +54,7 @@ def get_task():
 def test_and_plot():
     # run model with selected params and plot!
     # TBD: parameterize directory.
-    with open( "emod-sis/CalibManager.json" ) as results_fp: 
+    with open( os.path.join( settings.CALIBRATION_NAME, "CalibManager.json" ) ) as results_fp: 
         finals = json.load( results_fp )["final_samples"]
         a = finals["a"][0]
         b = finals["b"][0]

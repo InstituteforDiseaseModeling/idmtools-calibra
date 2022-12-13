@@ -36,7 +36,7 @@ if __name__ == "__main__":
         reference_sources={'production': os.path.join(settings.REFERENCE_DATA_DIR, 'output.csv')}
     )
     task, platform = tap.get_task()
-    calib_man = calib_app.init( settings, site, task )
+    calib_man = calib_app.init( settings, site, task, platform )
     calib_app.campaign_builder_fn = tap.build_camp
     calib_app.campaign_mapper = camp_mapper
     calib_man.platform = platform
