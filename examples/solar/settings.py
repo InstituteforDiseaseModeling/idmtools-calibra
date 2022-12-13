@@ -1,5 +1,5 @@
 import os
-thing=1
+
 class Settings:
     #
     # Run environment controls
