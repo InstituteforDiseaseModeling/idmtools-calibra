@@ -5,6 +5,8 @@ from idmtools.builders import SimulationBuilder
 import manifest 
 from emodpy.emod_task import EMODTask
 from settings import Settings
+import matplotlib
+matplotlib.use( "TkAgg" )
 
 settings = Settings()
 
@@ -16,6 +18,7 @@ def get_task():
         config.parameters.Enable_Demographics_Reporting = 0 
         config.parameters.Incubation_Period_Constant = 0
         config.parameters.Infectious_Period_Exponential = 4.0 
+        config.parameters.Base_Individual_Sample_Rate = 0.1 
         #config.parameters.Minimum_End_Time = 90
 
         return config
