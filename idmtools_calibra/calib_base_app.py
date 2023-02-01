@@ -106,7 +106,8 @@ def init(settings, site, task=None, platform=None):
     global params
     params = settings
     if not platform:
-        platform = Platform(settings.LOCALE)
+        print( "No platform specified. Creating Platform with Normal proirity." )
+        platform = Platform(settings.LOCALE, priority="Normal")
 
     # If any directories of files were specified to be added as assets of the simulations, add them now.
     assets = AssetCollection()
@@ -193,5 +194,5 @@ def init(settings, site, task=None, platform=None):
     return calib_manager
 
 
-def go(calib_manager):
-    calib_manager.run_calibration()
+def go(calib_manager, **kwargs):
+    calib_manager.run_calibration(**kwargs)

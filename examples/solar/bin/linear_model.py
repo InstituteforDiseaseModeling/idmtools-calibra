@@ -35,7 +35,7 @@ def run_from_values( a, b ):
         lines.append(f"{independent_values[i]},{model_results[i]}")
     lines_str = '\n'.join(lines)
 
-    output_path = Path('output', 'production.csv')
+    output_path = Path('output', 'output.csv')
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w') as f:
         f.write(lines_str) 

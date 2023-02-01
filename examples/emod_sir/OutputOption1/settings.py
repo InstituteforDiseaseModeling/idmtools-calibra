@@ -8,6 +8,7 @@ class Settings:
     MODEL_DRIVER = manifest.eradication_path
     REFERENCE_DATA_DIR = manifest.REFERENCE_DATA_DIR 
     INPUT_DIRS = []
+    
     SIF = manifest.sif
     SIF_FILENAME = manifest.sif_filename
 
@@ -16,11 +17,11 @@ class Settings:
     #
 
     # The number of parameter sets/samples to run in each calibration iteration
-    N_SAMPLES = 125
+    N_SAMPLES = 25
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1 # 5
-    # the number of times the algorithm will attempt to optimize the best-guess parameterization
-    N_ITERATIONS = 7
+    # the number of times the algorithm will attempt to optimize the best-guess parameterization 
+    N_ITERATIONS = 6
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
     CALIBRATION_NAME = 'emod-sir'
 
@@ -64,7 +65,7 @@ class Settings:
             'MapTo': 'Incubation_Period_Constant',
             'Guess': 5,
             'Min': 0,
-            'Max': 10
+            'Max': 20
         }
     ]
     volume_fraction = 0.002

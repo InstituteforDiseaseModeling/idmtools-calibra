@@ -18,7 +18,7 @@ if __name__ == "__main__":
     )
     # Next two lines aren't required but default priority is Lowest so your jobs can get stuck.
     from idmtools.core.platform_factory import Platform
-    platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
+    platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Normal")
     calib_man = calib_app.init( mysettings, site, platform=platform )
 
     # Required variable/dict in calibration scripts

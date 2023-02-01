@@ -9,8 +9,6 @@ from settings import Settings
 settings = Settings()
 
 if __name__ == "__main__":
-    import matplotlib
-    matplotlib.use( "TkAgg" )
     import test_and_plot as tap
     # site we want to calibrate on - a core organization object for calibra
     site = RMSESite(
@@ -18,8 +16,7 @@ if __name__ == "__main__":
         reference_sources={'production': os.path.join(settings.REFERENCE_DATA_DIR, 'output.csv')}
     )
     task, platform = tap.get_task()
-    calib_man = calib_app.init( settings, site, task )
-    calib_man.platform = platform
+    calib_man = calib_app.init( settings, site, task, platform=platform )
 
     # Required variable/dict in calibration scripts
     run_calib_args = {
