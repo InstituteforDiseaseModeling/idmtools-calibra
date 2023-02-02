@@ -41,7 +41,7 @@ jobs:
           pip install black flake8
       - name: Run bootstrap
         run: |
-          python .dev_scripts\bootstrap.py
+          python .dev_scripts/bootstrap.py
       - name: install dependencies
         run: |
           cd examples/emod_sir/OutputOption1
