@@ -7,7 +7,7 @@
 #  https://api.github.com/repos/InstituteforDiseaseModeling/idmtools_calibra/dispatches
 #
 # Note, this test will checkout 'dev' branch
-name: "run_pip_prod_all_tests"
+name: "run_bootstrap_and_test"
 on: [push, pull_request]
 #  repository_dispatch:
 #    types: [run_setup_dev_test]
@@ -45,7 +45,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install -r requirements.txt
-        path: examples/emod_sir/OutputOption1
+          path: examples/emod_sir/OutputOption1
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
