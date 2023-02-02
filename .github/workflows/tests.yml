@@ -1,4 +1,4 @@
- This workflows will install idmtools_calibra from setup-dev then run tests with curl command
+# This workflows will install idmtools_calibra from setup-dev then run tests with curl command
 #
 #curl command from your cmd:
 # curl -XPOST -u "username:githubPAT" -H "Accept: application/vnd.github.everest-preview+json" \
