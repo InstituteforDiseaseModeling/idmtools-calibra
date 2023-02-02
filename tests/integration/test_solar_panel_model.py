@@ -2,21 +2,24 @@
 import csv
 import json
 import os
+import sys
 import unittest
 
 import pandas as pd
 from idmtools.core import ItemType
-
-from examples.solar import settings
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
-from examples.solar.solar_site import SolarSite
 import datetime
 from sklearn.metrics import mean_squared_error
 import math
 
-mysettings = settings.Settings()
+# to make access from command line
 CURRENT_DIRECTORY = os.path.dirname(__file__)
+sys.path.append(os.path.join(CURRENT_DIRECTORY, "..", "..", "examples"))
+from solar import settings
+from solar.solar_site import SolarSite
+
+mysettings = settings.Settings()
 
 
 class TestSolarPanel(unittest.TestCase):
