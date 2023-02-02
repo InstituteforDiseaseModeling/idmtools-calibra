@@ -1,6 +1,8 @@
 import os
 import sys
 
+from idmtools.core.platform_factory import Platform
+
 from idmtools_calibra.rmse_site import RMSESite 
 from idmtools_calibra import calib_base_app as calib_app
 
@@ -15,7 +17,8 @@ if __name__ == "__main__":
         name='rmse_site',
         reference_sources={'production': os.path.join(settings.REFERENCE_DATA_DIR, 'output.csv')}
     )
-    task, platform = tap.get_task()
+    platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
+    task = tap.get_task()
     calib_man = calib_app.init( settings, site, task, platform=platform )
     #calib_man.platform = platform
 

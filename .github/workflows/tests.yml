@@ -12,7 +12,9 @@ name: "Install with setup-dev and run all test"
 
 on:
  repository_dispatch:
-  types: [run_setup_dev_test]
+  types: [run_setup_dev_test
+  workflow_dispatch:
+
  pull_request:
    types: [opened, edited, reopened]
 
@@ -21,7 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.9]
+    env:
+      PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
+      PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -37,15 +42,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install make
           pip install black flake8
-      - name: Run setup-dev
+      - name: Run bootstrap
         run: |
-          make setup-dev
-      - name: run idmtools_calibra tests
+          python .dev_scripts\bootstrap.py
+      - name: install dependencies
         run: |
-            py.test --durations=3 -v --junitxml=test_results.xml
+          cd examples/emod_sir/OutputOption1
+          pip install -r requirements.txt
+      - name: login to comps2
+        run: |
+          python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
+        env:
+            COMPS_PASS: ${ { secrets.COMPS_PASSWORD } }
+      - name: run idmtools_calibra integration tests
+        run: |
+          cd tests/integration
+          py.test -v --durations=3 --junitxml=test_results.xml
       - name: Upload idmtools_calibra test results
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: idmtools_calibra_test_results
-          path: tests/test_results.xml
+          path: tests/integration/test_results.xml
