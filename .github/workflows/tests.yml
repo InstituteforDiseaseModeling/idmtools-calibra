@@ -7,8 +7,7 @@
 #  https://api.github.com/repos/InstituteforDiseaseModeling/idmtools_calibra/dispatches
 #
 # Note, this test will checkout 'dev' branch
-
-name: "Install with setup-dev and run all test"
+name: "run_pip_prod_all_tests"
 
 on:
   repository_dispatch:
