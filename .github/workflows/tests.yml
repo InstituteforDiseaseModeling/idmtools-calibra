@@ -44,8 +44,8 @@ jobs:
           python .dev_scripts/bootstrap.py
       - name: install dependencies
         run: |
-          cd examples/emod_sir/OutputOption1
           pip install -r requirements.txt
+        path: examples/emod_sir/OutputOption1
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
