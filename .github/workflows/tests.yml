@@ -8,12 +8,12 @@
 #
 # Note, this test will checkout 'dev' branch
 name: "run_pip_prod_all_tests"
-on:
+on: [push, pull_request]
 #  repository_dispatch:
 #    types: [run_setup_dev_test]
 #  workflow_dispatch:
-  pull_request:
-   types: [opened, edited, reopened]
+#  pull_request:
+#   types: [opened, edited, reopened]
 
 jobs:
   install-setup-dev-run-all-test:
