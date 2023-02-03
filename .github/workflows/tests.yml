@@ -45,7 +45,7 @@ jobs:
         run: |
           pwd
           ls -lart
-          pip install -r test_requirements.txt
+          pip install emod-generic emodpy --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
