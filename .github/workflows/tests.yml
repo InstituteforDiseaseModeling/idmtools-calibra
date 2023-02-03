@@ -1,25 +1,14 @@
-# This workflows will install idmtools_calibra from setup-dev then run tests with curl command
-#
-#curl command from your cmd:
-# curl -XPOST -u "username:githubPAT" -H "Accept: application/vnd.github.everest-preview+json" \
-# -H "Content-Type: application/json" \
-# --data "{\"event_type\": \"run_setup_dev_test\"}" \
-#  https://api.github.com/repos/InstituteforDiseaseModeling/idmtools_calibra/dispatches
-#
-# Note, this test will checkout 'dev' branch
 name: "run_bootstrap_and_test"
-on: [push, pull_request]
-#  repository_dispatch:
-#    types: [run_setup_dev_test]
-#  workflow_dispatch:
-#  pull_request:
-#   types: [opened, edited, reopened]
+#on: [push, pull_request]
+on:
+  workflow_dispatch:
 
 jobs:
   run_bootstrap_and_test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ ubuntu-latest ]
         python-version: [3.9]
     env:
       PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
@@ -27,13 +16,14 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
-        with:
-          ref: dev
-      - name: Set up Python ${{ matrix.python-version  }}
-        uses: actions/setup-python@v1
+      - name: ${{ matrix.os }} Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
+          architecture: x64
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -43,14 +33,12 @@ jobs:
           python .dev_scripts/bootstrap.py
       - name: install emodpy dependencies
         run: |
-          pwd
-          ls -lart .dev_scripts/
           pip install emod-generic emodpy --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
         env:
-          COMPS_PASS: ${ { secrets.COMPS_PASSWORD } }
+            COMPS_PASS: ${{ secrets.COMPS_PASSWORD }}
       - name: run idmtools_calibra integration tests
         run: |
           cd tests/integration
