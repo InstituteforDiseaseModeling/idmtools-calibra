@@ -36,14 +36,12 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install make
-          pip install black flake8
           python -m pip install --upgrade pip
+          pip install idm-buildtools flake8 wheel matplotlib sqlalchemy black --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
       - name: Run bootstrap
         run: |
           python .dev_scripts/bootstrap.py
-      - name: install dependencies
+      - name: install emodpy dependencies
         run: |
           pip install -r requirements.txt
           path: examples/emod_sir/OutputOption1
