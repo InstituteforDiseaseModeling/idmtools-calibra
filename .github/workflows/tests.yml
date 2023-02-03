@@ -44,13 +44,13 @@ jobs:
       - name: install emodpy dependencies
         run: |
           pwd
-          ls -lart
+          ls -lart .dev_scripts/
           pip install emod-generic emodpy --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
         env:
-            COMPS_PASS: ${ { secrets.COMPS_PASSWORD } }
+          COMPS_PASS: ${ { secrets.COMPS_PASSWORD } }
       - name: run idmtools_calibra integration tests
         run: |
           cd tests/integration
