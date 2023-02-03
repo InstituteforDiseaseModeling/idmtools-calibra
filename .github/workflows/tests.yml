@@ -2,6 +2,11 @@ name: "run_bootstrap_and_test"
 #on: [push, pull_request]
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+#  pull_request:
+#    types: [ opened, edited, reopened ]
 
 jobs:
   run_bootstrap_and_test:

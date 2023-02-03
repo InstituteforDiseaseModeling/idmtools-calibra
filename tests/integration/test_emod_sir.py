@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import csv
 import os
-import sys
 import unittest
 
 import pandas as pd
@@ -14,7 +13,6 @@ import datetime
 from sklearn.metrics import mean_squared_error
 import math
 from idmtools_calibra.rmse_site import RMSESite
-# to make access from command line
 from tests.integration.emod_sir.task import get_task
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
@@ -22,6 +20,7 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 from tests.integration.emod_sir import settings
 
 mysettings = settings.Settings()
+
 
 class TestEMODSir(unittest.TestCase):
     @classmethod
@@ -36,7 +35,6 @@ class TestEMODSir(unittest.TestCase):
         cls.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
         task = get_task(mysettings)
         calib_man = calib_app.init(mysettings, cls.site, task, platform=cls.platform)
-        #calib_man = calib_app.init(mysettings, cls.site, platform=cls.platform)
         cls.settings = mysettings
         cls.calibra_name = mysettings.CALIBRATION_NAME
         uniq_filename = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':',
@@ -46,9 +44,9 @@ class TestEMODSir(unittest.TestCase):
         calib_app.go(calib_man, directory=cls.directory)
 
         # following few lines for debug
-        # uniq_filename = '2023-02-02_13_36_58.478958'
-        # cls.directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
-        # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=2, iter_step='plot', loop=True)
+        # uniq_filename = '2023-02-02_20_08_13.484256'
+        # cls.directory = os.path.join(CURRENT_DIRECTORY, "emod_sir_calibra_result", uniq_filename)
+        # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=4, iter_step='plot', loop=True)
 
     def get_output_data(self, simulation):
         """
@@ -60,7 +58,7 @@ class TestEMODSir(unittest.TestCase):
         df = pd.DataFrame([x.split(',') for x in l]).dropna() # convert list to dataframe
         df.columns = df.iloc[0]  # set df column names
         df = df[1:]  # set df content data
-        return df['value']
+        return df['value'].astype('float32')  # convert string to float
 
     def test_emod_sir_regression_fitness(self):
         """
@@ -79,6 +77,7 @@ class TestEMODSir(unittest.TestCase):
             index_total = data[0].index('total')
             index_sim = data[0].index('simid')
             rmse_list = []
+            distance_list = []
             for i in range(1, len(data) - 2):
                 # validate LL_all.csv is sorted by 'total' column
                 self.assertTrue(float(data[i][index_total]) >= float(data[i + 1][index_total]))
@@ -93,7 +92,14 @@ class TestEMODSir(unittest.TestCase):
                 rmse = math.sqrt(mean_squared_error(sim_output_production, reference_dict['value_reference']))
                 # save each rmse value to a list
                 rmse_list.append(rmse)
+
+                # Or we can simply calculate distance between real value (i.e sim_output_production) and reference
+                # value, top sim should have shortest distance
+                distance = abs(sim_output_production.values[0]-reference_dict['value_reference'].values[0])
+                distance_list.append(distance)
+
             # validate rmse_list is sorted in ascend order(small to large)
-            is_sorted = all(a <= b for a, b in zip(rmse_list, rmse_list[1:]))
-            self.assertTrue(is_sorted)
+            self.assertTrue(all(a <= b for a, b in zip(rmse_list, rmse_list[1:])))
+            # verify distance_list is also sorted
+            self.assertTrue(distance_list == sorted(distance_list))
 
