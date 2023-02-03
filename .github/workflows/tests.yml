@@ -44,6 +44,7 @@ jobs:
       - name: install emodpy dependencies
         run: |
           pwd
+          ls -lart
           pip install -r test_requirements.txt
       - name: login to comps2
         run: |
