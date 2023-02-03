@@ -16,7 +16,7 @@ on: [push, pull_request]
 #   types: [opened, edited, reopened]
 
 jobs:
-  install-setup-dev-run-all-test:
+  run_bootstrap_and_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,8 +43,8 @@ jobs:
           python .dev_scripts/bootstrap.py
       - name: install emodpy dependencies
         run: |
-          pip install -r requirements.txt
-          path: examples/emod_sir/OutputOption1
+          pwd
+          pip install -r test_requirements.txt
       - name: login to comps2
         run: |
           python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
