@@ -3,21 +3,17 @@ import os
 import sys
 
 from emodpy.emod_task import EMODTask
-from idmtools.core.platform_factory import Platform
 from idmtools.entities.experiment import Experiment
 from idmtools.builders import SimulationBuilder
-
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(CURRENT_DIR)
-import manifest
-
+import manifest 
 from emodpy.emod_task import EMODTask
 from settings import Settings
 import matplotlib
 #matplotlib.use( "TkAgg" )
 
 settings = Settings()
-platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
 
 # NOTE: Any campaign parameter you want to calibrate must be in the build_camp param list
 def build_camp():
@@ -51,7 +47,7 @@ def get_task( build_camp_fn=None ):
     import emod_generic.bootstrap as dtk
     dtk.setup( manifest.model_dl_dir )
     from idmtools.core.platform_factory import Platform
-    #platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
+    platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
     task = EMODTask.from_default2(
         config_path="config.json",
         eradication_path=settings.MODEL_DRIVER,
@@ -62,7 +58,7 @@ def get_task( build_camp_fn=None ):
         ep4_path=manifest.ep4
     )
     task.set_sif( settings.SIF )
-    return task
+    return task, platform
 
 def test_and_plot():
     # run model with selected params and plot!
@@ -90,7 +86,7 @@ def test_and_plot():
     builder.add_sweep_definition( update_sim_random_seed, range(10) )
 
     # create experiment from builder
-    task = get_task()
+    task,platform=get_task()
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sir sweep") 
     experiment.run(wait_until_done=True, platform=platform)
     task.handle_experiment_completion( experiment )

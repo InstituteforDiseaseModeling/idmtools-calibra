@@ -15,9 +15,11 @@ from sklearn.metrics import mean_squared_error
 import math
 from idmtools_calibra.rmse_site import RMSESite
 # to make access from command line
+from tests.integration.emod_sir.task import get_task
+
 CURRENT_DIRECTORY = os.path.dirname(__file__)
-sys.path.append(os.path.join(CURRENT_DIRECTORY, "..", "..", "examples"))
-from emod_sir.OutputOption1 import settings
+
+from tests.integration.emod_sir import settings
 
 mysettings = settings.Settings()
 
@@ -26,15 +28,13 @@ class TestEMODSir(unittest.TestCase):
     def setUpClass(cls) -> None:
         mysettings.LOCALE = "SlurmStage"
         mysettings.N_ITERATIONS = 5
-        # mysettings.MODEL_DRIVER = os.path.join('..', '..', 'examples', 'emod_sir', 'OutputOption1', mysettings.MODEL_DRIVER)
         # site we want to calibrate on - a core organization object for calibra
         cls.site = RMSESite(
             name='rmse_site',
             reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'output.csv')}
         )
         cls.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
-        import emod_sir.OutputOption1.test_and_plot as tap
-        task = tap.get_task()
+        task = get_task(mysettings)
         calib_man = calib_app.init(mysettings, cls.site, task, platform=cls.platform)
         #calib_man = calib_app.init(mysettings, cls.site, platform=cls.platform)
         cls.settings = mysettings
