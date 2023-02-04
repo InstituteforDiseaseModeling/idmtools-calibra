@@ -178,6 +178,32 @@ class TestIterationState(unittest.TestCase):
     @mock.patch.object(idmtools_calibra.plotters.likelihood_plotter.LikelihoodPlotter, 'plot_by_parameter')
     @mock.patch.object(idmtools_calibra.plotters.optim_tool_plotter.OptimToolPlotter, 'visualize_results')
     def test_plot_step(self, plot_by_parameter, visualize_results):
+        params = [
+            {
+                'Name': 'linear-coefficient',
+                'Dynamic': True,
+                'MapTo': 'a',
+                'Guess': 50,
+                'Min': 0,
+                'Max': 400
+            },
+            {
+                'Name': 'constant',
+                'Dynamic': True,
+                'MapTo': 'b',
+                'Guess': 500,
+                'Min': 0,
+                'Max': 2000
+            }
+        ]
+        optimtool = OptimTool(params, samples_per_iteration=20)
+        self.state.next_point_algo = optimtool
+        self.state.next_point = optimtool.get_state()
+        self.state.plotters = [
+            LikelihoodPlotter(combine_sites=True),
+            SiteDataPlotter(num_to_plot=5, combine_sites=True),
+            OptimToolPlotter()
+        ]
         self.state.plotting_step()
         self.assertEqual(self.state.status, StatusPoint.plot)
 
