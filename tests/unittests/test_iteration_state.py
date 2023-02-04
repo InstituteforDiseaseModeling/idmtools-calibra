@@ -8,9 +8,13 @@ from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
 from idmtools.entities.command_task import CommandTask
 
+import idmtools_calibra
 from idmtools_calibra.algorithms.optim_tool import OptimTool
 from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer
 from idmtools_calibra.iteration_state import IterationState
+from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
+from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
+from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.rmse_site import RMSESite
 
@@ -117,21 +121,22 @@ class TestIterationState(unittest.TestCase):
         self.assertEqual(self.state.iteration_file, str(os.path.join(os.getcwd(), 'iter0', 'IterationState.json')))
         os.remove(os.path.join('iter0', 'IterationState.json'))
 
-    def test_commission_step(self):
+    @mock.patch.object(idmtools_calibra.iteration_state.IterationState, 'commission_iteration')
+    def test_commission_step(self, commission_iteration):
         self.example_OptimalTool_settings()
         self.assertEqual(len(self.state.samples_for_this_iteration), 0)
         # we are not doing real commission to comps, instead we can mock commission_iteration step so we can test
         # everything before real commission
-        with mock.patch('idmtools_calibra.iteration_state.IterationState.commission_iteration') as mock_fetch:
-            self.state.commission_step()
-            self.assertEqual(len(self.state.samples_for_this_iteration), 5)
-            for sample in self.state.samples_for_this_iteration:
-                self.assertEqual(sample['p2'], 2000.0)  # p2 is not dynamic parameter, so it should not change
-                self.assertTrue(sample['p1'] <= 1 or sample['p1'] >= 0)
-            self.assertEqual(self.state.status, StatusPoint.commission)
+        self.state.commission_step()
+        self.assertEqual(len(self.state.samples_for_this_iteration), 5)
+        for sample in self.state.samples_for_this_iteration:
+            self.assertEqual(sample['p2'], 2000.0)  # p2 is not dynamic parameter, so it should not change
+            self.assertTrue(sample['p1'] <= 1 or sample['p1'] >= 0)
+        self.assertEqual(self.state.status, StatusPoint.commission)
 
-    def test_analyze_step(self):
-        self.state.experiment_id = 'e341ac89-1ba3-ed11-92f3-f0921c167864'
+    @mock.patch.object(idmtools_calibra.algorithms.optim_tool.OptimTool, 'set_results_for_iteration')
+    def test_analyze_step(self, set_results_for_iteration):
+        self.state.experiment_id = 'e341ac89-1ba3-ed11-92f3-f0921c167864'  # comps2 exp_id
         params = [
             {
                 'Name': 'linear-coefficient',
@@ -159,13 +164,19 @@ class TestIterationState(unittest.TestCase):
                 'production': os.path.join('..', '..', 'examples', 'solar', 'reference', 'production.csv')}
         )
         self.state.analyzer_list = [RMSEAnalyzer(site, 'production', 'date')]
-        with mock.patch('idmtools_calibra.algorithms.optim_tool.OptimTool.set_results_for_iteration') as mock_fetch:
-            self.state.analyze_step()
-            self.assertEqual(len(self.state.results['total']), 20)
-            np.testing.assert_array_equal(self.state.results['RMSEAnalyzer'], self.state.results['total'])
-            self.assertEqual(self.state.summary_table.shape, (10, 2))
-            np.testing.assert_array_equal(self.state.summary_table['iteration'].values, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            self.assertEqual(self.state.status, StatusPoint.analyze)
-            # verify results for total are sorted from analyzer result
-            self.assertTrue(
-                all(a >= b for a, b in zip(self.state.all_results['total'], self.state.all_results['total'][1:])))
+        #with mock.patch('idmtools_calibra.algorithms.optim_tool.OptimTool.set_results_for_iteration') as mock_fetch:
+        self.state.analyze_step()
+        self.assertEqual(len(self.state.results['total']), 20)
+        np.testing.assert_array_equal(self.state.results['RMSEAnalyzer'], self.state.results['total'])
+        self.assertEqual(self.state.summary_table.shape, (10, 2))
+        np.testing.assert_array_equal(self.state.summary_table['iteration'].values, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(self.state.status, StatusPoint.analyze)
+        # verify results for total are sorted from analyzer result
+        self.assertTrue(
+            all(a >= b for a, b in zip(self.state.all_results['total'], self.state.all_results['total'][1:])))
+
+    @mock.patch.object(idmtools_calibra.plotters.likelihood_plotter.LikelihoodPlotter, 'plot_by_parameter')
+    @mock.patch.object(idmtools_calibra.plotters.optim_tool_plotter.OptimToolPlotter, 'visualize_results')
+    def test_plot_step(self, plot_by_parameter, visualize_results):
+        self.state.plotting_step()
+        self.assertEqual(self.state.status, StatusPoint.plot)
