@@ -180,3 +180,8 @@ class TestIterationState(unittest.TestCase):
     def test_plot_step(self, plot_by_parameter, visualize_results):
         self.state.plotting_step()
         self.assertEqual(self.state.status, StatusPoint.plot)
+
+    def test_next_point_step(self):
+        self.example_OptimalTool_settings()
+        self.state.next_point_step()
+        self.assertEqual(self.state.status, StatusPoint.next_point)
