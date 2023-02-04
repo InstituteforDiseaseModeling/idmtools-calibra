@@ -3,13 +3,16 @@ import os
 import unittest
 from unittest import mock
 
+import numpy as np
 from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
 from idmtools.entities.command_task import CommandTask
 
 from idmtools_calibra.algorithms.optim_tool import OptimTool
+from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer
 from idmtools_calibra.iteration_state import IterationState
 from idmtools_calibra.process_state import StatusPoint
+from idmtools_calibra.rmse_site import RMSESite
 
 
 class TestIterationState(unittest.TestCase):
@@ -128,4 +131,41 @@ class TestIterationState(unittest.TestCase):
             self.assertEqual(self.state.status, StatusPoint.commission)
 
     def test_analyze_step(self):
-        pass
+        self.state.experiment_id = 'e341ac89-1ba3-ed11-92f3-f0921c167864'
+        params = [
+            {
+                'Name': 'linear-coefficient',
+                'Dynamic': True,
+                'MapTo': 'a',
+                'Guess': 50,
+                'Min': 0,
+                'Max': 400
+            },
+            {
+                'Name': 'constant',
+                'Dynamic': True,
+                'MapTo': 'b',
+                'Guess': 500,
+                'Min': 0,
+                'Max': 2000
+            }
+        ]
+        optimtool = OptimTool(params, samples_per_iteration=20)
+        self.state.next_point_algo = optimtool
+        self.state.next_point = optimtool.get_state()
+        site = RMSESite(
+            name='rmse_site',
+            reference_sources={
+                'production': os.path.join('..', '..', 'examples', 'solar', 'reference', 'production.csv')}
+        )
+        self.state.analyzer_list = [RMSEAnalyzer(site, 'production', 'date')]
+        with mock.patch('idmtools_calibra.algorithms.optim_tool.OptimTool.set_results_for_iteration') as mock_fetch:
+            self.state.analyze_step()
+            self.assertEqual(len(self.state.results['total']), 20)
+            np.testing.assert_array_equal(self.state.results['RMSEAnalyzer'], self.state.results['total'])
+            self.assertEqual(self.state.summary_table.shape, (10, 2))
+            np.testing.assert_array_equal(self.state.summary_table['iteration'].values, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            self.assertEqual(self.state.status, StatusPoint.analyze)
+            # verify results for total are sorted from analyzer result
+            self.assertTrue(
+                all(a >= b for a, b in zip(self.state.all_results['total'], self.state.all_results['total'][1:])))
