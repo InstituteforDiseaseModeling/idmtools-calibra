@@ -97,17 +97,17 @@ class TestIterationState(unittest.TestCase):
         self.assertEqual(self.state.analyzer_list, [])
         self.assertEqual(self.state.analyzers, {'TestAnalyzer': 'idmtools_calibra.analyzers.my_analyzer.TestAnalyzer'})
         self.assertEqual(self.state.calibration_directory, os.getcwd())
+        # remove these 2 datatype for comparison since different machine may return different datatypes
+        self.state.next_point.pop('regression_dtypes')
+        self.state.next_point.pop('state_dtypes')
         self.assertEqual(self.state.next_point,
                          {'mu_r': 0.1, 'sigma_r': 0.02, 'center_repeats': 2, 'rsquared_thresh': 0.5, 'n_dimensions': 0,
                           'params': [{'Name': 'p2', 'Dynamic': False, 'Guess': 2000, 'Min': 1200, 'Max': 2400},
                                      {'Name': 'p1', 'Dynamic': True, 'Guess': 0.1, 'Min': 0, 'Max': 1, 'MapTo': 'p1'}],
                           'samples_per_iteration': 5, 'data': {}, 'data_dtypes': {},
                           'regression': {'Iteration': [], 'Parameter': [], 'Value': []},
-                          'regression_dtypes': {'Iteration': 'int32', 'Parameter': 'object', 'Value': 'object'},
                           'state': {'Iteration': [], 'Parameter': [], 'Center': [], 'Min': [], 'Max': [],
-                                    'Dynamic': []},
-                          'state_dtypes': {'Iteration': 'int32', 'Parameter': 'object', 'Center': 'object',
-                                           'Min': 'object', 'Max': 'object', 'Dynamic': 'object'}})
+                                    'Dynamic': []}})
         self.assertEqual(self.state.results, {'TestAnalyzer': [-13, -11], 'Total': [-13, -11]})
         self.assertEqual(self.state.simulations,
                          {'sims': {'sim_id1': {'p1': 1, 'p2': 2}, 'sim_id2': {'p1': 3, 'p2': 4}}})
@@ -126,3 +126,6 @@ class TestIterationState(unittest.TestCase):
                 self.assertEqual(sample['p2'], 2000.0)  # p2 is not dynamic parameter, so it should not change
                 self.assertTrue(sample['p1'] <= 1 or sample['p1'] >= 0)
             self.assertEqual(self.state.status, StatusPoint.commission)
+
+    def test_analyze_step(self):
+        pass
