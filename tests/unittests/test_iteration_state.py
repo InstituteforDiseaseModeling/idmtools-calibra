@@ -2,6 +2,7 @@ import copy
 import os
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 
 import numpy as np
 from idmtools.core.platform_factory import Platform
@@ -49,10 +50,12 @@ class TestIterationState(unittest.TestCase):
     )
 
     def setUp(self):
-        self.state = IterationState(calibration_directory=os.getcwd(), platform=Platform("SlurmStage"))
+        fake_platform = MagicMock(_config_block="mock_platform")
+        # fack_simulation = MagicMock(id=str(uuid.uuid4()))
+        # fake_platform.get_item.return_value = fack_simulation
+        self.state = IterationState(calibration_directory=os.getcwd(), platform=fake_platform)
 
     def example_OptimalTool_settings(self):
-        self.state.status = StatusPoint.done
         params = [
             {
                 'Name': 'p2',
@@ -92,6 +95,7 @@ class TestIterationState(unittest.TestCase):
 
     def test_to_save_OptimalTool(self):
         self.example_OptimalTool_settings()
+        self.state.status = StatusPoint.running  # can set any status when save to fine
         self.state.to_file()
         iter_state_file = os.path.join('iter0', 'IterationState.json')
         new_state = IterationState.from_file(iter_state_file)
@@ -136,6 +140,7 @@ class TestIterationState(unittest.TestCase):
 
     @mock.patch.object(idmtools_calibra.algorithms.optim_tool.OptimTool, 'set_results_for_iteration')
     def test_analyze_step(self, set_results_for_iteration):
+        self.state.platform = Platform("SlurmStage")
         self.state.experiment_id = 'e341ac89-1ba3-ed11-92f3-f0921c167864'  # comps2 exp_id
         params = [
             {
