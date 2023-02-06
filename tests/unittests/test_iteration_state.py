@@ -169,7 +169,6 @@ class TestIterationState(unittest.TestCase):
                 'production': os.path.join('..', '..', 'examples', 'solar', 'reference', 'production.csv')}
         )
         self.state.analyzer_list = [RMSEAnalyzer(site, 'production', 'date')]
-        #with mock.patch('idmtools_calibra.algorithms.optim_tool.OptimTool.set_results_for_iteration') as mock_fetch:
         self.state.analyze_step()
         self.assertEqual(len(self.state.results['total']), 20)
         np.testing.assert_array_equal(self.state.results['RMSEAnalyzer'], self.state.results['total'])
