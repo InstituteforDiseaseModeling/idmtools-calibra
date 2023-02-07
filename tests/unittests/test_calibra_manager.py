@@ -179,7 +179,7 @@ class TestCalibraManager(unittest.TestCase):
 
             # Verify ll_all_final.csv and ll_all.csv are same
             df1 = pd.read_csv(os.path.join(self.directory, self.calib_manager.name, "_plots", "ll_all_final.csv"))
-            df2 = pd.read_csv(os.path.join(self.directory, self.calib_manager.name, "_plots", "ll_all.csv"))
+            df2 = pd.read_csv(os.path.join(self.directory, self.calib_manager.name, "_plots", "LL_all.csv"))
             changed = df1.compare(df2)
             self.assertTrue(changed.empty)
 
