@@ -1,8 +1,10 @@
+import json
 import os
 import unittest
 import datetime
 
 from idmtools.assets import AssetCollection
+from idmtools.core import ItemType
 from idmtools.core.platform_factory import Platform
 from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
 
@@ -55,14 +57,15 @@ class TestCalibraManager(unittest.TestCase):
             assert len(sample) == 0  # All params used
             return tags
 
-        site = RMSESite(
+        self.site = RMSESite(
             name='rmse_site',
             reference_sources={
                 'production': os.path.join('..', '..', 'examples', 'solar', 'reference', 'production.csv')}
         )
         self.n_samples = 5
         self.max_iterations = 2
-        optimtool = OptimTool(params.CALIBRATION_PARAMETERS, samples_per_iteration=self.n_samples)
+        self.calibra_name = 'test_dummy_calibration'
+        self.optimtool = OptimTool(params.CALIBRATION_PARAMETERS, samples_per_iteration=self.n_samples)
         plotters = [LikelihoodPlotter(True), SiteDataPlotter(True)]
         assets = AssetCollection()
         assets.add_directory(os.path.join('..', '..', 'examples', 'solar', 'bin'), relative_path="bin")
@@ -70,43 +73,112 @@ class TestCalibraManager(unittest.TestCase):
             script_path=str(os.path.join('..', '..', 'examples', 'solar', 'bin', 'linear_model.py')),
             common_assets=assets,
             config_file_name='config.json')
-        calib_manager = CalibManager(
-            name='test_dummy_calibration',
+        self.calib_manager = CalibManager(
+            name=self.calibra_name,
             task=task,
             map_sample_to_model_input_fn=map_sample_to_model_input,
-            sites=[site],
-            next_point=optimtool,
+            sites=[self.site],
+            next_point=self.optimtool,
             sim_runs_per_param_set=1,
             max_iterations=self.max_iterations,
             plotters=plotters)
-        platform = Platform("SlurmStage")
-        calib_manager.platform = platform
-        # calib_manager.run_calibration(directory=directory)
-        self.calib_manager = calib_manager
+        self.platform = Platform("SlurmStage")
+        self.calib_manager.platform = self.platform
+        self.case_name = self._testMethodName
+
+    def test_calibration_run(self):
+        date = datetime.datetime.now()
+        uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
+        #uniq_filename = "2023-02-06_16_56_04.136092"
+        directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
+        self.calib_manager.name = self.case_name
+        self.calib_manager.run_calibration(directory=directory)
+        # Open the IterationState.json from iter0 and check values
+        with open(f'{directory}/{self.calib_manager.name}/iter0/IterationState.json', 'r') as fp:
+            it = json.load(fp)
+            for sample in it['samples_for_this_iteration']:
+                self.assertTrue(sample['linear-coefficient'] >= self.optimtool.params[0]['Min']
+                                or sample['linear-coefficient'] <= self.optimtool.params[0]['Max'])
+                self.assertTrue(sample['constant'] >= self.optimtool.params[1]['Min']
+                                or sample['constant'] <= self.optimtool.params[1]['Max'])
+            self.assertEqual(len(it['samples_for_this_iteration']), self.n_samples)
+            self.assertEqual(it['status'], 'done')
+            self.assertEqual(it['location'], "SlurmStage")
+            self.assertTrue(self.site.get_analyzers()[0].__class__.__name__ in it['analyzers']['RMSEAnalyzer'])
+            self.assertEqual(it['iteration'], 0)
+            self.assertListEqual(it['results']['RMSEAnalyzer'], it['results']['total'])
+            self.assertEqual(it['calibration_name'], self.calib_manager.name)
+            self.assertEqual((it['next_point']['samples_per_iteration']), self.n_samples)
+            self.assertEqual(it['next_point']['params'], self.optimtool.params)
+            self.assertEqual(it['next_point']['state'],
+                             {'Iteration': [0, 0], 'Parameter': ['linear-coefficient', 'constant'], 'Center': [50, 500],
+                              'Min': [0, 0], 'Max': [400, 2000], 'Dynamic': [True, True]})
+
+        # Validate iter1 directory exists
+        self.assertTrue(os.path.exists(
+            os.path.join(directory, self.calib_manager.name, f'iter{self.max_iterations - 1}')))
+        # Validate CalibraManager.json contains
+        with open(os.path.join(os.path.join(directory, self.calib_manager.name, 'CalibManager.json')), 'r') as fp:
+            cm = json.load(fp)
+            self.assertEqual(cm['name'], self.calib_manager.name)
+            self.assertEqual(cm['location'], "SlurmStage")
+            self.assertEqual(cm['sites'], {'rmse_site': ['RMSEAnalyzer']})
+            self.assertEqual(cm['param_names'], ['linear-coefficient', 'constant'])
+            result_keys = ['sample', 'iteration', 'total', 'RMSEAnalyzer', 'linear-coefficient', 'constant']
+            for key, value in cm['results'].items():
+                self.assertEqual(len(value), self.n_samples * self.max_iterations)
+                self.assertTrue(bool([x for x in result_keys if (x in key)]))
 
     def test_dummy_calibra_manager_resume(self):
-        uniq_filename = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':',
-                                                                                                                '_')
+        date = datetime.datetime.now()
+        uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
         directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
+        calib_manager = self.calib_manager
+        self.calib_manager.name = self.case_name
         self.calib_manager.run_calibration(directory=directory)
+        # validate current iteration from setupClass:
         self.assertEqual(self.calib_manager.current_iteration.iteration, 1)
-        self.assertEqual(self.calib_manager.all_results.shape[0], self.n_samples * self.max_iterations)  # 2*(5sim/iter) iterations
-        suite_id = str(self.calib_manager.suite_id)
+        self.assertEqual(self.calib_manager.all_results.shape[0],
+                         self.n_samples * self.max_iterations)  # 2*(5sim/iter) iterations
+        experiments = self.platform.get_children(self.calib_manager.suite_id, ItemType.SUITE)
+        # verify comps has 2 experiments created at this point
+        self.assertEqual(len(experiments), 2)
+        # resume from iteration 0 commission step and stop
         self.calib_manager.run_calibration(directory=directory, resume=True, iteration=0, iter_step='commission',
                                            loop=False)
         self.assertEqual(self.calib_manager.current_iteration.iteration, 0)
+        self.assertEqual(self.calib_manager.iteration, 0)
         self.assertEqual(self.calib_manager.all_results.shape[0],
                          self.n_samples)  # rerun only return first iteration with 5 simulations
-        self.assertEqual(str(self.calib_manager.suite_id), suite_id)  # verify that resume still use same suite
         self.assertEqual(self.calib_manager.current_iteration.status, StatusPoint.done)
+        experiments = self.platform.get_children(self.calib_manager.suite_id, ItemType.SUITE, force=True)
+        # verify comps has 3 (previous 2 + 1 new_ experiments created at this point
+        self.assertEqual(len(experiments), 3)
+        # resume from iteration 0 commission step and run all the way through
+        self.calib_manager.run_calibration(directory=directory, resume=True, iteration=0, iter_step='commission',
+                                           loop=True)
+        self.assertEqual(self.calib_manager.current_iteration.iteration, 1)
+        self.assertEqual(self.calib_manager.iteration, 1)
+        experiments = self.platform.get_children(self.calib_manager.suite_id, ItemType.SUITE, force=True)
+        # verify comps has 5 experiments (previous 3 + 3 new_ experiments created at this point
+        self.assertEqual(len(experiments), 5)
+        # resume from iteration 1 analyze step and run all the way through
+        self.calib_manager.run_calibration(directory=directory, resume=True, iteration=0, iter_step='analyze',
+                                           loop=True)
+        self.assertEqual(self.calib_manager.current_iteration.iteration, 1)
+        experiments = self.platform.get_children(self.calib_manager.suite_id, ItemType.SUITE, force=True)
+        # verify comps has 6 experiments (previous 5 + 1 new_ experiment created at this point, since we only start from
+        # iter1 for new commssion
+        self.assertEqual(len(experiments),6)
 
     def test_dummy_calibra_manager_ll_all(self):
-        uniq_filename = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':',
-                                                                                                                '-')
+        date = datetime.datetime.now()
+        uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
         directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
+        self.calib_manager.name = self.case_name
         self.calib_manager.run_calibration(directory=directory)
         try:
             self.calib_manager.run_calibration(directory=directory, ll_all=True)
-        except:  # otherwise after generate ll_call_final.csv program exit(0)
+        except:  # otherwise after generate ll_call_final.csv program calls exit(0) which will throw exception
             self.assertTrue(
-                os.path.exists(os.path.join(directory, "test_dummy_calibration", "_plots", "ll_all_final.csv")))
+                os.path.exists(os.path.join(directory, self.calib_manager.name, "_plots", "ll_all_final.csv")))
