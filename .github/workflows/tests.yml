@@ -64,3 +64,13 @@ jobs:
         with:
           name: idmtools_calibra_test_results
           path: tests/integration/test_results.xml
+     - name: run idmtools_calibra algorithms tests
+        run: |
+          cd tests/algorithms
+          py.test -v --durations=3 --junitxml=test_results.xml
+      - name: Upload idmtools_calibra algorithms test results
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: idmtools_calibra_test_results
+          path: tests/algorithms/test_results.xml
