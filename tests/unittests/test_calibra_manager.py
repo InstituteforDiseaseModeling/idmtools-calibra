@@ -15,7 +15,7 @@ from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.rmse_site import RMSESite
-from tests.unittests import params
+import params
 
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
