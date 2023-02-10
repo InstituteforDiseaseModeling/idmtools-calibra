@@ -1,40 +1,48 @@
 import json
+import os
+import sys
+
 from emodpy.emod_task import EMODTask
 from idmtools.entities.experiment import Experiment
 from idmtools.builders import SimulationBuilder
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(CURRENT_DIR)
 import manifest 
 from emodpy.emod_task import EMODTask
 from settings import Settings
 import matplotlib
-matplotlib.use( "TkAgg" )
+#matplotlib.use( "TkAgg" )
 
 settings = Settings()
 
-def get_task():
+# NOTE: Any campaign parameter you want to calibrate must be in the build_camp param list
+def build_camp():
+    """
+    Build a campaign input file for the DTK using emod_api. 
+    """
+    import emod_api.campaign as camp
+    import emod_api.interventions.outbreak as ob 
+
+    camp.set_schema( manifest.schema_file )
+
+    # Seed the outbreak
+    event = ob.new_intervention( camp, timestep=1, cases=1 )
+    camp.add( event )
+
+    return camp
+
+def get_task( build_camp_fn=None ):
     def set_param_fn( config ):
-        #config.parameters.Simulation_Duration = 365.0
-        config.parameters.Simulation_Duration = 181.0
+        config.parameters.Simulation_Duration = 365.0
+        #config.parameters.Simulation_Duration = 730.0
         config.parameters.Base_Infectivity_Constant = 3.5 
         config.parameters.Enable_Demographics_Reporting = 0 
         config.parameters.Incubation_Period_Constant = 0
         config.parameters.Infectious_Period_Exponential = 4.0 
-        config.parameters.Base_Individual_Sample_Rate = 0.1 
+        config.parameters.Base_Individual_Sample_Rate = 0.1
         #config.parameters.Minimum_End_Time = 90
 
         return config
-
-    def build_camp():
-        """
-        Build a campaign input file for the DTK using emod_api. 
-        """
-        import emod_api.campaign as camp
-        import emod_api.interventions.outbreak as ob 
-
-        camp.set_schema( manifest.schema_file )
-        
-        event = ob.new_intervention( camp, timestep=1, cases=1 )
-        camp.add( event )
-        return camp
 
     import emod_generic.bootstrap as dtk
     dtk.setup( manifest.model_dl_dir )
@@ -60,6 +68,13 @@ def test_and_plot():
         a = finals["a"][0]
         b = finals["b"][0]
         c = finals["c"][0]
+        # print param names and values
+        for param in settings.CALIBRATION_PARAMETERS:
+            internal_name = param["Name"]
+            model_name = param["MapTo"]
+            value = finals[internal_name][0]
+            format_value = "{:.3f}".format( value )
+            print( f"{model_name} = {format_value}" )
 
     builder = SimulationBuilder()
     def update_sim_random_seed(simulation, value):
@@ -70,8 +85,8 @@ def test_and_plot():
         return {"Run_Number": value}
     builder.add_sweep_definition( update_sim_random_seed, range(10) )
 
-    task, platform = get_task()
     # create experiment from builder
+    task,platform=get_task()
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sir sweep") 
     experiment.run(wait_until_done=True, platform=platform)
     task.handle_experiment_completion( experiment )
