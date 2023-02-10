@@ -40,6 +40,9 @@ calibrate.py is run via:
 ```
 python calibrate.py
 ```
+You should see something like the following plot: ![](output.png)
+
+The scatterplot is the raw reference data. The red line is what calibra came up with. The green line is the result of running a LinearRegression from sklearn, for comparison.
 
 ##### What's Happening?
 Calibra runs as many iterations as you tell it and then stops. In each iteration, it selects N values for the input configuration parameters you've specified, where N is the number of samples you have also specified. The model you have told it to run will produce an output which will be compared to the reference and thus each simulation will be scored. Next values for each parameter will be selected based on a hill-climb optimization algorithm that seeks to reduce the measured error.
