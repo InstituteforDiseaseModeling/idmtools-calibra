@@ -13,11 +13,11 @@ import datetime
 from sklearn.metrics import mean_squared_error
 import math
 from idmtools_calibra.rmse_site import RMSESite
-from tests.integration.emod_sir.task import get_task
+from .emod_sir.task import get_task
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 
-from tests.integration.emod_sir import settings
+from .emod_sir import settings
 
 mysettings = settings.Settings()
 
@@ -25,21 +25,21 @@ mysettings = settings.Settings()
 class TestEMODSir(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        mysettings.LOCALE = "SlurmStage"
-        mysettings.N_ITERATIONS = 5
         # site we want to calibrate on - a core organization object for calibra
         cls.site = RMSESite(
             name='rmse_site',
             reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'output.csv')}
         )
         cls.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
-        task = get_task(mysettings)
+        task = get_task()
         calib_man = calib_app.init(mysettings, cls.site, task, platform=cls.platform)
-        cls.settings = mysettings
+
         cls.calibra_name = mysettings.CALIBRATION_NAME
-        uniq_filename = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':',
-                                                                                                                '_')
+
+        date = datetime.datetime.now()
+        uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
         print(uniq_filename)
+
         cls.directory = os.path.join(CURRENT_DIRECTORY, "emod_sir_calibra_result", uniq_filename)
         calib_app.go(calib_man, directory=cls.directory)
 
