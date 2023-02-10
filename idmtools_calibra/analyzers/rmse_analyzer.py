@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibrationAnalyzer
 
@@ -44,12 +45,20 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         return result
 
     @staticmethod
-    def _rmse(series1, series2):
-        return ((series1 - series2) ** 2).mean() ** 0.5
+    def _rmse(series1, series2, series3): # 3 is weights
+        return (((series1 - series2)*series3) ** 2).mean() ** 0.5
 
     @classmethod
     def rmse(cls, df, data_column, reference_column):
-        return cls._rmse(series1=df[data_column], series2=df[reference_column])
+        # optional third column for weighting. 
+        weights = np.ones(len(df[data_column]))
+        if 'weights' in df.columns:
+            weights = df['weights']
+            # normalize
+            weights *= (np.ones(len(weights)))*(1/sum(weights))
+
+
+        return cls._rmse(series1=df[data_column], series2=df[reference_column], series3=weights)
 
     def compare(self, sample, data_column, reference_column):
         # we need to now group by Sim_Id within sample, which lets us compute scores on a per-replicate basis
