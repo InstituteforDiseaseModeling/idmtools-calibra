@@ -1,5 +1,7 @@
 */COMPS_log.log
 */idmtools.log*
+COMPS_log.log
+idmtools.log
 */*_result/
 integration/model/
 algorithms/tmp/
