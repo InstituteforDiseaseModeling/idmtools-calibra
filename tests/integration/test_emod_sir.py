@@ -15,6 +15,7 @@ import math
 from idmtools_calibra.rmse_site import RMSESite
 from tests.integration.emod_sir import settings
 from tests.integration.emod_sir.task import get_task
+from tests.integration.helper import download_experiment_files, delete_experiments, get_output_data
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 
@@ -46,6 +47,11 @@ class TestEMODSir(unittest.TestCase):
         # uniq_filename = '2023-02-02_20_08_13.484256'
         # cls.directory = os.path.join(CURRENT_DIRECTORY, "emod_sir_calibra_result", uniq_filename)
         # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=4, iter_step='plot', loop=True)
+        cls.experiments = download_experiment_files(cls.platform, cls.directory, cls.calibra_name, "output.csv")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        delete_experiments(cls.experiments)
 
     def get_output_data(self, simulation):
         """
@@ -83,10 +89,9 @@ class TestEMODSir(unittest.TestCase):
 
                 # validate ll_all.csv is sorted with RMSE - Root Mean Square Error which means the top one is the best
                 # prediction against the real reference value
-                # first get simulation by id
                 sim_id = data[i][index_sim].replace("('", '').replace("',)", '')
-                simulation = self.platform.get_item(item_id=sim_id, item_type=ItemType.SIMULATION)
-                sim_output_production = self.get_output_data(simulation)
+                # Get 'value' column in simulation's output.csv from comps
+                sim_output_production = get_output_data(self.experiments, sim_id, 'value')
                 # Calculate RMSE for each simulation
                 rmse = math.sqrt(mean_squared_error(sim_output_production, reference_dict['value_reference']))
                 # save each rmse value to a list

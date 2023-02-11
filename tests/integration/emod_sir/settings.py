@@ -23,7 +23,7 @@ class Settings:
     # the number of times the algorithm will attempt to optimize the best-guess parameterization 
     N_ITERATIONS = 6
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
-    CALIBRATION_NAME = 'emod-sir'
+    CALIBRATION_NAME = 'test-emod-sir'
 
     """
     Calibration parameter specification

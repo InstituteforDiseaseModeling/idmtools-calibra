@@ -23,7 +23,7 @@ class Settings:
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
     N_ITERATIONS = 10
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
-    CALIBRATION_NAME = 'solar_optimtool_linear_model'
+    CALIBRATION_NAME = 'test_solar_optimtool_linear_model'
 
     """
     Calibration parameter specification

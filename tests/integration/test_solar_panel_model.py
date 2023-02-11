@@ -2,11 +2,7 @@
 import csv
 import json
 import os
-import sys
 import unittest
-
-import pandas as pd
-from idmtools.core import ItemType
 
 from examples.solar.solar_site import SolarSite
 from idmtools_calibra import calib_base_app as calib_app
@@ -16,6 +12,7 @@ from sklearn.metrics import mean_squared_error
 import math
 
 # to make access from command line
+from tests.integration.helper import download_experiment_files, delete_experiments, get_output_data
 from tests.integration.solar import settings
 
 
@@ -50,18 +47,11 @@ class TestSolarPanel(unittest.TestCase):
         # uniq_filename = '2023-02-02_09_03_40.161383'
         # cls.directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
         # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=4, iter_step='plot', loop=True)
+        cls.experiments = download_experiment_files(cls.platform, cls.directory, cls.calibra_name, "output.csv")
 
-    def get_output_data(self, simulation):
-        """
-        Return simulation's output/output.csv 'production' column
-        """
-        files = self.platform.get_files(item=simulation, files=['output/output.csv'])
-        output_content = files['output/output.csv'].decode('utf-8')
-        l = list(output_content.split("\n"))  # convert output content to list
-        df = pd.DataFrame([x.split(',') for x in l])  # convert list to dataframe
-        df.columns = df.iloc[0]  # set df column names
-        df = df[1:]  # set df content data
-        return df['production']
+    @classmethod
+    def tearDownClass(cls) -> None:
+        delete_experiments(cls.experiments)
 
     def test_regression_fitness(self):
         """
@@ -86,10 +76,9 @@ class TestSolarPanel(unittest.TestCase):
 
                 # validate ll_all.csv is sorted with RMSE - Root Mean Square Error which means the top one is the best
                 # prediction against the real reference value
-                # first get simulation by id
                 sim_id = data[i][index_sim].replace("('", '').replace("',)", '')
-                simulation = self.platform.get_item(item_id=sim_id, item_type=ItemType.SIMULATION)
-                sim_output_production = self.get_output_data(simulation)
+                # Get 'production' column in simulation's output.csv from comps
+                sim_output_production = get_output_data(self.experiments, sim_id, 'production')
                 # Calculate RMSE for each simulation
                 rmse = math.sqrt(mean_squared_error(sim_output_production, reference_dict))
                 # save each rmse value to a list
