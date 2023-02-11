@@ -1,4 +1,5 @@
-import manifest
+from tests.integration.emod_hint import manifest
+
 
 class Settings:
     #

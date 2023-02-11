@@ -1,4 +1,5 @@
-import manifest
+from tests.integration.emod_hint import manifest
+
 
 def set_param_fn( config ):
     #config.parameters.Simulation_Duration = 365.0

@@ -13,11 +13,10 @@ import datetime
 from sklearn.metrics import mean_squared_error
 import math
 from idmtools_calibra.rmse_site import RMSESite
-from .emod_sir.task import get_task
+from tests.integration.emod_sir import settings
+from tests.integration.emod_sir.task import get_task
 
 CURRENT_DIRECTORY = os.path.dirname(__file__)
-
-from .emod_sir import settings
 
 mysettings = settings.Settings()
 

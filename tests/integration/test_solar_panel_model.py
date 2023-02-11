@@ -7,6 +7,8 @@ import unittest
 
 import pandas as pd
 from idmtools.core import ItemType
+
+from examples.solar.solar_site import SolarSite
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
 import datetime
@@ -14,10 +16,11 @@ from sklearn.metrics import mean_squared_error
 import math
 
 # to make access from command line
+from tests.integration.solar import settings
+
+
 CURRENT_DIRECTORY = os.path.dirname(__file__)
-sys.path.append(os.path.join(CURRENT_DIRECTORY, "..", "..", "examples"))
-from solar import settings
-from solar.solar_site import SolarSite
+
 
 mysettings = settings.Settings()
 
@@ -25,20 +28,20 @@ mysettings = settings.Settings()
 class TestSolarPanel(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        mysettings.LOCALE = "SlurmStage"
-        mysettings.N_ITERATIONS = 5
-        mysettings.MODEL_DRIVER = os.path.join('..', '..', 'examples', 'solar', 'bin', 'linear_model.py')
         # site we want to calibrate on - a core organization object for calibra
         cls.site = SolarSite(
             name='solar_site',
-            reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'production.csv')}
+            reference_sources={'production': os.path.join(CURRENT_DIRECTORY, mysettings.REFERENCE_DATA_DIR, 'production.csv')}
         )
         cls.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
+        # these 2 lines are important. Otherwise calibra_base_app may pick up values from previous test
+        calib_app.campaign_builder_fn = None
+        calib_app.demog_builder_fn = None
         calib_man = calib_app.init(mysettings, cls.site, platform=cls.platform)
         cls.settings = mysettings
         cls.calibra_name = mysettings.CALIBRATION_NAME
-        uniq_filename = str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':',
-                                                                                                                '_')
+        date = datetime.datetime.now()
+        uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
         print(uniq_filename)
         cls.directory = os.path.join(CURRENT_DIRECTORY, "calibra_result", uniq_filename)
         calib_app.go(calib_man, directory=cls.directory)

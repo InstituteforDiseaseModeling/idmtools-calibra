@@ -1,29 +1,29 @@
-from tests.integration.emod_sir import manifest_sir as manifest
+import os
+CURRENT_DIRECTORY = os.path.dirname(__file__)
+
 
 class Settings:
     #
     # Run environment controls
     #
     LOCALE = 'SlurmStage'
-    MODEL_DRIVER = manifest.eradication_path
-    REFERENCE_DATA_DIR = manifest.REFERENCE_DATA_DIR
+    MODEL_DRIVER = os.path.join(CURRENT_DIRECTORY, '..', '..', '..', 'examples', 'solar', 'bin', 'linear_model.py')
+    CONFIG_FILENAME = 'config.json'
+    REFERENCE_DATA_DIR = os.path.join(CURRENT_DIRECTORY, '..', '..', '..', 'examples', 'solar', 'reference')
     INPUT_DIRS = []
-    
-    SIF = manifest.sif
-    SIF_FILENAME = manifest.sif_filename
 
     #
     # Calibration controls
     #
 
     # The number of parameter sets/samples to run in each calibration iteration
-    N_SAMPLES = 25
+    N_SAMPLES = 20
     # number of randomly seeded simulations per parameter set/sample
-    N_REPLICATES = 1 # 5
-    # the number of times the algorithm will attempt to optimize the best-guess parameterization 
-    N_ITERATIONS = 6
+    N_REPLICATES = 1
+    # the number of times the algorithm will attempt to optimize the best-guess parameterization
+    N_ITERATIONS = 10
     # Calibration state/results will be kept in a directory by this name in the same directory as this file
-    CALIBRATION_NAME = 'emod-sir'
+    CALIBRATION_NAME = 'solar_optimtool_linear_model'
 
     """
     Calibration parameter specification
@@ -39,35 +39,28 @@ class Settings:
     Min: The minimum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
     Max: The maximum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
 
-    The model in this example has two parameters, 'a' and 'b'. a -> beta in SIR and b->gamme in SIR.
-    Trying to rediscover values of: beta = 0.2, gamma = 0.1
+    The model in this example has two parameters, 'a' and 'b' used in equation: y = a * x + b, where x is time and y is
+    solar power production.
     """
     CALIBRATION_PARAMETERS = [
         {
-            'Name': 'a',
+            'Name': 'linear-coefficient',
             'Dynamic': True,
-            'MapTo': 'Base_Infectivity_Constant',
-            'Guess': 5,
+            'MapTo': 'a',
+            'Guess': 50,
             'Min': 0,
-            'Max': 10.0
+            'Max': 400
         },
         {
-            'Name': 'b',
+            'Name': 'constant',
             'Dynamic': True,
-            'MapTo': 'Infectious_Period_Exponential',
-            'Guess': 5,
-            'Min': 0.1,
-            'Max': 10
-        },
-        {
-            'Name': 'c',
-            'Dynamic': True,
-            'MapTo': 'Incubation_Period_Constant',
-            'Guess': 5,
+            'MapTo': 'b',
+            'Guess': 500,
             'Min': 0,
-            'Max': 20
+            'Max': 2000
         }
     ]
     volume_fraction = 0.002
     num_to_plot = 5
+
 

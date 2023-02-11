@@ -4,7 +4,7 @@ import sys
 from emodpy.emod_task import EMODTask
 
 sys.path.append(os.path.dirname(__file__))
-import manifest
+import manifest_sir as manifest
 import settings
 
 settings = settings.Settings()
