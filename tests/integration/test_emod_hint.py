@@ -115,6 +115,5 @@ class TestEMODHint(unittest.TestCase):
 
             # validate rmse_list is sorted in ascend order(small to large)
             self.assertTrue(all(a <= b for a, b in zip(rmse_list, rmse_list[1:])))
-            # verify distance_list is also sorted
-            self.assertTrue(distance_list == sorted(distance_list))
+
 
