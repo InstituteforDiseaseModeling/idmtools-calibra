@@ -6,6 +6,8 @@ from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibration
 
 class RMSEAnalyzer(BaseCalibrationAnalyzer):
 
+    _user_cost_fn = None
+
     # Setting up the reference data for use in the analyzer and identifying the model output file to compare against
     def __init__(
         self, site, dependent_column, independent_column, output_filename="output.csv"
@@ -45,8 +47,15 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         return result
 
     @staticmethod
+    def set_custom_cost_fn( user_cost_fn ):
+        RMSEAnalyzer._user_cost_fn = user_cost_fn 
+
+    @staticmethod
     def _rmse(series1, series2, series3): # 3 is weights
-        return (((series1 - series2)*series3) ** 2).mean() ** 0.5
+        if RMSEAnalyzer._user_cost_fn:
+            return RMSEAnalyzer._user_cost_fn( series1, series2, series3 )
+        else:
+            return (((series1 - series2)*series3) ** 2).mean() ** 0.5
 
     @classmethod
     def rmse(cls, df, data_column, reference_column):
