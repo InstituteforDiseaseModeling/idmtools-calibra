@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 
 from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibrationAnalyzer
 
@@ -55,12 +56,13 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         if RMSEAnalyzer._user_cost_fn:
             return RMSEAnalyzer._user_cost_fn( series1, series2, series3 )
         else:
-            return (((series1 - series2)*series3) ** 2).mean() ** 0.5
+            return math.sqrt( np.average( series1-series2 ) ** 2, weights=series3 )
+            # alternative: sklearn.metrics.mean_squared_error( series1, series2, weights=series3, squared=False )
+            # but we would be introducing an sklearn dependency to calibra for the first time.
 
-    @classmethod
     def rmse(cls, df, data_column, reference_column):
         # optional third column for weighting. 
-        weights = np.ones(len(df[data_column]))
+        weights = np.ones_like(df[data_column])
         if 'weights' in df.columns:
             weights = df['weights']
             # normalize
