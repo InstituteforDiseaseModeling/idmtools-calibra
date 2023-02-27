@@ -67,8 +67,8 @@ autodoc_mock_imports = ['history_matching',
                         'idmtools_calibra.output.output_parser',
                         'simtools',
                         'dtk',
-                        'idmtools_calibra.interventions',
-                        'idmtools_calibra.utilities']
+                        'idmtools_calibra.interventions']
+                        #'idmtools_calibra.utilities']
 
 
 napoleon_google_docstring = True
@@ -110,7 +110,7 @@ version = idmtools_calibra.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

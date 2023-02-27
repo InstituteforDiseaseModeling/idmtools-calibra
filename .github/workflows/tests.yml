@@ -1,51 +1,76 @@
- This workflows will install idmtools_calibra from setup-dev then run tests with curl command
-#
-#curl command from your cmd:
-# curl -XPOST -u "username:githubPAT" -H "Accept: application/vnd.github.everest-preview+json" \
-# -H "Content-Type: application/json" \
-# --data "{\"event_type\": \"run_setup_dev_test\"}" \
-#  https://api.github.com/repos/InstituteforDiseaseModeling/idmtools_calibra/dispatches
-#
-# Note, this test will checkout 'dev' branch
-
-name: "Install with setup-dev and run all test"
-
+name: "run_bootstrap_and_test"
+#on: [push, pull_request]
 on:
- repository_dispatch:
-  types: [run_setup_dev_test]
- pull_request:
-   types: [opened, edited, reopened]
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+#  pull_request:
+#    types: [ opened, edited, reopened ]
 
 jobs:
-  install-setup-dev-run-all-test:
-    runs-on: ubuntu-latest
+  run_bootstrap_and_test:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [ ubuntu-latest ]
+        python-version: [3.9]
+    env:
+      PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
+      PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
-        with:
-          ref: dev
-      - name: Set up Python ${{ matrix.python-version  }}
-        uses: actions/setup-python@v1
+      - name: ${{ matrix.os }} Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
+          architecture: x64
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
       - name: Install Python dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install make
-          pip install black flake8
-      - name: Run setup-dev
+          python -m pip install --upgrade pip
+          pip install idm-buildtools flake8 wheel matplotlib sqlalchemy black --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+      - name: Run bootstrap
         run: |
-          make setup-dev
-      - name: run idmtools_calibra tests
+          python .dev_scripts/bootstrap.py
+      - name: install emodpy dependencies
         run: |
-            py.test --durations=3 -v --junitxml=test_results.xml
-      - name: Upload idmtools_calibra test results
+          pip install -r test_requirements.txt
+      - name: login to comps2
+        run: |
+          python .dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
+        env:
+            COMPS_PASS: ${{ secrets.COMPS_PASSWORD }}
+      - name: run idmtools_calibra unittests
+        run: |
+            cd tests/unittests
+            py.test -v --durations=3 --junitxml=test_results.xml
+      - name: Upload idmtools_calibra unittest results
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: idmtools_calibra_test_results
-          path: tests/test_results.xml
+          path: tests/unittests/test_results.xml
+      - name: run idmtools_calibra integration tests
+        run: |
+          cd tests/integration
+          py.test -v --durations=3 --junitxml=test_results.xml
+      - name: Upload idmtools_calibra integration test results
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: idmtools_calibra_test_results
+          path: tests/integration/test_results.xml
+      - name: run idmtools_calibra algorithms tests
+        run: |
+          cd tests/algorithms
+          py.test -v --durations=3 --junitxml=test_results.xml
+      - name: Upload idmtools_calibra algorithms test results
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: idmtools_calibra_test_results
+          path: tests/algorithms/test_results.xml

@@ -2,8 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """The setup script for the itertool"""
+import pkg_resources
 from setuptools import setup, find_packages
 import sys
+
+# enforce a minimum pip version to avoid a bug in some versions of pip's dependency resolver
+pkg_resources.require(['pip >= 21.3.1'])
 
 with open('requirements.txt') as requirements_file:
     lines = requirements_file.read().strip().split("\n")
@@ -65,5 +69,5 @@ setup(
     python_requires='>3.6.*, !=3.7.0, !=3.7.1, !=3.7.2',
     test_suite='tests',
     extras_require=extras,
-    version='1.0.7'
+    version='1.0.8'
 )

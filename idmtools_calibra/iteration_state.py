@@ -10,8 +10,8 @@ from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
 from idmtools_calibra.utilities.display import verbose_timedelta
 
-
 logger = getLogger("Calibration")
+user_logger = getLogger('user')
 
 
 class IterationState:
@@ -285,7 +285,7 @@ class IterationState:
             if experiment.any_failed and not experiment.done:
                 # Kill the remaining simulations
                 print("\nOne or more simulations failed. Calibration cannot continue. Exiting...")
-                self.kill()
+                self.cancel()
                 exit()
 
             # Test if we are all done
@@ -303,27 +303,11 @@ class IterationState:
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
 
-    def kill(self):
-        def experiment_is_running(e):
-            from COMPS.Data.Simulation import SimulationState
-            for sim in e.get_simulations():
-                if sim.state not in (SimulationState.Succeeded, SimulationState.Failed,
-                                     SimulationState.Canceled, SimulationState.Created,
-                                     SimulationState.CancelRequested):
-                    return True
-            return False
-
-        from idmtools.core import ItemType
-        comps_experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT, raw=True)
-        if comps_experiment and experiment_is_running(comps_experiment):
-            comps_experiment.cancel()
-
-        logger.info("Waiting to complete cancellation...")
-        self.wait_for_finished()
+    def cancel(self):
+        self.platform._experiments.platform_cancel(self.experiment_id)
 
         # Print confirmation
-        logger.info("Calibration %s successfully cancelled!" % self.calibration_name)
-        print("Calibration %s successfully cancelled!" % self.calibration_name)
+        user_logger.info("Have submitted cancellation for Calibration %s" % self.calibration_name)
 
     @property
     def iteration_directory(self):
