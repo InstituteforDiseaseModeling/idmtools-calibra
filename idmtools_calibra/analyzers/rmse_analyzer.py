@@ -65,9 +65,6 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         weights = np.ones_like(df[data_column])
         if 'weights' in df.columns:
             weights = df['weights']
-            # normalize
-            weights *= (np.ones(len(weights)))*(1/sum(weights))
-
 
         return cls._rmse(series1=df[data_column], series2=df[reference_column], series3=weights)
 
