@@ -3,8 +3,9 @@ import csv
 import json
 import os
 import unittest
+import pandas as pd
 
-from examples.solar.solar_site import SolarSite
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as SolarSite
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
 import datetime
@@ -61,7 +62,7 @@ class TestSolarPanel(unittest.TestCase):
         Although automation can not tell which iteration to stop, but at least can validate top one is the best
         https://towardsdatascience.com/what-are-the-best-metrics-to-evaluate-your-regression-model-418ca481755b
         """
-        reference_dict = self.site.reference_dict['production']['production_reference']
+        reference_dict = self.site.get_reference_data()
         ll_all_path = os.path.join(self.directory, self.calibra_name, "_plots", "LL_all.csv")
         with open(ll_all_path, newline='') as f:
             reader = csv.reader(f)
@@ -80,7 +81,8 @@ class TestSolarPanel(unittest.TestCase):
                 # Get 'production' column in simulation's output.csv from comps
                 sim_output_production = get_output_data(self.experiments, sim_id, 'production')
                 # Calculate RMSE for each simulation
-                rmse = math.sqrt(mean_squared_error(sim_output_production, reference_dict))
+                ref = pd.Series( data=reference_dict['production_reference'] )
+                rmse = math.sqrt(mean_squared_error(sim_output_production, ref))
                 # save each rmse value to a list
                 rmse_list.append(rmse)
             # validate rmse_list is sorted in ascend order(small to large)

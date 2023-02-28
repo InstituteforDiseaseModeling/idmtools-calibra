@@ -12,7 +12,7 @@ from idmtools.core.platform_factory import Platform
 import datetime
 from sklearn.metrics import mean_squared_error
 import math
-from idmtools_calibra.rmse_site import RMSESite
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 from tests.integration.emod_sir import settings
 from tests.integration.emod_sir.task import get_task
 from tests.integration.helper import download_experiment_files, delete_experiments, get_output_data

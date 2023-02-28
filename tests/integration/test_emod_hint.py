@@ -13,7 +13,7 @@ from idmtools.core.platform_factory import Platform
 import datetime
 from sklearn.metrics import mean_squared_error
 import math
-from idmtools_calibra.rmse_site import RMSESite
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 
 from tests.integration.emod_hint import model, settings
 from tests.integration.emod_hint.task import  get_task
@@ -124,7 +124,7 @@ class TestEMODHint(unittest.TestCase):
             reference_sources={'production': os.path.join(CURRENT_DIRECTORY, 'emod_hint', 'reference', 'output_weights.csv')}
         )
         self.run_calibra(site)
-        reference_dict = site.reference_dict['production']
+        reference_dict = site.get_reference_data()
         ll_all_path = os.path.join(self.directory, self.calibra_name, "_plots", "LL_all.csv")
         with open(ll_all_path, newline='') as f:
             reader = csv.reader(f)
