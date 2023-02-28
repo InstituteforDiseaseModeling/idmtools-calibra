@@ -91,7 +91,7 @@ class TestEMODHint(unittest.TestCase):
             reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'output.csv')}
         )
         self.run_calibra(site)
-        reference_dict = site.reference_dict['production']
+        reference_dict = site.get_reference_data()
         ll_all_path = os.path.join(self.directory, self.calibra_name, "_plots", "LL_all.csv")
         with open(ll_all_path, newline='') as f:
             reader = csv.reader(f)
@@ -145,7 +145,7 @@ class TestEMODHint(unittest.TestCase):
                 sim_output_value = get_output_data(self.experiments, sim_id, 'value')
                 # Calculate RMSE for each simulation with weights
                 # get raw weight
-                w = site.reference_dict['production']['weights']
+                w = reference_dict['weights']
                 # # normalized weights. looks like no need to normalized weight for mean_squared_error
                 # w *= (np.ones(len(w)))*(1/sum(w))
                 rmse = math.sqrt(mean_squared_error(sim_output_value, reference_dict['value_reference'], sample_weight=w))

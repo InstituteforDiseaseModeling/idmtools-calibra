@@ -73,7 +73,7 @@ class TestEMODSir(unittest.TestCase):
         Although automation can not tell which iteration to stop, but at least can validate top one is the best
         https://towardsdatascience.com/what-are-the-best-metrics-to-evaluate-your-regression-model-418ca481755b
         """
-        reference_dict = self.site.reference_dict['production']
+        reference_dict = self.site.get_reference_data()
         ll_all_path = os.path.join(self.directory, self.calibra_name, "_plots", "LL_all.csv")
         with open(ll_all_path, newline='') as f:
             reader = csv.reader(f)
