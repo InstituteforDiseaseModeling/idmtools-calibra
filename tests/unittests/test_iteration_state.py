@@ -17,7 +17,7 @@ from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools_calibra.process_state import StatusPoint
-from idmtools_calibra.rmse_site import RMSESite
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 
 
 class TestIterationState(unittest.TestCase):

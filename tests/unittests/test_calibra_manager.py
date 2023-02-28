@@ -14,7 +14,7 @@ from idmtools_calibra.calib_manager import CalibManager
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools_calibra.process_state import StatusPoint
-from idmtools_calibra.rmse_site import RMSESite
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 import params
 
 
