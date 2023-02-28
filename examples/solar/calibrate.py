@@ -2,7 +2,7 @@
 import os
 
 from idmtools_calibra import calib_base_app as calib_app
-from solar_site import SolarSite 
+from idmtools_calibra.rmse_site import RMSESingleSite 
 import settings
 
 mysettings = settings.Settings()
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     matplotlib.use( "TkAgg" )
     import plot
     # site we want to calibrate on - a core organization object for calibra
-    site = SolarSite(
+    site = RMSESingleSite(
         name='solar_site',
         reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'production.csv')}
     )

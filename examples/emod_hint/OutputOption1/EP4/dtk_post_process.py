@@ -2,6 +2,9 @@
 
 import json
 import os
+import emod_api
+import pandas
+import numpy
 
 def application( output_path ):
     # Calculate mean prevelance over final 60 days

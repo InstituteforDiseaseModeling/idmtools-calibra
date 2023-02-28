@@ -3,6 +3,7 @@ import sys
 from functools import partial
 
 from idmtools_calibra.rmse_site import RMSESite 
+from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer 
 from idmtools_calibra import calib_base_app as calib_app
 
 from settings import Settings
@@ -50,6 +51,12 @@ if __name__ == "__main__":
     run_calib_args = {
         "calib_manager": calib_man
     }
+    def lse_cost_fn( series1, series2, series3 ):
+        #return (((series1 - series2)*series3) ** 2).mean() ** 0.5
+        return (((series1 - series2) ** 2)*series3).sum()
+
+    RMSEAnalyzer.set_custom_cost_fn( lse_cost_fn )
+
     calib_app.go( calib_man )
 
     tap.test_and_plot()

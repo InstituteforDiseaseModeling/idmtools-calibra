@@ -7,17 +7,16 @@ from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer
 # analyzers will be used for scoring our calibration simulations.
 
 
-class RMSESite(CalibSite):
-    def __init__(self, name, reference_sources):
-        self.reference_dict = {}
-        for channel, file_path in reference_sources.items():
-            self.reference_dict[channel] = pd.read_csv(file_path)
-            self.ind_col = self.reference_dict[channel].columns[0]
-            self.dep_col = self.reference_dict[channel].columns[1]
+class RMSESiteSingleChannel(CalibSite):
+    def __init__(self, name, reference_sources={'just_one': 'reference/output.csv'}):
+        one_key = list(reference_sources.keys())[0]
+        self.reference = pd.read_csv(reference_sources[one_key])
+        self.ind_col = self.reference.columns[0]
+        self.dep_col = self.reference.columns[1]
         super().__init__(name=name)
 
-    def get_reference_data(self, reference_type):
-        return self.reference_dict[reference_type]
+    def get_reference_data(self, reference_type=None):
+        return self.reference
 
     def get_analyzers(self):
         return [

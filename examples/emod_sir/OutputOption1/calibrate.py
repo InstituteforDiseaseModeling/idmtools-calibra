@@ -1,7 +1,7 @@
 import os
 import sys
 
-from idmtools_calibra.rmse_site import RMSESite 
+from idmtools_calibra.rmse_site import RMSESingleSite as RMSESite
 from idmtools_calibra import calib_base_app as calib_app
 
 from settings import Settings

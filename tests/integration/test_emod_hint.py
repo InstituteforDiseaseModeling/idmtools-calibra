@@ -121,7 +121,7 @@ class TestEMODHint(unittest.TestCase):
     def test_emod_hint_with_weights(self):
         site = RMSESite(
             name='rmse_site',
-            reference_sources={'production': os.path.join('emod_hint', 'reference', 'output_weights.csv')}
+            reference_sources={'production': os.path.join(CURRENT_DIRECTORY, 'emod_hint', 'reference', 'output_weights.csv')}
         )
         self.run_calibra(site)
         reference_dict = site.reference_dict['production']
