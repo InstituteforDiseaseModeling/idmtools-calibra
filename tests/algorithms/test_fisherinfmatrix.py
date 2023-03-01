@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 import matplotlib as plt
+import pytest
 from matplotlib.patches import Ellipse
 
 from idmtools_calibra.algorithms.fisher_inf_matrix import compute_fisher_inf_matrix, trunc_gauss
@@ -46,7 +47,7 @@ def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
     ax.add_artist(ellip)
     return ellip
 
-
+@pytest.mark.skip("missing data")
 class TestStuff(unittest.TestCase):
     def test_a(self):
         center_point = np.array([0.08, -0.92, .92])

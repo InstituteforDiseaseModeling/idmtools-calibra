@@ -1,0 +1,17 @@
+#!/usr/bin/python
+
+import json
+import os
+
+def application( output_path ):
+    # Calculate mean prevelance over final 60 days
+    with open( os.path.join( output_path, "InsetChart.json" ) ) as icj_fp:
+        prev = json.loads( icj_fp.read() )["Channels"]["Infected"]["Data"]
+    result = 0
+    cum = 0 
+    for idx in range( 305,365,1 ):
+        cum += prev[idx]
+    result = cum / 60
+    with open( os.path.join( output_path, "output.csv" ), "w" ) as calib_out_fp:
+        calib_out_fp.write( "metric,value\n" )
+        calib_out_fp.write( f"mean_prev,{result}\n" )

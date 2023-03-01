@@ -1,209 +1,29 @@
-# Execute directly:
-# python calibrate.py
-
+#!/usr/bin/env python
 import os
-from pathlib import Path
-import sys
 
-from idmtools.assets import AssetCollection
-from idmtools_calibra.calib_manager import CalibManager
-from idmtools_calibra.algorithms.optim_tool import OptimTool
-from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
-from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
-from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
-from idmtools.core.platform_factory import Platform
-from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
-import matplotlib
-matplotlib.use( "TkAgg" )
-import matplotlib.pyplot as plt
-import plot
+from idmtools_calibra import calib_base_app as calib_app
+from idmtools_calibra.rmse_site import RMSESingleSite 
+import settings
 
-sys.path.append(os.getcwd())
-from solar_site import SolarSite
-
-
-#
-# Run environment controls
-#
-
-
-LOCALE = 'CALCULON'
-MODEL_DRIVER = Path('bin', 'linear_model.py')
-CONFIG_FILENAME = 'config.json'
-REFERENCE_DATA_DIR = 'reference'
-INPUT_DIRS = []
-
-#
-# Calibration controls
-#
-
-# The number of parameter sets/samples to run in each calibration iteration
-N_SAMPLES = 20
-# number of randomly seeded simulations per parameter set/sample
-N_REPLICATES = 1
-# the number of times the algorithm will attempt to optimize the best-guess parameterization
-N_ITERATIONS = 10
-# Calibration state/results will be kept in a directory by this name in the same directory as this file
-CALIBRATION_NAME = 'solar_optimtool_linear_model'
-
-"""
-Calibration parameter specification
-
-Dynamic parameters are those that calibra can use to explore parameter space during calibration, non-dynamic parameters
-are simply overrides of model parameters.
-
-Name: Human readable name of the parameter to utilize
-Dynamic: True/False, whether this parameter can be altered by the calibration (False still overrides input files)
-MapTo: actual model parameter name to use. If not specified, the map_sample_to_model_input method below will have to
-  handle the (more complicated) mapping of this parameter to actual model parameter(s)
-Guess: Initial value for parameter in calibration
-Min: The minimum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
-Max: The maximum value the parameter can be in the calibration (if Dynamic is True) (required even if not Dynamic)
-
-The model in this example has two parameters, 'a' and 'b' used in equation: y = a * x + b, where x is time and y is
-solar power production.
-"""
-CALIBRATION_PARAMETERS = [
-    {
-        'Name': 'linear-coefficient',
-        'Dynamic': True,
-        'MapTo': 'a',
-        'Guess': 50,
-        'Min': 0,
-        'Max': 400
-    },
-    {
-        'Name': 'constant',
-        'Dynamic': True,
-        'MapTo': 'b',
-        'Guess': 500,
-        'Min': 0,
-        'Max': 2000
-    }
-]
-
-# the object representing the resource we will use for running simulations
-platform = Platform(LOCALE)
-
-# If any directories of files were specified to be added as assets of the simulations, add them now.
-assets = AssetCollection()
-for directory in INPUT_DIRS:
-    assets.add_directory(directory, relative_path=os.path.basename(directory))
-
-# The task object defines what to run, how, and what assets will be associated with an experiment of simulations
-# Each calibration iteration will run one experiment (group of simulations)
-task = JSONConfiguredPythonTask(script_path=str(MODEL_DRIVER), common_assets=assets,
-                                config_file_name=CONFIG_FILENAME)
-
-# site we want to calibrate on - a core organization object for calibra
-site = SolarSite(name='solar_site',
-                 reference_sources={'production': os.path.join(REFERENCE_DATA_DIR, 'production.csv')})
-
-# The default plotters used in an Optimization with OptimTool
-plotters = [LikelihoodPlotter(combine_sites=True),
-            SiteDataPlotter(num_to_plot=5, combine_sites=True),
-            OptimToolPlotter()  # OTP must be last because it calls gc.collect()
-            ]
-
-
-def constrain_sample(sample):
-    """
-    This function is called on every samples and allow the user to edit them before they are passed
-    to the map_sample_to_model_input function.
-    It is useful to round some parameters as demonstrated below.
-    Can do much more here, e.g. for
-    # Clinical Fever Threshold High <  MSP1 Merozoite Kill Fraction
-    if 'Clinical Fever Threshold High' and 'MSP1 Merozoite Kill Fraction' in sample:
-        sample['Clinical Fever Threshold High'] = \
-            min( sample['Clinical Fever Threshold High'], sample['MSP1 Merozoite Kill Fraction'] )
-    You can omit this function by not specifying it in the OptimTool constructor call below.
-    Args:
-        sample: The sample coming from the next point algorithm
-
-    Returns: The sample with constrained values
-
-    """
-    return sample
-
-
-def map_sample_to_model_input(simulation, sample):
-    """
-    This method maps the samples generated by the next point algorithm to the model inputs (via the simulation object).
-    All parameters specified for dynamic calibration (above) that do not have a MapTo value must have associated mapping
-        logic in this method.
-    Args:
-        simulation: idmtools simulation
-        sample: The sample containing a values for all the params. e.g. {'Clinical Fever Threshold High':1, ... }
-
-    Returns: A dictionary containing the tags that will be attached to the simulation
-    """
-
-    tags = {}
-    for p in CALIBRATION_PARAMETERS:
-        if 'MapTo' not in p:
-            raise Exception('Calibration parameter dicts must include a MapTo (model param name) entry. Missing from parameter: %s' % p['Name'])
-        if p['Name'] not in sample:
-            print('Warning: %s not in sample, perhaps resuming previous iteration' % p['Name'])
-            continue
-        value = sample.pop(p['Name'])
-        tags.update(simulation.task.set_parameter(p['MapTo'], value))
-
-    for name, value in sample.items():
-        print('UNUSED PARAMETER:' + name)
-    assert (len(sample) == 0)  # All params used
-
-    return tags
-
-
-# desired fraction of N-sphere area to unit cube area for numerical derivative (automatic radius scaling with N)
-volume_fraction = 0.002
-n_dynamic_parameters = len([p for p in CALIBRATION_PARAMETERS if p['Dynamic']])
-
-if n_dynamic_parameters == 0:
-    warning_note = \
-        """
-        /!\\ WARNING /!\\ OptimTool requires at least one dynamic parameter ('Dynamic' set to True). Exiting ...                  
-        """
-    print(warning_note)
-    exit()
-
-r = OptimTool.get_r(n_dynamic_parameters, volume_fraction)
-
-# Here we combine all the inputs above to configure OptimTool (our next point algorithm) and the CalibManager (the
-# object that will drive the calibration).
-optimtool = OptimTool(CALIBRATION_PARAMETERS,
-                      constrain_sample,
-                      rsquared_thresh=0.81,
-                      mu_r=r,  # <-- radius for numerical derivatve. CAREFUL not to go too small with integer parameters
-                      sigma_r=r / 10.,  # <-- stdev of radius
-
-                      # this many samples will be repetitions of the existing best-sample (with
-                      # different run numbers)
-                      center_repeats=2,
-
-                      # Samples per iteration, includes center repeats.
-                      # Actual number of sims run is this number times number of replicates.
-                      samples_per_iteration=N_SAMPLES
-                      )
-
-calib_manager = CalibManager(name=CALIBRATION_NAME,
-                             task=task,
-                             map_sample_to_model_input_fn=map_sample_to_model_input,
-                             sites=[site],
-                             next_point=optimtool,
-                             sim_runs_per_param_set=N_REPLICATES,
-                             # <-- Number of times to replicate the center (current guess). For comparing intrinsic and extrinsic variability.
-                             max_iterations=N_ITERATIONS,  # <-- number of iterations to run
-                             plotters=plotters)
-
-
-# Required variable/dict in calibration scripts
-run_calib_args = {
-    "calib_manager": calib_manager
-}
+mysettings = settings.Settings()
 
 if __name__ == "__main__":
-    # Here we actually execute the calibration
-    calib_manager.platform = platform
-    calib_manager.run_calibration()
-    plot.plot(CALIBRATION_NAME)
+    import matplotlib
+    matplotlib.use( "TkAgg" )
+    import plot
+    # site we want to calibrate on - a core organization object for calibra
+    site = RMSESingleSite(
+        name='solar_site',
+        reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'production.csv')}
+    )
+    # Next two lines aren't required but default priority is Lowest so your jobs can get stuck.
+    from idmtools.core.platform_factory import Platform
+    platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Normal")
+    calib_man = calib_app.init( mysettings, site, platform=platform )
+
+    # Required variable/dict in calibration scripts
+    run_calib_args = {
+        "calib_manager": calib_man
+    }
+    calib_app.go( calib_man )
+    plot.plot(mysettings.CALIBRATION_NAME)
