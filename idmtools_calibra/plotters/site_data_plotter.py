@@ -90,7 +90,7 @@ class SiteDataPlotter(BasePlotter):
         for iteration, iter_samples in samples.groupby('iteration'):
             analyzer_data = self.get_analyzer_data(iteration, site_name, analyzer_name)
 
-            for rank, sample in iter_samples['sample'].iteritems():  # index is rank
+            for rank, sample in iter_samples['sample'].items():  # index is rank
                 fname = os.path.join(self.directory, f'{site_name}_{analyzer_name}', f'rank{rank:d}')
                 fig = plt.figure(fname, figsize=(8, 6))
 
@@ -115,7 +115,7 @@ class SiteDataPlotter(BasePlotter):
         for iteration, iter_samples in samples.groupby('iteration'):
             analyzer_data = self.get_analyzer_data(iteration, site_name, analyzer_name)
             results_by_sample = iter_samples.reset_index().set_index('sample')['total']
-            for sample, result in results_by_sample.iteritems():
+            for sample, result in results_by_sample.items():
                 analyzer.plot_comparison(fig, analyzer_data['samples'][sample], fmt='-',
                                          color=cm.Blues((result - cmin) / (cmax - cmin)), alpha=0.5, linewidth=0.5)
 
@@ -161,7 +161,7 @@ class SiteDataPlotter(BasePlotter):
         :return:
         """
         for iteration, iter_samples in samples.groupby('iteration'):
-            for rank, sample in iter_samples['sample'].iteritems():  # index is rank
+            for rank, sample in iter_samples['sample'].items():  # index is rank
                 fname = os.path.join(self.directory, site_analyzer, 'rank%d' % rank)
                 plot_path = fname + '.pdf'
                 if os.path.exists(plot_path):

@@ -434,7 +434,7 @@ class OptimToolSPSA(NextPointAlgorithm):
         xc = X_Center.to_frame().transpose().reset_index(drop=True)
         xc.columns.name = ""
 
-        dtypes = {name: str(data.dtype) for name, data in xc.iteritems()}
+        dtypes = {name: str(data.dtype) for name, data in xc.items()}
         final_samples_NaN_to_Null = xc.where(~xc.isnull(), other=None)
         return {'final_samples': final_samples_NaN_to_Null.to_dict(orient='list'), 'final_samples_dtypes': dtypes}
 
@@ -454,10 +454,10 @@ class OptimToolSPSA(NextPointAlgorithm):
             comps_per_iteration=self.comps_per_iteration,
 
             data=self.prep_for_dict(self.data),
-            data_dtypes={name: str(data.dtype) for name, data in self.data.iteritems()},
+            data_dtypes={name: str(data.dtype) for name, data in self.data.items()},
 
             state=self.prep_for_dict(self.state),
-            state_dtypes={name: str(data.dtype) for name, data in self.state.iteritems()}
+            state_dtypes={name: str(data.dtype) for name, data in self.state.items()}
         )
         return optimtool_state
 

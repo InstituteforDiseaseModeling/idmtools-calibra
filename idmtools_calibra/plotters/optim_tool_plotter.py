@@ -62,11 +62,11 @@ class OptimToolPlotter(BasePlotter):
 
         data_this_iter = self.data.set_index('Iteration').loc[self.iteration_state.iteration]
 
-        x_center_all = self.state.pivot('Iteration', 'Parameter', 'Center')[self.param_names].values
+        x_center_all = self.state.pivot(index='Iteration', columns='Parameter', values='Center')[self.param_names].values
         x_center = x_center_all[self.iteration_state.iteration]
-        x_min = self.state.pivot('Iteration', 'Parameter', 'Min')[self.param_names].values
-        x_max = self.state.pivot('Iteration', 'Parameter', 'Max')[self.param_names].values
-        dynamic = self.state.pivot('Iteration', 'Parameter', 'Dynamic')[self.param_names].values
+        x_min = self.state.pivot(index='Iteration', columns='Parameter', values='Min')[self.param_names].values
+        x_max = self.state.pivot(index='Iteration', columns='Parameter', values='Max')[self.param_names].values
+        dynamic = self.state.pivot(index='Iteration', columns='Parameter', values='Dynamic')[self.param_names].values
 
         latest_results = data_this_iter['Results'].values  # Sort by sample?
         latest_fitted = data_this_iter['Fitted'].values  # Sort by sample?
@@ -106,7 +106,7 @@ class OptimToolPlotter(BasePlotter):
         plt.close()
 
         # Regression based on results from previous iteration
-        regression_by_iter = self.regression.pivot('Iteration', 'Parameter', 'Value')
+        regression_by_iter = self.regression.pivot(index='Iteration', columns='Parameter', values='Value')
         rsquared = regression_by_iter.loc[prev_iter, 'Rsquared']
 
         ### REGRESSION ###
@@ -140,7 +140,7 @@ class OptimToolPlotter(BasePlotter):
             h1 = plt.plot(sorted_samples, sorted_results, 'ko', figure=fig)
             yl = ax.get_ylim()
 
-            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
+            x_center = self.state.pivot(index='Iteration', columns='Parameter', values='Center')[dynamic_param_names[0]].values[prev_iter]
             h2 = plt.plot(2 * [x_center], yl, 'b-', figure=fig)
 
             h3 = plt.plot(sorted_samples, sorted_fitted, 'r-', figure=fig)
@@ -168,7 +168,7 @@ class OptimToolPlotter(BasePlotter):
             h1 = ax.scatter(x0, x1, y, c='k', marker='o', figure=fig)
             i = int(prev_iter)
 
-            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names].values[prev_iter]
+            x_center = self.state.pivot(index='Iteration', columns='Parameter', values='Center')[dynamic_param_names].values[prev_iter]
 
             h2 = ax.scatter(x_center[0],
                             x_center[1],
