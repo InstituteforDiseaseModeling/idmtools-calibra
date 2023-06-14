@@ -355,7 +355,7 @@ class IterationState:
 
     def set_samples_for_iteration(self, samples, next_point):
         if isinstance(samples, pd.DataFrame):
-            dtypes = {name: str(data.dtype) for name, data in samples.iteritems()}
+            dtypes = {name: str(data.dtype) for name, data in samples.items()}
             self.samples_for_this_iteration_dtypes = dtypes
             samples_NaN_to_Null = samples.where(~samples.isnull(), other=None)
             self.samples_for_this_iteration = samples_NaN_to_Null.to_dict(orient='list')
