@@ -19,7 +19,7 @@ class Settings:
     #
 
     # The number of parameter sets/samples to run in each calibration iteration
-    N_SAMPLES = 125
+    N_SAMPLES = 25
     # number of randomly seeded simulations per parameter set/sample
     N_REPLICATES = 1 # 5
     # the number of times the algorithm will attempt to optimize the best-guess parameterization
