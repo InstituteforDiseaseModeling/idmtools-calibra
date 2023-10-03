@@ -113,6 +113,8 @@ coverage.xml
 
 # Sphinx docs
 docs/_build/
+docs/idmtools*.rst
+docs/*.log
 
 # PyBuilder
 target/
