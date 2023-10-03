@@ -48,6 +48,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx_copybutton'
     'sphinx_search.extension', # search across multiple docsets in domain
+    'sphinx.ext.viewcode', # link to view source code
 ]
 
 plantuml = 'plantweb'
