@@ -66,7 +66,7 @@ setup(
     entry_points={"idmtools_cli.cli_plugins": ["calibra=idmtools_calibra.cli.commands:calibra"]},
     packages=find_packages(),
     setup_requires=setup_requirements,
-    python_requires='>3.6.*, !=3.7.0, !=3.7.1, !=3.7.2',
+    python_requires='>3.6.0, !=3.7.0, !=3.7.1, !=3.7.2',
     test_suite='tests',
     extras_require=extras,
     version='1.0.10'
