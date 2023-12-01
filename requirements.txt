@@ -2,6 +2,8 @@
 fasteners~=0.15
 geopy~=2.0
 idmtools~=1.7
+idmtools_platform_comps~=1.7
+idmtools-models~=1.7
 scipy~=1.5
 seaborn~=0.11
 scikit-learn
