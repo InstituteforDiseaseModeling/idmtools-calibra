@@ -5,6 +5,7 @@
 import pkg_resources
 from setuptools import setup, find_packages
 import sys
+import version
 
 # enforce a minimum pip version to avoid a bug in some versions of pip's dependency resolver
 pkg_resources.require(['pip >= 21.3.1'])
@@ -69,5 +70,5 @@ setup(
     python_requires='>3.6, !=3.7.0, !=3.7.1, !=3.7.2',
     test_suite='tests',
     extras_require=extras,
-    version='1.0.10'
+    version=version.__version__,
 )
