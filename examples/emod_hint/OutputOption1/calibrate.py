@@ -2,7 +2,7 @@ import os
 import sys
 from functools import partial
 
-from idmtools_calibra.rmse_site import RMSESite 
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer 
 from idmtools_calibra import calib_base_app as calib_app
 
