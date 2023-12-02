@@ -35,4 +35,5 @@ jobs:
       - name: Builds docs
         working-directory: 'docs'
         run: |
+          pip install -r requirements.txt
           make html
