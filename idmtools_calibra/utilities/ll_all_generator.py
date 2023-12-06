@@ -37,15 +37,6 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=No
     if latest_step is None or latest_step.value < StatusPoint.done.value:
         raise Exception(f"LL_all for iteration = {current_iteration} is not available!")
 
-    # # get SiteDataPlotter
-    # sp = None
-    # for plotter in calib_manager.plotters:
-    #     if isinstance(plotter, SiteDataPlotter):
-    #         sp = plotter
-    #         break
-    # if sp is None:
-    #     sp = SiteDataPlotter(num_to_plot=num_to_plot, combine_sites=True)
-
     # build ll_all.csv
     if ll_all_name is None:
         ll_all_name = "ll_all_final.csv"
