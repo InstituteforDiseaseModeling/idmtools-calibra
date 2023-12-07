@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import datetime
 from logging import getLogger
 from idmtools.analysis.analyze_manager import AnalyzeManager
+from idmtools.registry.functions import FunctionPluginManager
+
 from idmtools_calibra.utilities.parameter_set import ParameterSet
 from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
@@ -302,6 +304,19 @@ class IterationState:
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
+        self.after_commission_done(experiment)
+
+    def after_commission_done(self, experiment):
+        """
+        Run after an item is done after waiting. Currently we call the on succeeded and on failure plugins.
+
+        Returns:
+            Runs after an item is done after waiting
+        """
+        if experiment.succeeded:
+            FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=self)
+        else:
+            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=self)
 
     def cancel(self):
         self.platform._experiments.platform_cancel(self.experiment_id)
@@ -323,6 +338,7 @@ class IterationState:
 
     def finished(self):
         """ The next-point algorithm has reached its termination condition. """
+        FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=self)
         return self.next_point_algo.end_condition()
 
     @classmethod
