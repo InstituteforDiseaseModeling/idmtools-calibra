@@ -52,8 +52,8 @@ class PluginForTest:
                 a = simulation.tags
                 tags_for_all_sims.append(a)
             df = pd.DataFrame(tags_for_all_sims)
-            d1, d2 = item.name.split('_')
-            df.to_csv(os.path.join(self.kwargs['directory'], d1, d2, filename), index=False)
+            parts = item.name.split('_')
+            df.to_csv(os.path.join(self.kwargs['directory'], self.kwargs['name'], parts[-1], filename), index=False)
 
     @function_hook_impl
     def idmtools_runnable_on_done(self, item, **kwargs):
@@ -68,12 +68,10 @@ class PluginForTest:
 
         """
         if isinstance(item, Experiment):
-            d1, d2 = item.name.split('_')
-            assert os.path.exists(os.path.join(self.kwargs['directory'], d1, d2, "IterationState.json"))
+            parts = item.name.split('_')
+            assert os.path.exists(os.path.join(self.kwargs['directory'], self.kwargs['name'], parts[-1], "IterationState.json"))
 
 
-@pytest.mark.comps
-@pytest.mark.python
 class TestHooks(unittest.TestCase):
     def setUp(self) -> None:
         self.platform = Platform('SlurmStage')
@@ -97,6 +95,7 @@ class TestHooks(unittest.TestCase):
         # add my plugin hook
         kwargs = {}
         kwargs['directory'] = directory
+        kwargs['name'] = mysettings.CALIBRATION_NAME
         initialize_plugins(**kwargs)
 
         calib_app.go(calib_man, directory=directory)
