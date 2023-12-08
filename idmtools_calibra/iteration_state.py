@@ -287,6 +287,7 @@ class IterationState:
             if experiment.any_failed and not experiment.done:
                 # Kill the remaining simulations
                 print("\nOne or more simulations failed. Calibration cannot continue. Exiting...")
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
                 self.cancel()
                 exit()
 
@@ -299,7 +300,6 @@ class IterationState:
 
         # exit if it is failed
         if experiment.done and not experiment.succeeded:
-            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
             print("\nexperiment failed")
             exit()
         FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
@@ -327,7 +327,6 @@ class IterationState:
 
     def finished(self):
         """ The next-point algorithm has reached its termination condition. """
-        FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=self)
         return self.next_point_algo.end_condition()
 
     @classmethod
