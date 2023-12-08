@@ -313,10 +313,11 @@ class IterationState:
         Returns:
             Runs after an item is done after waiting
         """
+        FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=experiment)
         if experiment.succeeded:
-            FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=self)
+            FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
         else:
-            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=self)
+            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
 
     def cancel(self):
         self.platform._experiments.platform_cancel(self.experiment_id)

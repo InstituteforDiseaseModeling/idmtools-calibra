@@ -12,7 +12,6 @@ from idmtools.core.context import get_current_platform
 from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.itask import ITask
 from idmtools.entities.simulation import Simulation
-from idmtools.registry.functions import FunctionPluginManager
 from idmtools.utils.json import IDMJSONEncoder
 from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
 from idmtools_calibra.calib_site import CalibSite
@@ -327,7 +326,6 @@ class CalibManager(object):
             print("{}: {}".format(k, v))
 
         self.cache_calibration(**final_samples)
-        FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=self)
 
     def cache_calibration(self, **kwargs):
         """

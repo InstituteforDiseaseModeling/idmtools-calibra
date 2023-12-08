@@ -3,14 +3,13 @@ import os
 import unittest
 
 import pandas as pd
+from idmtools.entities.experiment import Experiment
 
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
 
 import datetime
 
-from idmtools_calibra.calib_manager import CalibManager
-from idmtools_calibra.iteration_state import IterationState
 from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 from tests.integration.emod_sir import settings
 from tests.integration.emod_sir.task import get_task
@@ -31,19 +30,46 @@ def initialize_plugins(**kwargs):
 
 
 class PluginForTest:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
 
     @function_hook_impl
     def idmtools_runnable_on_succeeded(self, item, **kwargs):
-        if isinstance(item, IterationState):
+        """
+        This function will be triggered after each iteration's commission done and experiment status is succeeded
+        We will download simulations tags for each experiment and save to a file
+        Args:
+            item:
+            **kwargs:
+
+        Returns:
+
+        """
+        if isinstance(item, Experiment):
             filename = 'hook_test_output.csv'
-            df = pd.DataFrame(item.samples_for_this_iteration)
-            df.to_csv(os.path.join(item.iteration_directory, filename))
+            tags_for_all_sims = []
+            for simulation in item.simulations.items:
+                a = simulation.tags
+                tags_for_all_sims.append(a)
+            df = pd.DataFrame(tags_for_all_sims)
+            d1, d2 = item.name.split('_')
+            df.to_csv(os.path.join(self.kwargs['directory'], d1, d2, filename), index=False)
 
     @function_hook_impl
     def idmtools_runnable_on_done(self, item, **kwargs):
-        if isinstance(item, CalibManager):
-            df = item.all_results.copy()
-            df.to_csv(os.path.join(item.directory, "all_result.csv"))
+        """
+        This function will be triggered after comission done.
+        Then make sure IterationState.json file exists for each iteration
+        Args:
+            item:
+            **kwargs:
+
+        Returns:
+
+        """
+        if isinstance(item, Experiment):
+            d1, d2 = item.name.split('_')
+            assert os.path.exists(os.path.join(self.kwargs['directory'], d1, d2, "IterationState.json"))
 
 
 @pytest.mark.comps
@@ -55,9 +81,6 @@ class TestHooks(unittest.TestCase):
         self.case_name = os.path.basename(__file__) + "--" + self._testMethodName
 
     def test_plugin_hooks(self):
-        kwargs = {}
-        initialize_plugins(**kwargs)
-
         site = RMSESite(
             name='rmse_site',
             reference_sources={'production': os.path.join(mysettings.REFERENCE_DATA_DIR, 'output.csv')}
@@ -69,13 +92,18 @@ class TestHooks(unittest.TestCase):
         date = datetime.datetime.now()
         uniq_filename = str(date.date()) + '_' + str(date.time()).replace(':', '_')
         print(uniq_filename)
-        #uniq_filename = "2023-12-06_18_45_41.593705"
+        #uniq_filename = "2023-12-06_19_47_33.124852"
         directory = os.path.join(CURRENT_DIRECTORY, "emod_sir_calibra_result", uniq_filename)
+        # add my plugin hook
+        kwargs = {}
+        kwargs['directory'] = directory
+        initialize_plugins(**kwargs)
+
         calib_app.go(calib_man, directory=directory)
-        df = pd.read_csv(os.path.join(directory, mysettings.CALIBRATION_NAME, "iter0", "hook_test_output.csv"))
-        self.assertEqual(df.shape[0], mysettings.N_SAMPLES)  # make sure there are 10 lines
-        df = pd.read_csv(os.path.join(directory, mysettings.CALIBRATION_NAME, "all_result.csv"))
-        self.assertEqual(df.shape[0], mysettings.N_SAMPLES * mysettings.N_ITERATIONS * mysettings.N_REPLICATES)
+
+        for n in range(mysettings.N_ITERATIONS):
+            df = pd.read_csv(os.path.join(directory, mysettings.CALIBRATION_NAME, f"iter{n}", "hook_test_output.csv"))
+            self.assertEqual(df.shape[0], mysettings.N_SAMPLES)  # make sure there are 10 lines
 
 
 
