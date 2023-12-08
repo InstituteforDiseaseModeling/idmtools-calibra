@@ -36,13 +36,13 @@ class PluginForTest:
     @function_hook_impl
     def idmtools_runnable_on_succeeded(self, item, **kwargs):
         """
-        This function will be triggered after each iteration's commission done and experiment status is succeeded
-        We will download simulations tags for each experiment and save to a file
+        This function will be triggered after experiment status is succeeded for each iteration.
+        We will download simulations tags for each experiment and save to a file.
         Args:
-            item:
-            **kwargs:
+            item: Experiment
+            kwargs: Additional parameters
 
-        Returns:
+        Returns: None
 
         """
         if isinstance(item, Experiment):
@@ -58,18 +58,32 @@ class PluginForTest:
     @function_hook_impl
     def idmtools_runnable_on_done(self, item, **kwargs):
         """
-        This function will be triggered after comission done.
-        Then make sure IterationState.json file exists for each iteration
+        This function will be triggered after experiment done for each iteration.
+        Then make sure IterationState.json file exists for each iteration.
         Args:
-            item:
-            **kwargs:
+            item: Experiment
+            kwargs: Additional parameters
 
-        Returns:
+        Returns: None
 
         """
         if isinstance(item, Experiment):
             parts = item.name.split('_')
             assert os.path.exists(os.path.join(self.kwargs['directory'], self.kwargs['name'], parts[-1], "IterationState.json"))
+
+    @function_hook_impl
+    def idmtools_runnable_on_failure(self, item, **kwargs):
+        """
+         This function will be triggered if experiment fails.
+         Args:
+             item: Experiment
+             kwargs: Additional parameters
+
+         Returns: None
+
+         """
+        if isinstance(item, Experiment):
+            print(item.status)
 
 
 class TestHooks(unittest.TestCase):

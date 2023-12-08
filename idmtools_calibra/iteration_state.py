@@ -292,32 +292,20 @@ class IterationState:
 
             # Test if we are all done
             if experiment.done:
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=experiment)
                 break
 
             time.sleep(sleep_time)
 
         # exit if it is failed
         if experiment.done and not experiment.succeeded:
+            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
             print("\nexperiment failed")
             exit()
-
+        FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
-        self.after_commission_done(experiment)
-
-    def after_commission_done(self, experiment):
-        """
-        Run after an item is done after waiting. Currently we call the on succeeded and on failure plugins.
-
-        Returns:
-            Runs after an item is done after waiting
-        """
-        FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=experiment)
-        if experiment.succeeded:
-            FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
-        else:
-            FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
 
     def cancel(self):
         self.platform._experiments.platform_cancel(self.experiment_id)
