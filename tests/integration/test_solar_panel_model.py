@@ -21,6 +21,8 @@ CURRENT_DIRECTORY = os.path.dirname(__file__)
 
 
 mysettings = settings.Settings()
+mysettings.N_ITERATIONS = 2
+mysettings.N_SAMPLES = 10
 
 
 class TestSolarPanel(unittest.TestCase):

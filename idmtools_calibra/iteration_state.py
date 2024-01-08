@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import datetime
 from logging import getLogger
 from idmtools.analysis.analyze_manager import AnalyzeManager
+from idmtools.registry.functions import FunctionPluginManager
+
 from idmtools_calibra.utilities.parameter_set import ParameterSet
 from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
@@ -285,11 +287,13 @@ class IterationState:
             if experiment.any_failed and not experiment.done:
                 # Kill the remaining simulations
                 print("\nOne or more simulations failed. Calibration cannot continue. Exiting...")
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
                 self.cancel()
                 exit()
 
             # Test if we are all done
             if experiment.done:
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=experiment)
                 break
 
             time.sleep(sleep_time)
@@ -298,7 +302,7 @@ class IterationState:
         if experiment.done and not experiment.succeeded:
             print("\nexperiment failed")
             exit()
-
+        FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))

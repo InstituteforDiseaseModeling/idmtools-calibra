@@ -20,6 +20,8 @@ from tests.integration.helper import download_experiment_files, delete_experimen
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 
 mysettings = settings.Settings()
+mysettings.N_ITERATIONS = 2
+mysettings.N_SAMPLES = 10
 
 
 class TestEMODSir(unittest.TestCase):
