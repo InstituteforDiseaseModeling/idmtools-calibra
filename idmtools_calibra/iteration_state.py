@@ -235,6 +235,13 @@ class IterationState:
             print("Error encountered during analysis... Exiting")
             exit()
 
+        # Make sure each results index is sorted in correct order (ascending)
+        for a in analyzerManager.analyzers:
+            ser = a.results
+            ser.index = ser.index.astype(int)
+            ser = ser.sort_index(ascending=True)
+            a.results = ser
+
         # Ask the analyzers to cache themselves
         cached_analyses = {a.uid: a.cache() if callable(a.cache) else {} for a in analyzerManager.analyzers}
         logger.debug(cached_analyses)
