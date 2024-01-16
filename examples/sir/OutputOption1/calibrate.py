@@ -1,7 +1,7 @@
 import os
 import sys
 
-from idmtools_calibra.rmse_site import RMSESingleSite 
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel as RMSESite
 from idmtools_calibra import calib_base_app as calib_app
 from settings import Settings
 
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     import matplotlib
     matplotlib.use( "TkAgg" )
     # site we want to calibrate on - a core organization object for calibra
-    site = RMSESingleSite(
+    site = RMSESite(
         name='rmse_site'
     )
     from idmtools.core.platform_factory import Platform
