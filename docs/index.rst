@@ -13,6 +13,8 @@ See :doc:`idmtools:index` for a diagram showing how |IT_s| and each of the
 related packages are used in an end-to-end workflow using |EMOD_s| as the
 disease transmission model.
 
+Contents
+--------
 
 .. toctree::
    :maxdepth: 3
