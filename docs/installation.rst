@@ -15,26 +15,15 @@ First, ensure the following prerequisites are met.
 
 * A file that indicates the pip index-url:
 
-    .. container:: os-code-block
+    * For Windows, in C:\\Users\\Username\\pip\\pip.ini add the following::
 
-        .. container:: choices
+        [global]
+        index-url = https://packages.idmod.org/api/pypi/pypi-production/simple
 
-            * Windows
-            * Linux
+    * For Linux, in $HOME/.config/pip/pip.conf add the following::
 
-        .. container:: windows
-
-            In C:\\Users\\Username\\pip\\pip.ini, containing the following::
-
-                [global]
-                index-url = https://packages.idmod.org/api/pypi/pypi-production/simple
-
-        .. container:: linux
-
-            In $HOME/.config/pip/pip.conf, containing the following::
-
-                [global]
-                index-url = https://packages.idmod.org/api/pypi/pypi-production/simple
+        [global]
+        index-url = https://packages.idmod.org/api/pypi/pypi-production/simple
 
 Installation instructions
 =========================
@@ -46,34 +35,24 @@ Installation instructions
 
 #.  Activate the virtual environment:
 
-    .. container:: os-code-block
+    * For Windows, enter the following::
 
-        .. container:: choices
+        v-calibra\Scripts\activate
 
-            * Windows
-            * Linux
+    * For Linux, enter the following::
 
-        .. container:: windows
+        source v-calibra/bin/activate
 
-            Enter the following::
-
-                v-calibra\Scripts\activate
-
-        .. container:: linux
-
-            Enter the following::
-
-                source v-calibra/bin/activate
 
 #.  Install |calibra| packages::
 
         pip install idmtools_calibra
 
-    If you are on Python 3.6, also run::
+    * If you are on Python 3.6, also run::
 
         pip install dataclasses
 
-    If you are on Linux, also run::
+    * If you are on Linux, also run::
 
         pip install keyrings.alt
 
