@@ -1,6 +1,6 @@
-=============================
-|calibra| installation
-=============================
+=======
+Install
+=======
 
 Follow the steps below to install |calibra|.
 
