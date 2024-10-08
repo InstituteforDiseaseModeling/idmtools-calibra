@@ -5,10 +5,8 @@ import shutil
 import pandas as pd
 from datetime import datetime
 from logging import getLogger
-
 from functools import partial
 from typing import Optional, Any, Dict, List
-
 from idmtools.builders import SimulationBuilder
 from idmtools.core.context import get_current_platform
 from idmtools.entities.iplatform import IPlatform
@@ -340,8 +338,6 @@ class CalibManager(object):
         Returns: None
         """
         it = getattr(self, 'current_iteration', None)
-        if it and it.resume:
-            return
 
         state = {'name': self.name,
                  'directory': self.directory,
@@ -354,6 +350,12 @@ class CalibManager(object):
                  'calibration_start': self.calibration_start}
         state.update(kwargs)
         json.dump(state, open(os.path.join(self.directory, 'CalibManager.json'), 'w'), indent=4, cls=IDMJSONEncoder)
+        # save backup to current iteration
+        if it:
+            iteration = kwargs.get('iteration') - 1 if 'iteration' in kwargs else self.iteration
+            state['iteration'] = iteration
+            json.dump(state, open(os.path.join(it.iteration_directory, f'CalibManager_{it.iteration}.json'), 'w'),
+                      indent=4, cls=IDMJSONEncoder)
 
     def backup_calibration(self):
         """
@@ -395,30 +397,15 @@ class CalibManager(object):
         resume_manager = ResumeManager(self, iteration, iter_step, max_iterations, loop, backup, dry_run)
         resume_manager.resume()
 
-    def kill(self):
-        from idmtools.core import ItemType
-
+    def delete(self):
         calib_data = self.read_calib_data(force=True)
         if not calib_data:
             return
 
-        suites = calib_data.get('suites')
-        for suite in suites:
-            suite_id = suite['id']
-            comps_suite = self.platform.get_item(suite_id, ItemType.SUITE, raw=True)
-            comps_exps = comps_suite.get_experiments()
-            for comps_exp in comps_exps:
-                try:
-                    comps_exp.delete()
-                except RuntimeError:
-                    logger.info("Could not delete the associated experiment...")
-                    return
-
-            try:
-                comps_suite.delete()
-            except RuntimeError:
-                logger.info(f"Could not delete suite ({suite_id})...")
-                return
+        suite_list = calib_data.get('suites')
+        for suite_dict in suite_list:
+            suite_id = suite_dict['id']
+            self.platform._suites.platform_delete(suite_id)
 
         # Print confirmation
         logger.info("Calibration %s successfully cancelled!" % self.name)
@@ -429,8 +416,7 @@ class CalibManager(object):
         - Delete the result directory
         - If LOCAL -> also delete the simulations
         """
-        # Kill
-        self.kill()
+        self.delete()
 
         # Then delete the whole directory
         calib_dir = os.path.abspath(self.directory)

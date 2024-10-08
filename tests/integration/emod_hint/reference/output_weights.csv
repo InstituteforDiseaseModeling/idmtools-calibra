@@ -1,0 +1,5 @@
+metric,value,weights
+A,0.2,1
+B,0.1,2
+C,0.3,3
+D,0.4,4

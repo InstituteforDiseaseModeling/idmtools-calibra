@@ -19,7 +19,7 @@
 import os
 import subprocess
 import sys
-import sphinx_rtd_theme
+#import sphinx_rtd_theme
 from datetime import datetime
 
 
@@ -46,7 +46,27 @@ extensions = [
     'plantweb.directive',
     'sphinxcontrib.programoutput',
     'sphinx.ext.intersphinx',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'sphinx_search.extension', # search across multiple docsets in domain
+    'sphinx.ext.viewcode', # link to view source code
+    'myst_parser', # source files written in MD or RST
+]
+
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
 ]
 
 plantuml = 'plantweb'
@@ -67,8 +87,8 @@ autodoc_mock_imports = ['history_matching',
                         'idmtools_calibra.output.output_parser',
                         'simtools',
                         'dtk',
-                        'idmtools_calibra.interventions',
-                        'idmtools_calibra.utilities']
+                        'idmtools_calibra.interventions']
+                        #'idmtools_calibra.utilities']
 
 
 napoleon_google_docstring = True
@@ -80,8 +100,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The encoding of source files.
 #
@@ -110,7 +129,7 @@ version = idmtools_calibra.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -167,17 +186,52 @@ rst_epilog = "\n.. include:: /variables.txt"
 # The theme to use for HTML and HTML Help pages.  See the docs for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # docs.
 # #
-# html_theme_options = {
-# }
+html_theme_options = {
+    "collapse_navigation": False,
+    "navigation_depth": 3,
+    "show_prev_next": True,
+    "icon_links": [
+        {"name": "IDM docs", "url": "https://docs.idmod.org", "icon": "fas fa-home"},
+        {
+            "name": "GitHub",
+            "url": "https://github.com/institutefordiseasemodeling/idmtools_calibra",
+            "icon": "fab fa-github-square",
+        },
+    ],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "secondary_sidebar_items": ["navbar-side"],
+    "header_links_before_dropdown": 5,
+    "footer_start": ["copyright", "footer_start"],
+    "footer_end": ["theme-version", "footer_end"],
+}
+html_sidebars = {
+    "**": ["sidebar-nav-bs", "page-toc"],
+}
+html_logo = "images/idm-logo-transparent.png"
+html_favicon = "images/favicon.ico"
+html_static_path = ['_static']
+html_baseurl = "https://docs.idmod.org/projects/idmtools_calibra/en/latest"
+html_context = {
+    'rtd_url': 'https://docs.idmod.org/projects/idmtools_calibra/en/latest',
+    "versions_dropdown": {
+        "latest": "devel (latest)",
+        "stable": "current (stable)",
+    },
+    "default_mode": "light",
+}
+
+# Add customizations
+def setup(app):
+    app.add_css_file("theme_overrides.css")
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> docs" by default.
@@ -191,7 +245,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #
-html_logo = "images/IDM_white.png"
+#html_logo = "images/IDM_white.png"
 
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -202,16 +256,12 @@ html_favicon = "images/favicon.ico"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+
 html_static_path = ['_static']
 
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',
-        '_static/copy_button.css'
-        ]
-}
+html_css_files = ['theme_overrides.css']
 
-html_js_files = ['show_block_by_os.js']
+#html_js_files = ['show_block_by_os.js']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -292,6 +342,21 @@ html_use_opensearch = 'www.idmod.org/docs/'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'idmtools_calibra'
+
+# -- RTD Sphinx search for searching across the entire domain, default parent -------------
+
+if os.environ.get('READTHEDOCS') == 'True':
+
+    search_project_parent = "institute-for-disease-modeling-idm"
+    search_project = os.environ["READTHEDOCS_PROJECT"]
+    search_version = os.environ["READTHEDOCS_VERSION"]
+
+    rtd_sphinx_search_default_filter = f"subprojects:{search_project}/{search_version}"
+
+    rtd_sphinx_search_filters = {
+        "Search this project": f"project:{search_project}/{search_version}",
+        "Search all IDM docs": f"subprojects:{search_project_parent}/{search_version}",
+    }
 
 # -- Options for LaTeX output ---------------------------------------------
 

@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """The setup script for the itertool"""
+import pkg_resources
 from setuptools import setup, find_packages
 import sys
+import version
+
+# enforce a minimum pip version to avoid a bug in some versions of pip's dependency resolver
+pkg_resources.require(['pip >= 21.3.1'])
 
 with open('requirements.txt') as requirements_file:
     lines = requirements_file.read().strip().split("\n")
@@ -62,8 +67,8 @@ setup(
     entry_points={"idmtools_cli.cli_plugins": ["calibra=idmtools_calibra.cli.commands:calibra"]},
     packages=find_packages(),
     setup_requires=setup_requirements,
-    python_requires='>3.6.*, !=3.7.0, !=3.7.1, !=3.7.2',
+    python_requires='>3.6, !=3.7.0, !=3.7.1, !=3.7.2',
     test_suite='tests',
     extras_require=extras,
-    version='1.0.6'
+    version=version.__version__
 )

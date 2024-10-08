@@ -161,7 +161,9 @@ class ResumeManager(object):
         if self.iter_step is None:
             self.iter_step = latest_step
 
-        if self.iter_step == StatusPoint.analyze:
+        if self.iter_step == StatusPoint.running:
+            self.iter_step = StatusPoint.commission
+        elif self.iter_step == StatusPoint.analyze:
             self.iter_step = StatusPoint.running
 
         if self.iter_step.value > latest_step.value:
@@ -204,6 +206,9 @@ class ResumeManager(object):
         # update required objects for resume
         it.update(**self.calib_manager.required_components)
 
+        # set calibration_directory
+        IterationState.calibration_directory = self.calib_manager.directory
+
         # step 1: restore next_point
         if self.iter_step not in (
                 StatusPoint.plot, StatusPoint.next_point, StatusPoint.running) and self.iteration != 0:
@@ -220,12 +225,17 @@ class ResumeManager(object):
             it.next_point_algo.set_state(it.next_point, self.iteration)
 
         # step 2: restore Calibration results
-        if self.iteration > 0 and self.iter_step.value < StatusPoint.plot.value:
-            # it will combine current results with previous results
-            it.restore_results(self.iteration - 1)
+        if self.iteration > 0:
+            if self.iter_step.value < StatusPoint.plot.value:
+                # it will combine current results with previous results
+                it.restore_results(self.iteration - 1)
+            else:
+                # it will use the current results and resume from next iteration
+                it.restore_results(self.iteration)
         else:
-            # it will use the current results and resume from next iteration
-            it.restore_results(self.iteration)
+            if self.iter_step.value >= StatusPoint.plot.value:
+                # it will combine current results with previous results
+                it.restore_results(self.iteration)
 
         # it.all_results.reset_index(inplace=True)
         if it.iteration == 0 and self.iter_step.value < StatusPoint.plot.value:
@@ -241,7 +251,7 @@ class ResumeManager(object):
             it.results = {}
 
         # finally update current status
-        it._status = StatusPoint(self.iter_step.value - 1) if self.iter_step.value > 0 else None
+        it._status = StatusPoint(self.iter_step.value - 1) if self.iter_step.value > 0 else StatusPoint.iteration_start
 
         it.resume = True
         self.calib_manager.current_iteration = it
@@ -255,12 +265,12 @@ class ResumeManager(object):
             os.remove(ll_all_path)
 
         if self.iteration > 0:
-            if self.iter_step.value < StatusPoint.plot.value:
+            if self.iter_step.value <= StatusPoint.plot.value:
                 generate_ll_all(self.calib_manager, iteration=self.iteration - 1, ll_all_name=ll_all_name)
             else:
                 generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
         else:
-            if self.iter_step.value >= StatusPoint.plot.value:
+            if self.iter_step.value > StatusPoint.plot.value:
                 generate_ll_all(self.calib_manager, iteration=self.iteration, ll_all_name=ll_all_name)
 
     def backup_calibration(self):

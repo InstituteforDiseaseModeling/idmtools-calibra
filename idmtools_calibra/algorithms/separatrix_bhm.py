@@ -300,10 +300,10 @@ class SeparatrixBHM(NextPointAlgorithm):
 
             hyperparameters=self.prep_for_dict(self.hyperparameters),
             data=self.prep_for_dict(self.data),
-            data_dtypes={name: str(data.dtype) for name, data in self.data.iteritems()},
+            data_dtypes={name: str(data.dtype) for name, data in self.data.items()},
 
             emulation=self.prep_for_dict(self.emulation),
-            emulation_dtypes={name: str(data.dtype) for name, data in self.emulation.iteritems()},
+            emulation_dtypes={name: str(data.dtype) for name, data in self.emulation.items()},
 
             for_plotting=self.prep_for_dict(self.for_plotting),
             max_iterations=self.max_iterations,

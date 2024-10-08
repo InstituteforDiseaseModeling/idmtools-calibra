@@ -419,7 +419,7 @@ class IMIS(NextPointAlgorithm):
     def get_state(self):
         imis_state = dict(n_initial_samples=self.n_initial_samples,
                           data=self.prep_for_dict(self.data),
-                          data_dtypes={name: str(data.dtype) for name, data in self.data.iteritems()},
+                          data_dtypes={name: str(data.dtype) for name, data in self.data.items()},
                           gaussian_probs=self.gaussian_probs,
                           gaussian_centers=self.gaussian_centers,
                           gaussian_covariances=self.gaussian_covariances)

@@ -21,10 +21,14 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=No
         columns=(top_columns + list([a for a in all_results.columns if a not in top_columns])))
 
     # restore last time location
+    _iteration = calib_data['iteration']
     if iteration is None:
         current_iteration = calib_data['iteration']
     else:
         current_iteration = iteration
+
+    if current_iteration > _iteration:
+        raise Exception(f"LL_all for iteration = {iteration} is not available!")
 
     # validate current iteration status
     it = calib_manager.state_for_iteration(current_iteration)
@@ -32,15 +36,6 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=No
 
     if latest_step is None or latest_step.value < StatusPoint.done.value:
         raise Exception(f"LL_all for iteration = {current_iteration} is not available!")
-
-    # get SiteDataPlotter
-    sp = None
-    for plotter in calib_manager.plotters:
-        if isinstance(plotter, SiteDataPlotter):
-            sp = plotter
-            break
-    if sp is None:
-        sp = SiteDataPlotter(num_to_plot=num_to_plot, combine_sites=True)
 
     # build ll_all.csv
     if ll_all_name is None:
@@ -53,10 +48,10 @@ def generate_ll_all(calib_manager, num_to_plot=5, iteration=None, ll_all_name=No
 
     for iteration in range(current_iteration + 1):
         it = calib_manager.state_for_iteration(iteration)
-        it.all_results = all_results.copy(deep=True)
+        all_results = all_results.copy(deep=True)
         it.all_results = all_results[all_results.iteration <= iteration]
         it.all_results.set_index('sample', inplace=True)  # important to keep the same format as original
 
-        sp = SiteDataPlotter(num_to_plot=5, combine_sites=True)
+        sp = SiteDataPlotter(num_to_plot=num_to_plot, combine_sites=True)
         sp.iteration_state = it
         sp.write_LL_csv(ll_all_name=ll_all_name)

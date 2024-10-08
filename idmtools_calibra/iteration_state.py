@@ -5,13 +5,15 @@ import pandas as pd
 from datetime import datetime
 from logging import getLogger
 from idmtools.analysis.analyze_manager import AnalyzeManager
+from idmtools.registry.functions import FunctionPluginManager
+
 from idmtools_calibra.utilities.parameter_set import ParameterSet
 from idmtools_calibra.process_state import StatusPoint
 from idmtools_calibra.utilities.encoding import NumpyEncoder, json_numpy_obj_hook
 from idmtools_calibra.utilities.display import verbose_timedelta
 
-
 logger = getLogger("Calibration")
+user_logger = getLogger('user')
 
 
 class IterationState:
@@ -94,15 +96,6 @@ class IterationState:
         Returns:
 
         """
-        # Depending on the type of results (lists or dicts), handle differently how we treat the results
-        # This should be refactor to take care of both cases at once
-        # if iteration == 0:
-        #     self.all_results = None
-        #     # self.all_results = pd.DataFrame()
-        #     # self.all_results = self.all_results.head(0)     # keep columns and type
-        # elif len(self.all_results) == 0:
-        #     self.all_results = None
-        # el
         if isinstance(self.all_results, pd.DataFrame):
             self.all_results.set_index('sample', inplace=True)
             self.all_results = self.all_results[self.all_results.iteration <= iteration]
@@ -153,21 +146,21 @@ class IterationState:
         next_params = self.next_point_algo.get_samples_for_iteration(self.iteration)
         self.set_samples_for_iteration(next_params, self.next_point_algo)
 
-        # Then commission
-        self.commission_iteration(next_params)
-
         # Ready for commissioning
         self.status = StatusPoint.commission
+
+        # Then commission
+        self.commission_iteration(next_params)
 
         # Call the plot for post commission plots
         self.plot_iteration()
 
     def analyze_step(self):
-        # Analyze the iteration
-        self.analyze_iteration()
-
         # Ready for analyzing
         self.status = StatusPoint.analyze
+
+        # Analyze the iteration
+        self.analyze_iteration()
 
     def plotting_step(self):
         # Ready for plotting
@@ -242,6 +235,13 @@ class IterationState:
             print("Error encountered during analysis... Exiting")
             exit()
 
+        # Make sure each results index is sorted in correct order (ascending)
+        for a in analyzerManager.analyzers:
+            ser = a.results
+            ser.index = ser.index.astype(int)
+            ser = ser.sort_index(ascending=True)
+            a.results = ser
+
         # Ask the analyzers to cache themselves
         cached_analyses = {a.uid: a.cache() if callable(a.cache) else {} for a in analyzerManager.analyzers}
         logger.debug(cached_analyses)
@@ -294,11 +294,13 @@ class IterationState:
             if experiment.any_failed and not experiment.done:
                 # Kill the remaining simulations
                 print("\nOne or more simulations failed. Calibration cannot continue. Exiting...")
-                self.kill()
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_failure(item=experiment)
+                self.cancel()
                 exit()
 
             # Test if we are all done
             if experiment.done:
+                FunctionPluginManager.instance().hook.idmtools_runnable_on_done(item=experiment)
                 break
 
             time.sleep(sleep_time)
@@ -307,32 +309,16 @@ class IterationState:
         if experiment.done and not experiment.succeeded:
             print("\nexperiment failed")
             exit()
-
+        FunctionPluginManager.instance().hook.idmtools_runnable_on_succeeded(item=experiment)
         # Print the status one more time
         iteration_time_elapsed = current_time - self.iteration_start
         logger.info("Iteration %s done (took %s)" % (self.iteration, verbose_timedelta(iteration_time_elapsed)))
 
-    def kill(self):
-        def experiment_is_running(e):
-            from COMPS.Data.Simulation import SimulationState
-            for sim in e.get_simulations():
-                if sim.state not in (SimulationState.Succeeded, SimulationState.Failed,
-                                     SimulationState.Canceled, SimulationState.Created,
-                                     SimulationState.CancelRequested):
-                    return True
-            return False
-
-        from idmtools.core import ItemType
-        comps_experiment = self.platform.get_item(self.experiment_id, ItemType.EXPERIMENT, raw=True)
-        if comps_experiment and experiment_is_running(comps_experiment):
-            comps_experiment.cancel()
-
-        logger.info("Waiting to complete cancellation...")
-        self.wait_for_finished()
+    def cancel(self):
+        self.platform._experiments.platform_cancel(self.experiment_id)
 
         # Print confirmation
-        logger.info("Calibration %s successfully cancelled!" % self.calibration_name)
-        print("Calibration %s successfully cancelled!" % self.calibration_name)
+        user_logger.info("Have submitted cancellation for Calibration %s" % self.calibration_name)
 
     @property
     def iteration_directory(self):
@@ -380,7 +366,7 @@ class IterationState:
 
     def set_samples_for_iteration(self, samples, next_point):
         if isinstance(samples, pd.DataFrame):
-            dtypes = {name: str(data.dtype) for name, data in samples.iteritems()}
+            dtypes = {name: str(data.dtype) for name, data in samples.items()}
             self.samples_for_this_iteration_dtypes = dtypes
             samples_NaN_to_Null = samples.where(~samples.isnull(), other=None)
             self.samples_for_this_iteration = samples_NaN_to_Null.to_dict(orient='list')
@@ -399,6 +385,7 @@ class IterationState:
 
     def get_parameter_sets_with_likelihoods(self):
         likelihoods = self.results['total']  # an ordered list of likelihood floats
+        all_sublikelihoods = {k: v for k, v in self.results.items() if k != 'total'}
         param_dicts = self.samples_for_this_iteration  # an ordered list of input input parameters (user knobs)
         if len(likelihoods) != len(param_dicts):
             raise Exception('Inconsistent iteration data. \'total\' and \'samples_for_this_iteration\' '
@@ -409,6 +396,7 @@ class IterationState:
         for sample_index in range(len(param_dicts)):
             param_dict = param_dicts[sample_index]
             likelihood = likelihoods[sample_index]
+            sublikelihoods = {k: v[sample_index] for k, v in all_sublikelihoods.items()}
 
             replicates_dict = {sim_id: sim_dict for sim_id, sim_dict in self.simulations.items()
                                if sim_dict['__sample_index__'] == sample_index}
@@ -420,6 +408,7 @@ class IterationState:
             for sim_id, replicate_dict in replicates_dict.items():
                 run_number = replicate_dict['Run_Number']
                 parameter_set = ParameterSet(param_dict=param_dict, likelihood=likelihood,
+                                             sublikelihoods=sublikelihoods,
                                              iteration_number=self.iteration, sim_id=sim_id, run_number=run_number)
                 parameter_sets.append(parameter_set)
 

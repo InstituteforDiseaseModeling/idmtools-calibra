@@ -140,7 +140,7 @@ class OptimToolSPSAPlotter(BasePlotter):
             plt.plot(sorted_samples, sorted_results, 'ko', figure=fig)
             yl = ax.get_ylim()
 
-            x_center = self.state.pivot('Iteration', 'Parameter', 'Center')[dynamic_param_names[0]].values[prev_iter]
+            x_center = self.state.pivot(index='Iteration', columns='Parameter', values='Center')[dynamic_param_names[0]].values[prev_iter]
             plt.plot(2 * [x_center], yl, 'b-', figure=fig)
 
             #            h3 = plt.plot( sorted_samples, sorted_fitted, 'r-', figure=fig)
