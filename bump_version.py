@@ -50,6 +50,7 @@ def bump_version(version, bump_type):
 def process_file(filename, bump_type):
     with open(filename, 'r') as f:
         lines = f.readlines()
+    f.close()
 
     with open(filename, 'w') as f:
         for line in lines:
@@ -59,6 +60,7 @@ def process_file(filename, bump_type):
                 f.write(f"__version__ = '{new_version}'\n")
             else:
                 f.write(line)
+        f.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Bump version script.")
