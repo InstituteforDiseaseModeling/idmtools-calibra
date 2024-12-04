@@ -8,9 +8,9 @@ from setuptools import setup, find_packages
 import sys
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 version_file = os.path.join(CURRENT_DIRECTORY, "version.py")
-
+version = {}
 with open(version_file) as f:
-    exec(f.read())  # This will define __version__
+    exec(f.read(), version)  # This will define __version__
 
 with open('requirements.txt') as requirements_file:
     lines = requirements_file.read().strip().split("\n")
@@ -74,5 +74,5 @@ setup(
     python_requires='>3.7',
     test_suite='tests',
     extras_require=extras,
-    version=__version__
+    version=version['__version__']
 )
