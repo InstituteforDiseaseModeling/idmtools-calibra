@@ -60,6 +60,7 @@ def process_file(filename, bump_type):
             else:
                 f.write(line)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Bump version script.")
     parser.add_argument("--dev", action="store_true", help="Bump development version.")
