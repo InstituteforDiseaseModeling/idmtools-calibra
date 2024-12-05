@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error as sk_mse
+from sklearn.metrics import root_mean_squared_error as sk_mse
 
 from idmtools_calibra.analyzers.base_calibration_analyzer import BaseCalibrationAnalyzer
 
@@ -60,7 +60,7 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
             return RMSEAnalyzer._user_cost_fn( series1, series2, series3 )
         else:
             #return math.sqrt( np.average( ( series1-series2 ) ** 2, weights=series3 ) )
-            return sk_mse( series1, series2, sample_weight=series3, squared=False )
+            return sk_mse( series1, series2, sample_weight=series3)
             # alternative: 
             # but we would be introducing an sklearn dependency to calibra for the first time.
 

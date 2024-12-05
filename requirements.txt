@@ -1,9 +1,9 @@
 -i https://packages.idmod.org/api/pypi/pypi-production/simple
 fasteners~=0.15
 geopy~=2.0
-idmtools~=1.7
-idmtools_platform_comps~=1.7
-idmtools-models~=1.7
+idmtools~=2.0
+idmtools_platform_comps~=2.0
+idmtools-models~=2.0
 scipy~=1.5
 seaborn~=0.11
 scikit-learn

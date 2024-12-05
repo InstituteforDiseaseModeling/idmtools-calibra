@@ -96,6 +96,7 @@ def install_dev_packages(pip_url):
         logger.critical(f'idmtools-calibra installed failed using {e.cmd} did not succeed')
         result = e.returncode
         logger.debug(f'Return Code: {result}')
+    logger.info('Installing idmtools-calibra docs')
     for line in execute(["pip", "install", "-r", "requirements.txt", f"--extra-index-url={pip_url}"], cwd=join(base_directory, 'docs')):
         process_output(line)
 

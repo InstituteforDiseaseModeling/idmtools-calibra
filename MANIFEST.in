@@ -2,4 +2,5 @@ include requirements.txt
 include dev_requirements.txt
 include history_matching_requirements.txt
 include README.md
+include version.py
 prune tests

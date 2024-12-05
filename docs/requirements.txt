@@ -1,7 +1,7 @@
 -i https://packages.idmod.org/api/pypi/pypi-production/simple
-click~=8.0
-idmtools-models~=1.7
-sphinx~=6.2
+click~=8.0.1
+idmtools-models~=2.0
+sphinx~=6.2.1
 pydata-sphinx-theme
 sphinxcontrib-napoleon~=0.7
 plantweb~=1.2
