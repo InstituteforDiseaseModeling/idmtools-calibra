@@ -8,6 +8,7 @@ from setuptools import setup, find_packages
 import sys
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 version_file = os.path.join(CURRENT_DIRECTORY, "version.py")
+
 version = {}
 with open(version_file) as f:
     exec(f.read(), version)  # This will define __version__
