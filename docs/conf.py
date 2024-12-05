@@ -19,7 +19,6 @@
 import os
 import subprocess
 import sys
-#import sphinx_rtd_theme
 from datetime import datetime
 
 
@@ -47,7 +46,6 @@ extensions = [
     'sphinxcontrib.programoutput',
     'sphinx.ext.intersphinx',
     'sphinx_copybutton',
-    'sphinx_search.extension', # search across multiple docsets in domain
     'sphinx.ext.viewcode', # link to view source code
     'myst_parser', # source files written in MD or RST
 ]
