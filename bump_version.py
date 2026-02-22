@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     if bump_type:
         # Example files to be processed
-        files = [".bump_version.cfg", "version.py"]
+        files = [".bump_version.cfg", "version.py", "idmtools_calibra/__init__.py"]
         for file in files:
             process_file(file, bump_type)
     else:
