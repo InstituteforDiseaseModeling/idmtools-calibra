@@ -1,3 +1,19 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Explain this calibration:](#explain-this-calibration)
+  - [You have 3 dynamic parameters that control disease dynamics:](#you-have-3-dynamic-parameters-that-control-disease-dynamics)
+  - [The Connection](#the-connection)
+    - [Step 1: Each sample becomes a simulation](#step-1-each-sample-becomes-a-simulation)
+    - [Step 2: Each simulation gets a score](#step-2-each-simulation-gets-a-score)
+    - [Step 3: OLS fits scores to parameters](#step-3-ols-fits-scores-to-parameters)
+    - [Step 4: Gradient tells you which way to move](#step-4-gradient-tells-you-which-way-to-move)
+    - [Step 5: Repeat](#step-5-repeat)
+    - [In the equation:](#in-the-equation)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Explain this calibration:
 ## You have 3 dynamic parameters that control disease dynamics:
 
