@@ -84,32 +84,32 @@ def process_output(output_line: str):
         logger.debug("".join(ch for ch in output_line if unicodedata.category(ch)[0] != "C"))
 
 
-def install_dev_packages(pip_url):
+def install_dev_packages():
     # loop through and install our packages
     extras = ['test']
     extras_str = f"[{','.join(extras)}]" if extras else ''
     logger.info(f'Installing idmtools-calibra with extras: {extras_str if extras_str else "None"} from {base_directory}')
     try:
-        for line in execute(["pip", "install", "-e", f".{extras_str}", f"--extra-index-url={pip_url}"], cwd=base_directory):
+        for line in execute(["pip", "install", "-e", f".{extras_str}"], cwd=base_directory):
             process_output(line)
     except subprocess.CalledProcessError as e:
         logger.critical(f'idmtools-calibra installed failed using {e.cmd} did not succeed')
         result = e.returncode
         logger.debug(f'Return Code: {result}')
     logger.info('Installing idmtools-calibra docs')
-    for line in execute(["pip", "install", "-r", "requirements.txt", f"--extra-index-url={pip_url}"], cwd=join(base_directory, 'docs')):
+    for line in execute(["pip", "install", "-r", "requirements.txt"], cwd=join(base_directory, 'docs')):
         process_output(line)
 
 
-def install_base_environment(pip_url):
+def install_base_environment():
     # install wheel first to benefit from binaries
-    for line in execute(["pip", "install", "wheel", f"--extra-index-url={pip_url}"]):
+    for line in execute(["pip", "install", "wheel"]):
         process_output(line)
 
     for line in execute(["pip", "uninstall", "-y", "py-make"], ignore_error=True):
         process_output(line)
 
-    for line in execute(["pip", "install", "idm-buildtools~=1.0.1", f"--index-url={pip_url}"]):
+    for line in execute(["pip", "install", "idm-buildtools"]):
         process_output(line)
 
     dev_idmtools_ini = join(base_directory, "examples", "idmtools.ini")
@@ -120,7 +120,6 @@ def install_base_environment(pip_url):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bootstrap the development environment")
-    parser.add_argument("--index-url", default='https://packages.idmod.org/api/pypi/pypi-production/simple', help="Pip url to install dependencies from")
     parser.add_argument("--verbose", default=False, action='store_true')
 
     args = parser.parse_args()
@@ -146,5 +145,5 @@ if __name__ == "__main__":
         console_handler.setLevel(console_log_level)
         logger.addHandler(console_handler)
 
-    install_base_environment(args.index_url)
-    sys.exit(install_dev_packages(args.index_url))
+    install_base_environment()
+    sys.exit(install_dev_packages())
