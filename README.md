@@ -20,7 +20,7 @@
 # User Installation
 
 ```bash
-pip install idmtools-calibra --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-calibra
 ```
 
 ## Pre-requisites
