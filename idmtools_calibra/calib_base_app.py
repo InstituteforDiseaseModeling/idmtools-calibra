@@ -9,7 +9,7 @@ from idmtools_calibra.plotters.optim_tool_plotter import OptimToolPlotter
 from idmtools_calibra.plotters.site_data_plotter import SiteDataPlotter
 from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
-from idmtools_calibra.singularity_json_python_task import SingularityJSONConfiguredPythonTask as Task
+from idmtools_models.python.singularity_json_python_task import SingularityJSONConfiguredPythonTask as Task
 from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
 
 params = None  # hack block
@@ -115,19 +115,12 @@ def init(settings, site, task=None, platform=None):
         assets.add_directory(directory, relative_path=os.path.basename(directory))
 
     if task is None:
-        command = None
-        if "SIF" in settings.__dict__:
-            assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
-
+        if hasattr(settings, "SIF"):
             command = CommandLine(
                 f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}"
             )
-            task = Task(
-                provided_command=command,
-                script_path=str(settings.MODEL_DRIVER),
-                common_assets=assets,
-                config_file_name=settings.CONFIG_FILENAME
-            )
+            task = Task(provided_command=command,script_path=settings.MODEL_DRIVER)
+            task.common_assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
         else:
             #print( '"SIF" not found in settings."' )
             command = CommandLine(
@@ -136,8 +129,6 @@ def init(settings, site, task=None, platform=None):
             task = JSONConfiguredPythonTask(script_path=str(settings.MODEL_DRIVER), common_assets=assets, 
                 config_file_name=settings.CONFIG_FILENAME)
             task.provided_command = command
-
-        #print( str( command ) )
 
         # The task object defines what to run, how, and what assets will be associated with an experiment of simulations
         # Each calibration iteration will run one experiment (group of simulations)
