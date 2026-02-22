@@ -97,7 +97,7 @@ class IterationState:
 
         """
         if isinstance(self.all_results, pd.DataFrame):
-            self.all_results.set_index('sample', inplace=True)
+            self.all_results = self.all_results.set_index('sample')
             self.all_results = self.all_results[self.all_results.iteration <= iteration]
         elif isinstance(self.all_results, list):
             self.all_results = self.all_results[iteration]
