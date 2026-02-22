@@ -113,7 +113,7 @@ class SeparatrixBHM(NextPointAlgorithm):
         samples_cpy = samples.copy()
         samples_cpy.index.name = '__sample_index__'
         samples_cpy['Iteration'] = iteration
-        samples_cpy.reset_index(inplace=True)
+        samples_cpy = samples_cpy.reset_index()
 
         self.data = pd.concat([self.data, samples_cpy], ignore_index=True)
         self.data['__sample_index__'] = self.data['__sample_index__'].astype(int)
@@ -130,7 +130,7 @@ class SeparatrixBHM(NextPointAlgorithm):
             # Choose initial samples by History Matching
             samples = self.choose_samples_via_history_matching(iteration)
 
-        samples.reset_index(drop=True, inplace=True)
+        samples = samples.reset_index(drop=True)
         return self.generate_samples_from_df(samples)
 
     def set_results_for_iteration(self, iteration, results):
@@ -173,7 +173,7 @@ class SeparatrixBHM(NextPointAlgorithm):
         for param_name, v in self.param_info.iterrows():
             initial_samples[param_name] = v['Min'] + initial_samples[param_name] * (v['Max'] - v['Min'])
         initial_samples.index.name = 'Sample'
-        initial_samples.reset_index(inplace=True)
+        initial_samples = initial_samples.reset_index()
         initial_samples['Train'] = False
         initial_samples.loc[
             np.random.binomial(n=1, p=self.training_frac, size=initial_samples.shape[0]) == 1, 'Train'] = True
@@ -248,10 +248,10 @@ class SeparatrixBHM(NextPointAlgorithm):
                     [proposal['Max_Implausibility'], proposal['Implausibility_%d' % it]], axis=1).max(
                     axis=1)  # Better way?
 
-            self.for_plotting = self.for_plotting.append(proposal[self.param_names + ['Max_Implausibility']],
-                                                         ignore_index=True)
+            self.for_plotting = pd.concat([self.for_plotting, proposal[self.param_names + ['Max_Implausibility']]],
+                                          ignore_index=True)
             new_samples = proposal.loc[~proposal['Implausible']]
-            next_samples = next_samples.append(proposal.loc[~proposal['Implausible']])
+            next_samples = pd.concat([next_samples, proposal.loc[~proposal['Implausible']]], ignore_index=True)
             tried = tried + n
             accepted = accepted + new_samples.shape[0]
             accepted_percent = 100 * accepted / tried

@@ -290,7 +290,7 @@ class GPC:
     def assign_rep(self, sample):
         sample = sample.drop('index', axis=1).reset_index()
         sample.index.name = 'Replicate'
-        sample.reset_index(inplace=True)
+        sample = sample.reset_index()
         return sample
 
     def expectation_propagation(self, theta):
@@ -652,7 +652,7 @@ class GPC:
         ret = pd.DataFrame(columns=['Mean-Transformed', 'Var-Transformed', 'Mean', 'Var'])  # , 'Trapz'
         for idx, p_series in p.iterrows():
             user_logger.debug(idx, 'x_star is', p_series['x (scaled)'])
-            p = p_series.as_matrix()[np.newaxis, :]
+            p = p_series.to_numpy()[np.newaxis, :]
             k_xp = self.kxp_gpu_wrapper(x, p, theta)
             # TODO Reference this code directly from history matching. We need to make a utility function there that
             # can be used in this process or others
@@ -733,7 +733,7 @@ class GPC:
         ret = pd.DataFrame(columns=['Mean-Transformed', 'Var-Transformed', 'Mean', 'Var'])
         for idx, p_series in p.iterrows():
             user_logger.debug(idx, 'x_star is', p_series['x (scaled)'])
-            p = p_series.as_matrix()[np.newaxis, :]
+            p = p_series.to_numpy()[np.newaxis, :]
             k_xp = self.kxp_gpu_wrapper(x, p, theta)
             f_bar_star = np.dot(np.transpose(k_xp), nu - z)  # MEAN (vector of length 1)
 
@@ -770,7 +770,7 @@ class GPC:
         # bounds like ((0.005,10),)+((0.01,10),) + tuple((5e-5,10) for i in range(self.D))
         # K=None is leave one out cross validation, otherwise make K groups
         idx = self.training_data.index.names  # Save index
-        self.training_data.reset_index(inplace=True)
+        self.training_data = self.training_data.reset_index()
 
         if self.use_laplace_approximation:
             f_, fprime = GPC.func_wrapper(self.negative_log_marginal_likelihood_and_gradient)
@@ -857,7 +857,7 @@ class GPC:
 
         # Restore original index
         if idx[0] is not None:
-            self.training_data.set_index(idx, inplace=True)
+            self.training_data = self.training_data.set_index(idx)
 
         return ret
 

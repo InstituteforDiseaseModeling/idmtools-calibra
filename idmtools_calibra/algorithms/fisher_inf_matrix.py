@@ -161,21 +161,21 @@ def compute_fisher_inf_matrix(center_point, df_ll_points, data_columns):
         Fisher: Fisher Information matrix    (p x p) np array
     """
 
-    rounds = df_ll_points['j(1toN)'].as_matrix()  # j
-    samples_per_round = df_ll_points['k(1toM)'].as_matrix()  # k, points[:, 2]
+    rounds = df_ll_points['j(1toN)'].to_numpy()  # j
+    samples_per_round = df_ll_points['k(1toM)'].to_numpy()  # k, points[:, 2]
     rounds = (max(rounds) + 1).astype(int)
     m = (max(samples_per_round) + 1).astype(int)
     # n = int((np.shape(rounds)[0]) / (4 * m * rounds))
 
-    plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0].filter(data_columns).as_matrix()
-    plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1].filter(data_columns).as_matrix()
-    minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2].filter(data_columns).as_matrix()
-    minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3].filter(data_columns).as_matrix()
+    plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0].filter(data_columns).to_numpy()
+    plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1].filter(data_columns).to_numpy()
+    minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2].filter(data_columns).to_numpy()
+    minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3].filter(data_columns).to_numpy()
 
-    ll_plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0, 'LL'].as_matrix()
-    ll_plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1, 'LL'].as_matrix()
-    ll_minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2, 'LL'].as_matrix()
-    ll_minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3, 'LL'].as_matrix()
+    ll_plus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 0, 'LL'].to_numpy()
+    ll_plus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 1, 'LL'].to_numpy()
+    ll_minus_plus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 2, 'LL'].to_numpy()
+    ll_minus_minus_points = df_ll_points.loc[df_ll_points['i(1to4)'] == 3, 'LL'].to_numpy()
 
     # dimension of X
     p = len(center_point)
