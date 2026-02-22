@@ -52,12 +52,12 @@ def test_and_plot():
     # create experiment from builder
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sir sweep") 
     experiment.run(wait_until_done=True, platform=platform)
-    task.handle_experiment_completion( experiment )
-    task.get_file_from_comps( experiment.uid, "InsetChart.json" )
-    EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
-    import emod_api.channelreports.plot_icj_means as plotter
-    data = plotter.collect( str( experiment.uid ) )
-    plotter.display( data )
+    # task.handle_experiment_completion( experiment )
+    # task.get_file_from_comps( experiment.uid, "InsetChart.json" )
+    # EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
+    # import emod_api.channelreports.plot_icj_means as plotter
+    # data = plotter.collect( str( experiment.uid ) )
+    # plotter.display( data )
 
 if __name__ == "__main__":
     test_and_plot()

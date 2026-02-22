@@ -9,24 +9,28 @@ from settings import Settings
 settings = Settings()
 
 # NOTE: Any campaign parameter you want to calibrate must be in the build_camp param list
-def build_camp( eff=1.0, dur=3650 ):
+def build_camp( camp, eff=1.0, dur=3650 ):
     """
     Build a campaign input file for the DTK using emod_api. 
     """
-    import emod_api.campaign as camp
-    import emod_api.interventions.outbreak as ob 
-
-    camp.set_schema( manifest.schema_file )
-
-    # Seed the outbreak
-    event = ob.new_intervention( camp, timestep=1, cases=1 )
-    camp.add( event )
+    from emodpy.campaign.individual_intervention import OutbreakIndividual as OutbreakIndividual
+    from emodpy.campaign.common import TargetDemographicsConfig
+    from emodpy.campaign.distributor import add_intervention_scheduled
+    outbreak_event = OutbreakIndividual(campaign=camp)
+    target_demographics_config = TargetDemographicsConfig(demographic_coverage=0.4)
+    add_intervention_scheduled(camp,
+                               intervention_list=[outbreak_event],
+                               start_day=1,
+                               target_demographics_config=target_demographics_config)
 
     # Distribute vaccine
-    import emod_api.interventions.simple_vaccine as vac
-    vac.schema_path = camp.schema_path
-    event = vac.new_intervention( timestep=366, v_type="Acquire", efficacy=eff, waning_duration=dur )
-    camp.add( event )
+    # from emodpy.campaign.individual_intervention import CommonInterventionParameters, SimpleVaccine, VaccineType
+    # vaccine = SimpleVaccine(campaign,
+    #                         waning_config=this_waning_config,
+    #                         vaccine_take=another_param,
+    #                         vaccine_type=VaccineType.TransmissionBlocking,
+    #                         common_intervention_parameters=common_intervention_parameters)
+    # add_intervention_scheduled(campaign, intervention_list=[vaccine], start_day=2)
 
     return camp
 
@@ -50,16 +54,13 @@ def get_task( build_camp_fn=None ):
     from idmtools.core.platform_factory import Platform
     #platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
     platform = Platform(settings.LOCALE, missing_ok=True, default_missing=dict(type='TestExecute'))
-    task = EMODTask.from_default2(
-        config_path="config.json",
-        eradication_path=settings.MODEL_DRIVER,
-        campaign_builder=build_camp_fn,
-        demog_builder=None,
-        schema_path=manifest.schema_file,
-        param_custom_cb=set_param_fn,
-        ep4_path=manifest.ep4
-    )
-    task.set_sif( settings.SIF )
+    task = EMODTask.from_defaults(eradication_path=settings.MODEL_DRIVER,
+                                  campaign_builder=build_camp,
+                                  schema_path=manifest.schema_file,
+                                  config_builder=set_param_fn,
+                                  embedded_python_scripts_path=manifest.ep4,
+                                  demographics_builder=None)
+    task.set_sif( settings.SIF, platform )
     return task, platform
 
 def test_and_plot():
@@ -99,12 +100,12 @@ def test_and_plot():
     # create experiment from builder
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sis sweep") 
     experiment.run(wait_until_done=True, platform=platform)
-    task.handle_experiment_completion( experiment )
-    task.get_file_from_comps( experiment.uid, "InsetChart.json" )
-    EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
-    import emod_api.channelreports.plot_icj_means as plotter
-    data = plotter.collect( str( experiment.uid ) )
-    plotter.display( data )
+    # task.handle_experiment_completion( experiment )
+    # task.get_file_from_comps( experiment.uid, "InsetChart.json" )
+    # EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
+    # import emod_api.channelreports.plot_icj_means as plotter
+    # data = plotter.collect( str( experiment.uid ) )
+    # plotter.display( data )
 
 if __name__ == "__main__":
     test_and_plot()
