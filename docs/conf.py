@@ -19,7 +19,6 @@
 import os
 import subprocess
 import sys
-#import sphinx_rtd_theme
 from datetime import datetime
 
 
@@ -47,7 +46,6 @@ extensions = [
     'sphinxcontrib.programoutput',
     'sphinx.ext.intersphinx',
     'sphinx_copybutton',
-    'sphinx_search.extension', # search across multiple docsets in domain
     'sphinx.ext.viewcode', # link to view source code
     'myst_parser', # source files written in MD or RST
 ]
@@ -111,7 +109,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'idmtools_calibra'
-copyright = f'1999 - {datetime.today().year}, Bill & Melinda Gates Foundation. All rights reserved.'
+copyright = f'1999 - {datetime.today().year}, Gates Foundation. All rights reserved.'
 author = u'Institute for Disease Modeling'
 
 # The version info for the project you're documenting, acts as replacement for

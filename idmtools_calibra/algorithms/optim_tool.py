@@ -238,7 +238,9 @@ class OptimTool(NextPointAlgorithm):
                                  columns=['Iteration', 'Parameter', 'Value'])
         repeats_df = pd.DataFrame([[iteration - 1, 'Center_Repeats', self.center_repeats]],
                                   columns=['Iteration', 'Parameter', 'Value'])
-        self.regression = pd.concat([self.regression, r2_df, thresh_df, repeats_df])
+        dfs_to_concat = [df for df in [self.regression, r2_df, thresh_df, repeats_df] if not df.empty]
+        if dfs_to_concat:
+            self.regression = pd.concat(dfs_to_concat, ignore_index=True)
         for (p, v) in zip(['Constant'] + dynamic_params, mod_fit.params):  # mod.endog_names
             regression_param_df = pd.DataFrame([[iteration - 1, p, v]], columns=['Iteration', 'Parameter', 'Value'])
             self.regression = pd.concat([self.regression, regression_param_df])
@@ -371,7 +373,8 @@ class OptimTool(NextPointAlgorithm):
         for i, pname in enumerate(dynamic_state['Parameter']):
             x_cen = dynamic_state_by_param.loc[pname, 'Center']
             x_range = dynamic_state_by_param.loc[pname, 'Max'] - dynamic_state_by_param.loc[pname, 'Min']
-            samples.loc[self.center_repeats:N, pname] = x_cen + dt[i] * x_range
+            samples[pname] = samples[pname].astype(float)
+            samples.loc[self.center_repeats:N, pname] = (x_cen + dt[i] * x_range)
 
         return samples
 
