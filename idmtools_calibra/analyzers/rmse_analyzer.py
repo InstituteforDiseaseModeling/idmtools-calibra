@@ -28,8 +28,8 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         # rename reference data column to NOT conflict with model data column; it happens to have the same column
         # name in this example
         self.reference_column = f"{self.dependent_column}_reference"
-        self.reference.rename(
-            columns={self.dependent_column: self.reference_column}, inplace=True
+        self.reference = self.reference.rename(
+            columns={self.dependent_column: self.reference_column}
         )
         super().__init__(filenames=[str(self.model_output_filename)])
 
@@ -114,7 +114,7 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
             keys=list(data.keys()),
             names=["Sample", "Sim_Id"],
         )
-        data.reset_index(level="Index", drop=True, inplace=True)
+        data = data.reset_index(level="Index", drop=True)
 
         # compare sim data to reference data and determine a match likelihood/score. Higher is better in calibra.
         results = (
