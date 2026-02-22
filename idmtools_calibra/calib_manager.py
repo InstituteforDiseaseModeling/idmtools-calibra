@@ -380,7 +380,7 @@ class CalibManager(object):
         else:
             data = self.all_results
 
-        data.iteration = data.iteration.astype(int)
+        data['iteration'] = data['iteration'].astype(int)
         data['sample'] = data['sample'].astype(int)
 
         return data.to_dict(orient='list')
