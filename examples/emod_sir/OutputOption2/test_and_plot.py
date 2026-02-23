@@ -26,7 +26,7 @@ def get_task():
         from emodpy.campaign.individual_intervention import OutbreakIndividual as OutbreakIndividual
         from emodpy.campaign.common import TargetDemographicsConfig
         from emodpy.campaign.distributor import add_intervention_scheduled
-        outbreak_event = OutbreakIndividual(campaign=camp)
+        outbreak_event = OutbreakIndividual(campaign=camp, antigen=None)
         target_demographics_config = TargetDemographicsConfig(demographic_coverage=0.4)
         add_intervention_scheduled(camp,
                                    intervention_list=[outbreak_event],
@@ -34,14 +34,14 @@ def get_task():
                                    target_demographics_config=target_demographics_config)
         return camp
 
-    def build_demog():
-        """
-        Build a demographics input file for the DTK using emod_api. 
-        """
-        import emodpy_generic.demographics.GenericDemographics as Demographics # OK to call into emod-api
-
-        demog = Demographics.fromBasicNode( lat=0, lon=0, pop=1e5, name=1, forced_id=1 )
-        return demog
+    # def build_demog():
+    #     """
+    #     Build a demographics input file for the DTK using emod_api.
+    #     """
+    #     import emodpy_generic.demographics.GenericDemographics as Demographics # OK to call into emod-api
+    #
+    #     demog = Demographics.fromBasicNode( lat=0, lon=0, pop=1e5, name=1, forced_id=1 )
+    #     return demog
 
     import emod_generic.bootstrap as dtk
     dtk.setup( manifest.model_dl_dir )

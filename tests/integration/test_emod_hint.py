@@ -57,7 +57,8 @@ class TestEMODHint(unittest.TestCase):
         # site we want to calibrate on - a core organization object for calibra
         site = site
         #self.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
-        task = get_task()
+        task = get_task(self.platform)
+
         calib_man = calib_app.init(mysettings, site, task, platform=self.platform)
 
         self.calibra_name = mysettings.CALIBRATION_NAME

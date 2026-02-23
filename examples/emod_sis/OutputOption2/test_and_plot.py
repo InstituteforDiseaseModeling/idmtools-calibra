@@ -16,7 +16,7 @@ def build_camp( camp, eff=1.0, dur=3650 ):
     from emodpy.campaign.individual_intervention import OutbreakIndividual as OutbreakIndividual
     from emodpy.campaign.common import TargetDemographicsConfig
     from emodpy.campaign.distributor import add_intervention_scheduled
-    outbreak_event = OutbreakIndividual(campaign=camp)
+    outbreak_event = OutbreakIndividual(campaign=camp, antigen=None)
     target_demographics_config = TargetDemographicsConfig(demographic_coverage=0.4)
     add_intervention_scheduled(camp,
                                intervention_list=[outbreak_event],
