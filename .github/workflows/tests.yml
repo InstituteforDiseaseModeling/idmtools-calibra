@@ -1,12 +1,9 @@
-name: "run_bootstrap_and_test"
-#on: [push, pull_request]
+name: "Run All Tests"
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
-#  pull_request:
-#    types: [ opened, edited, reopened ]
+      - main
 
 jobs:
   run_bootstrap_and_test:
