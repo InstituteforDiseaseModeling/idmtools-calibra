@@ -27,7 +27,8 @@ mysettings = settings.Settings()
 mysettings.N_ITERATIONS = 2
 mysettings.N_SAMPLES = 10
 
-@pytest.skip
+
+@pytest.mark.skip(reason='disable all hint related tests')
 class TestEMODHint(unittest.TestCase):
     def demog_mapper(self, build_demog_actual, mapto_key, value):
         """
