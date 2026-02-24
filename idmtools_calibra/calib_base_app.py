@@ -96,7 +96,7 @@ def map_sample_to_model_input(simulation, sample):
         simulation.task.create_campaign_from_callback( builder=build_camp_actual )
 
     if build_demog_actual:
-        simulation.task.create_demog_from_callback( builder=build_demog_actual, from_sweep=True )
+        simulation.task.create_demographics_from_callback( builder=build_demog_actual, from_sweep=True )
 
     return tags
 
