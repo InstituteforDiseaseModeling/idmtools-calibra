@@ -1,3 +1,3 @@
 emod-generic~=2.22
-emodpy~=3.11
-emodpy-generic
+emodpy~=3.1
+
