@@ -51,16 +51,16 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         return result
 
     @staticmethod
-    def set_custom_cost_fn( user_cost_fn ):
+    def set_custom_cost_fn(user_cost_fn):
         RMSEAnalyzer._user_cost_fn = user_cost_fn 
 
     @staticmethod
-    def _rmse(series1, series2, series3): # 3 is weights
+    def _rmse(series1, series2, series3):  # 3 is weights
         if RMSEAnalyzer._user_cost_fn:
-            return RMSEAnalyzer._user_cost_fn( series1, series2, series3 )
+            return RMSEAnalyzer._user_cost_fn(series1, series2, series3)
         else:
-            #return math.sqrt( np.average( ( series1-series2 ) ** 2, weights=series3 ) )
-            return sk_mse( series1, series2, sample_weight=series3)
+            # return math.sqrt( np.average( ( series1-series2 ) ** 2, weights=series3 ) )
+            return sk_mse(series1, series2, sample_weight=series3)
             # alternative: 
             # but we would be introducing an sklearn dependency to calibra for the first time.
 

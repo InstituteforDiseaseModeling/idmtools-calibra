@@ -14,15 +14,17 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [3.9]
+        python-version: [3.11]
     env:
       PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
       PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: ${{ matrix.os }} Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -49,7 +51,7 @@ jobs:
             cd tests/unittests
             py.test -v --durations=3 --junitxml=test_results.xml
       - name: Upload idmtools_calibra unittest results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: idmtools_calibra_test_results
@@ -59,7 +61,7 @@ jobs:
           cd tests/integration
           py.test -v --durations=3 --junitxml=test_results.xml
       - name: Upload idmtools_calibra integration test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: idmtools_calibra_test_results
@@ -69,7 +71,7 @@ jobs:
           cd tests/algorithms
           py.test -v --durations=3 --junitxml=test_results.xml
       - name: Upload idmtools_calibra algorithms test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: idmtools_calibra_test_results

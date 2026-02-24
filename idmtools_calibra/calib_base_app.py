@@ -16,6 +16,7 @@ params = None  # hack block
 campaign_builder_fn = None
 demog_builder_fn = None
 
+
 def constrain_sample(sample):
     """
     This function is called on every samples and allow the user to edit them before they are passed
@@ -35,8 +36,10 @@ def constrain_sample(sample):
     """
     return sample
 
+
 campaign_mapper = None
 demog_mapper = None
+
 
 def map_sample_to_model_input(simulation, sample):
     """
@@ -51,15 +54,14 @@ def map_sample_to_model_input(simulation, sample):
     """
 
     tags = {}
-    global params
     from functools import partial
 
     build_camp_actual = None
     if campaign_builder_fn:
-        build_camp_actual = partial( campaign_builder_fn )
+        build_camp_actual = partial(campaign_builder_fn)
     build_demog_actual = None
     if demog_builder_fn:
-        build_demog_actual = partial( demog_builder_fn )
+        build_demog_actual = partial(demog_builder_fn)
 
     for p in params.CALIBRATION_PARAMETERS:
         if "MapTo" not in p:
@@ -75,28 +77,28 @@ def map_sample_to_model_input(simulation, sample):
             continue
         value = sample.pop(p["Name"])
         mapto_key = p["MapTo"]
-        if mapto_key.startswith( "campaign:" ):
+        if mapto_key.startswith("campaign:"):
             if not campaign_mapper:
-                raise ValueError( "No campaign mapper function defined." )
-            build_camp_actual = campaign_mapper( build_camp_actual, mapto_key, value )
+                raise ValueError("No campaign mapper function defined.")
+            build_camp_actual = campaign_mapper(build_camp_actual, mapto_key, value)
             tags[mapto_key] = f"{value}"
-        elif mapto_key.startswith( "demog:" ):
+        elif mapto_key.startswith("demog:"):
             if not demog_mapper:
-                raise ValueError( "No demog mapper function defined." )
-            build_demog_actual = demog_mapper( build_demog_actual, mapto_key, value )
+                raise ValueError("No demog mapper function defined.")
+            build_demog_actual = demog_mapper(build_demog_actual, mapto_key, value)
             tags[mapto_key] = f"{value}"
         else:
-            tags.update(simulation.task.set_parameter(mapto_key.replace( "config:", "" ), value))
+            tags.update(simulation.task.set_parameter(mapto_key.replace("config:", ""), value))
 
     for name, value in sample.items():
         print("UNUSED PARAMETER:" + name)
     assert len(sample) == 0  # All params used
 
     if build_camp_actual:
-        simulation.task.create_campaign_from_callback( builder=build_camp_actual )
+        simulation.task.create_campaign_from_callback(builder=build_camp_actual)
 
     if build_demog_actual:
-        simulation.task.create_demographics_from_callback( builder=build_demog_actual, from_sweep=True )
+        simulation.task.create_demographics_from_callback(builder=build_demog_actual, from_sweep=True)
 
     return tags
 
@@ -106,7 +108,7 @@ def init(settings, site, task=None, platform=None):
     global params
     params = settings
     if not platform:
-        print( "No platform specified. Creating Platform with Normal proirity." )
+        print("No platform specified. Creating Platform with Normal proirity.")
         platform = Platform(settings.LOCALE, priority="Normal")
 
     # If any directories of files were specified to be added as assets of the simulations, add them now.
@@ -119,14 +121,16 @@ def init(settings, site, task=None, platform=None):
             command = CommandLine(
                 f"singularity exec ./Assets/{settings.SIF_FILENAME} python3 Assets/{Path(settings.MODEL_DRIVER).name}"
             )
-            task = Task(provided_command=command,script_path=settings.MODEL_DRIVER)
+            task = Task(provided_command=command, script_path=settings.MODEL_DRIVER)
             task.common_assets.add_assets(AssetCollection.from_id(item_id=settings.SIF))
         else:
-            #print( '"SIF" not found in settings."' )
+            # print('"SIF" not found in settings."')
             command = CommandLine(
                 f"python3 Assets/{Path(settings.MODEL_DRIVER).name}"
             )
-            task = JSONConfiguredPythonTask(script_path=str(settings.MODEL_DRIVER), common_assets=assets, 
+            task = JSONConfiguredPythonTask(
+                script_path=str(settings.MODEL_DRIVER),
+                common_assets=assets,
                 config_file_name=settings.CONFIG_FILENAME)
             task.provided_command = command
 
