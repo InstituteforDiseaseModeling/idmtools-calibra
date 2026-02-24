@@ -21,16 +21,6 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
 
         self.independent_column = independent_column
         self.dependent_column = dependent_column
-        # I really want to not have to pass reference_type at all here. Should default
-        # to dep col w/o having to even tell it.
-        self.reference = site.get_reference_data()
-
-        # rename reference data column to NOT conflict with model data column; it happens to have the same column
-        # name in this example
-        self.reference_column = f"{self.dependent_column}_reference"
-        self.reference = self.reference.rename(
-            columns={self.dependent_column: self.reference_column}
-        )
         super().__init__(filenames=[str(self.model_output_filename)])
 
     # Here we do what needs to be done once per simulation. Often, as below, the main goal is to line up comparable
