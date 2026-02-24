@@ -4,7 +4,7 @@ class Settings:
     #
     # Run environment controls
     #
-    LOCALE = 'SLURMStage'
+    LOCALE = 'Calculon'
     MODEL_DRIVER = manifest.eradication_path
     REFERENCE_DATA_DIR = manifest.REFERENCE_DATA_DIR 
     INPUT_DIRS = []
