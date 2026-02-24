@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "idmtools-calibra"
 dynamic = ["version"]
 description = "Calibration tool for IDM-Tools"
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
 keywords = ["modeling", "IDM"]
 authors = [
