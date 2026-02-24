@@ -39,6 +39,7 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     environment:
       name: pypi
       url: https://pypi.org/project/idmtools-calibra/
@@ -59,7 +60,6 @@ jobs:
     name: Publish to TestPyPI
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     environment:
       name: testpypi
       url: https://test.pypi.org/project/idmtools-calibra/
