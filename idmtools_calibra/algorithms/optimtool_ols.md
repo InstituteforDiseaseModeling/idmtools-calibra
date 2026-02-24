@@ -1,3 +1,29 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [OLS OptimTool — Gradient Ascent via Linear Regression](#ols-optimtool--gradient-ascent-via-linear-regression)
+  - [What It Does (High Level)](#what-it-does-high-level)
+  - [Key Components](#key-components)
+    - [Initialization](#initialization)
+    - [`choose_initial_samples`](#choose_initial_samples)
+    - [`sample_hypersphere`](#sample_hypersphere)
+    - [`choose_samples_via_gradient_ascent`](#choose_samples_via_gradient_ascent)
+    - [`clamp`](#clamp)
+    - [`constrain_sample_fn`](#constrain_sample_fn)
+    - [State Management (`get_state` / `set_state`)](#state-management-get_state--set_state)
+  - [OLS Linear Regression Explained](#ols-linear-regression-explained)
+    - [The Model](#the-model)
+    - [How Samples Apply](#how-samples-apply)
+    - [In Matrix Form](#in-matrix-form)
+    - [Using the Gradient](#using-the-gradient)
+  - [R² (R-squared)](#r%C2%B2-r-squared)
+  - [Connecting to an EMOD-SIR Problem](#connecting-to-an-emod-sir-problem)
+    - [Visually](#visually)
+    - [Analogy](#analogy)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # OLS OptimTool — Gradient Ascent via Linear Regression
 
 OptimTool is a gradient-ascent-based optimization algorithm used for **calibration** of simulation models. It is part of the `idmtools_calibra` package (from the Institute for Disease Modeling).
