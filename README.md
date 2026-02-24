@@ -17,7 +17,9 @@
 - [Development Environment Setup](#development-environment-setup)
   - [First Time Setup](#first-time-setup)
   - [Development Tips](#development-tips)
-  - [Building docs](#building-docs)
+  - [Documentation](#documentation)
+    - [Build mkdocs locally](#build-mkdocs-locally)
+    - [Build and publish document from Github Actions](#build-and-publish-document-from-github-actions)
   - [Resume Supports Parameters](#resume-supports-parameters)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
