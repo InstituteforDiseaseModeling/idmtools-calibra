@@ -1,3 +1,24 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Overview](#overview)
+  - [Calibration Workflow](#calibration-workflow)
+  - [How OptimTool Works: EMOD SIR Example](#how-optimtool-works-emod-sir-example)
+    - [The Problem](#the-problem)
+    - [Step 1: Samples Become Simulations](#step-1-samples-become-simulations)
+    - [Step 2: Each Simulation Gets a Score](#step-2-each-simulation-gets-a-score)
+    - [Step 3: OLS Regression Fits Scores to Parameters](#step-3-ols-regression-fits-scores-to-parameters)
+    - [Step 4: Gradient Tells You Which Way to Move](#step-4-gradient-tells-you-which-way-to-move)
+    - [Step 5: Repeat Until Convergence](#step-5-repeat-until-convergence)
+    - [When R² Is Low](#when-r%C2%B2-is-low)
+  - [Key Abstractions](#key-abstractions)
+  - [Resume Support](#resume-support)
+    - [`iter_step` Options](#iter_step-options)
+  - [Example: EMOD SIR (OutputOption1)](#example-emod-sir-outputoption1)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Overview
 
 **idmtools_calibra** is an iterative calibration framework for scientific and epidemic models. It

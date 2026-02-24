@@ -1,3 +1,15 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [idmtools_calibra](#idmtools_calibra)
+  - [Features](#features)
+  - [Package Structure](#package-structure)
+  - [Examples](#examples)
+  - [Contents](#contents)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # idmtools_calibra
 
 **idmtools_calibra** (v3.0.0) is an iterative parameter calibration framework for epidemic and scientific models. It repeatedly samples the parameter space, runs simulations via [idmtools](https://comps.idmod.org/), compares output to reference data, and updates the sampling strategy until convergence.

@@ -1,3 +1,26 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Plotters](#plotters)
+  - [Available Plotters](#available-plotters)
+  - [BasePlotter](#baseplotter)
+    - [Constructor](#constructor)
+    - [Abstract Method](#abstract-method)
+      - [`visualize(iteration_state)`](#visualizeiteration_state)
+    - [Helper Methods](#helper-methods)
+      - [`combine_by_site(site_name, analyzer_names, results)` *(staticmethod)*](#combine_by_sitesite_name-analyzer_names-results-staticmethod)
+    - [Custom Plotter Example](#custom-plotter-example)
+  - [LikelihoodPlotter](#likelihoodplotter)
+  - [SiteDataPlotter](#sitedataplotter)
+  - [OptimToolPlotter](#optimtoolplotter)
+  - [OptimToolPBNBPlotter](#optimtoolpbnbplotter)
+  - [OptimToolSPSAPlotter](#optimtoolspsaplotter)
+  - [SeparatrixBHMPlotter](#separatrixbhmplotter)
+  - [Using Multiple Plotters](#using-multiple-plotters)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Plotters
 
 Plotters generate diagnostic visualizations after each calibration iteration. They are passed to `CalibManager` and called automatically.

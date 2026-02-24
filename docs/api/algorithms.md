@@ -1,3 +1,30 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Algorithms](#algorithms)
+  - [Comparison](#comparison)
+  - [NextPointAlgorithm *(abstract base)*](#nextpointalgorithm-abstract-base)
+    - [Methods to Implement](#methods-to-implement)
+    - [Inherited Utility Methods](#inherited-utility-methods)
+  - [OptimTool](#optimtool)
+    - [Constructor](#constructor)
+    - [Parameter Dictionary Format](#parameter-dictionary-format)
+    - [Example](#example)
+  - [IMIS](#imis)
+    - [Constructor](#constructor-1)
+    - [Example](#example-1)
+  - [GPC](#gpc)
+    - [Constructor](#constructor-2)
+  - [SPSA](#spsa)
+    - [Constructor](#constructor-3)
+  - [PSPO](#pspo)
+    - [Constructor](#constructor-4)
+  - [PBNB](#pbnb)
+    - [Constructor](#constructor-5)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Algorithms
 
 Sampling algorithms that propose and refine parameter sets across calibration iterations.

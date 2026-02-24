@@ -1,3 +1,14 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [API Reference](#api-reference)
+  - [Package Map](#package-map)
+  - [Typical Import Pattern](#typical-import-pattern)
+  - [Calibration Flow](#calibration-flow)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # API Reference
 
 Complete reference for all public classes and functions in **idmtools_calibra**.

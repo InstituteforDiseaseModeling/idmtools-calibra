@@ -1,3 +1,21 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Analyzers](#analyzers)
+  - [BaseCalibrationAnalyzer](#basecalibrationanalyzer)
+    - [Constructor](#constructor)
+    - [Methods to Implement](#methods-to-implement)
+    - [Inherited Method](#inherited-method)
+      - [`cache()`](#cache)
+    - [Example](#example)
+  - [RMSEAnalyzer](#rmseanalyzer)
+    - [Constructor](#constructor-1)
+    - [Custom Cost Function](#custom-cost-function)
+    - [Example](#example-1)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Analyzers
 
 Analyzers compare simulation output against reference data and return a scalar score (likelihood or error) per simulation. They extend idmtools' `IAnalyzer` interface.
