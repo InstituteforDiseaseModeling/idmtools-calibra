@@ -1,4 +1,10 @@
-![Staging: idmtools-calibra]
+# emodpy
+
+[![Build docs and deploy to GH Pages](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml)
+[![Lint](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml)
+[![Build and publish package to Pypi](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/publish-pypi.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/publish-pypi.yml)
+[![Tests](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/tests.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/tests.yml)
+
 
 # idmtools-calibra
 
@@ -17,14 +23,14 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-# User Installation
+# User Installation 
 
 ```bash
-pip install idmtools-calibra
+pip install idmtools-calibra 
 ```
 
 ## Pre-requisites
-- Python 3.6/3.7 x64
+- Python 3.10, 3.11, 3.12, 3.13, 31.4 x64
 
 
 # Development Environment Setup
@@ -54,14 +60,22 @@ coverage    -   Run tests and generate coverage report that is shown in browser
 On Windows, you can use `pymake` instead of `make`
 
 
-## Building docs
+## Documentation
+Documentation available at https://institutefordiseasemodeling.github.io/idmtools-calibra/.
 
-From your virtualenv, install idmtools_calibra and all dependencies. Then from the docs folder, run ``pip install -r requirements.txt``. You can build the docs from that folder using ``make html``. 
+### Build mkdocs locally
 
-To pick up docstring changes, you must re-run the setup script to include those changes in the itertool installation. Then run ``make clean`` and re-run ``make html``. 
-
-Documentation on Read the Docs is available at https://docs.idmod.org/projects/idmtools_calibra/en/latest/.
-
+Create and activate a venv.
+Navigate to the root directory of the repo.
+```bash
+cd docs
+pip install -r requirments.txt
+mkdocs build  # build docs
+mkdocs serve  # view docs from  http://127.0.0.1:8000/idmtools_calibra/
+mkdocs gh-deploy # deploy to github (need to be on the specific branch)
+```
+### Build and publish document from Github Actions
+Go to Github Actions -> Run GHA job: **Deploy MkDocs via GitHub Pages API**
 
 ## Resume Supports Parameters
 CalibManager's run_calibration method supports the following parameters for resume action, for example:

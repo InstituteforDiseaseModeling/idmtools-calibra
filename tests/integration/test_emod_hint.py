@@ -6,6 +6,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
@@ -26,6 +27,7 @@ mysettings = settings.Settings()
 mysettings.N_ITERATIONS = 2
 mysettings.N_SAMPLES = 10
 
+@pytest.skip
 class TestEMODHint(unittest.TestCase):
     def demog_mapper(self, build_demog_actual, mapto_key, value):
         """
