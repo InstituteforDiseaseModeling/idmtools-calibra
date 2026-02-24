@@ -12,7 +12,7 @@
 
 # idmtools_calibra
 
-**idmtools_calibra** (v3.0.0) is an iterative parameter calibration framework for epidemic and scientific models. It repeatedly samples the parameter space, runs simulations via [idmtools](https://comps.idmod.org/), compares output to reference data, and updates the sampling strategy until convergence.
+**idmtools_calibra** (v3.0.0) is an iterative parameter calibration framework for epidemic and scientific models. It repeatedly samples the parameter space, runs simulations/experiments via idmtools on [comps](https://comps.idmod.org/), compares output to reference data, and updates the sampling strategy until convergence.
 
 For a detailed explanation and step-by-step calibration of an EMOD SIR model, see the  [Overview](overview.md)
 
