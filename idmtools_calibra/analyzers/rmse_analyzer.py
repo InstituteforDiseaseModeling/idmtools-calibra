@@ -11,16 +11,23 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
 
     # Setting up the reference data for use in the analyzer and identifying the model output file to compare against
     def __init__(
-        self,
-        site,
-        dependent_column,
-        independent_column,
-        output_filename="output.csv"
+            self,
+            site,
+            dependent_column,
+            independent_column,
+            output_filename="output.csv"
     ):
         self.model_output_filename = '/'.join(['output', f'{output_filename}'])
-
         self.independent_column = independent_column
         self.dependent_column = dependent_column
+        self.reference_column = f"{self.dependent_column}_reference"
+
+        # Load and rename reference data
+        self.reference = site.get_reference_data()
+        self.reference = self.reference.rename(
+            columns={self.dependent_column: self.reference_column}
+        )
+
         super().__init__(filenames=[str(self.model_output_filename)])
 
     # Here we do what needs to be done once per simulation. Often, as below, the main goal is to line up comparable
