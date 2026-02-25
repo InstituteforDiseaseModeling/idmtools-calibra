@@ -9,7 +9,7 @@ PY?=python
 IPY=python -c
 PDR=$(PDS)run.py
 CLDIR=$(PDS)clean_dir.py
-PYPI_URL?=https://packages.idmod.org/api/pypi/idm-pypi-staging/
+
 
 help:
 	$(PDS)get_help_from_makefile.py
@@ -24,13 +24,18 @@ clean-all: clean ## Deleting package info hides plugins so we only want to do th
 lint: ## check style with flake8
 	flake8 --ignore=E501,W291 $(PACKAGE_NAME)
 
-test: ## Run our tests
-	$(MAKE) -C tests $@
+test-unittests: ## Run unittests
+	cd tests/unittests && python -m pytest -v --durations=3 --junitxml=test_results.xml
 
-test-all: ## Run all our tests
-	$(MAKE) -C tests $@
+test-it-tests: ## Run interation tests
+	cd tests/integration && python -m pytest -v --durations=3 --junitxml=test_results.xml
 
-dist: clean ## build our package
+test-algo-tests: ## Run algorithms tests
+	cd tests/algorithms && python -m pytest -v --durations=3 --junitxml=test_results.xml
+
+test-all: test-unittests test-algo-tests test-it-tests ## Run all tests
+
+dist: clean ## build package
 	python -m build
 
 release-staging: dist ## perform a release to staging

@@ -57,10 +57,11 @@ There is a Makefile file available for most common development tasks. Here is a 
 clean       -   Clean up temproary files
 lint        -   Lint package and tests
 test        -   Run All tests
-coverage    -   Run tests and generate coverage report that is shown in browser
+docs        -   Build mkdocs documentation
+bump-patch  -   Bump patch version
+bump-minor  -   Bump minor version
+bump-major  -   Bump major version
 ```
-On Windows, you can use `pymake` instead of `make`
-
 
 ## Documentation
 Documentation available at https://institutefordiseasemodeling.github.io/idmtools-calibra/.
@@ -104,3 +105,11 @@ iter_step supports the following options:
 - analyze: analyze the output data from given iteration
 - plot: just plot for given iteration
 - next_point: go directly to next iteration
+
+## Examples as Reference
+
+The `examples/` directory contains canonical usage patterns:
+- `examples/solar/` — Simplest: fits a linear model (y = mx + c) to data using OptimTool + RMSE
+- `examples/sir/` — SIR epidemiological model with multiple output configuration options
+- `examples/emod_sir/` — EMOD sir disease model calibrations using COMPS platform
+When implementing new features or debugging, the solar example (`solar_optimtool_linear_model.py`) is the clearest end-to-end reference.
