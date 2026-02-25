@@ -16,7 +16,7 @@ help:
 
 clean: ## Clean most of the temp-data from the project
 	$(MAKE) -C tests clean
-	-rm -rf *.pyc *.pyo *.done *.log .coverage dist build **/__pycache__
+	-rm -rf *.pyc *.pyo *.done .coverage dist build **/__pycache__
 
 clean-all: clean ## Deleting package info hides plugins so we only want to do that for packaging
 	-rm -rf **/*.egg-info/
@@ -30,95 +30,27 @@ test: ## Run our tests
 test-all: ## Run all our tests
 	$(MAKE) -C tests $@
 
-test-failed: ## Run only previously failed tests
-	$(MAKE) -C tests $@
-
-test-long: ## Run any tests that takes more than 30s
-	$(MAKE) -C tests $@
-
-test-no-long: ## Run any tests that takes less than 30s
-	$(MAKE) -C tests $@
-
-test-comps: ## Run our comps tests
-	$(MAKE) -C tests $@
-
-test-docker: ## Run our docker tests
-	$(MAKE) -C tests $@
-
-test-python: ## Run our python tests
-	$(MAKE) -C tests $@
-
-test-smoke: ## Run our smoke tests
-	$(MAKE) -C tests $@
-
-test-report: ## Launch test report in browser
-	$(MAKE) -C tests $@
-
-coverage-report: coverage ## Generate HTML report from coverage. Requires running coverage run first(coverage, coverage-smoke, coverage-all)
-	$(MAKE) -C tests $@
-
-coverage-report-view: coverage-report
-	$(MAKE) -C tests $@
-
-coverage: clean ## Generate a code-coverage report
-	$(MAKE) -C tests $@
-
-coverage-smoke: clean ## Generate a code-coverage report
-	$(MAKE) -C tests $@
-
-coverage-all: ## Generate a code-coverage report using all tests
-	$(MAKE) -C tests $@
-
-# Release related rules
-
 dist: clean ## build our package
-	python setup.py sdist
+	python -m build
 
 release-staging: dist ## perform a release to staging
-	twine upload --verbose --repository-url $(PYPI_URL) dist/*
-
-bump-release: ## bump the release version.
-	bump2version release --commit
-
-# Use before release-staging-release-commit to confirm next version.
-bump-release-dry-run: ## bump the release version. (dry run)
-	bump2version release --dry-run --allow-dirty --verbose
+	twine upload --verbose --repository-url https://upload.test.pypi.org/legacy/ dist/*
 
 bump-patch: ## bump the patch version
-	bump2version patch --commit
+	python bump_version --patch
 
 bump-minor: ## bump the minor version
-	bump2version minor --commit
+	python bump_version --minor
 
 bump-major: ## bump the major version
-	bump2version major --commit
-
-bump-patch-dry-run: ## bump the patch version(dry run)
-	bump2version patch --dry-run --allow-dirty --verbose
-
-bump-minor-dry-run: ## bump the minor version(dry run)
-	bump2version minor --dry-run --allow-dirty --verbose
-
-bump-major-dry-run: ## bump the major version(dry run)
-	bump2version major --dry-run --allow-dirty --verbose
-
-dev-watch: ## Run lint on any python code changes
-	$(PDS)run_commands_and_wait.py --command 'watchmedo shell-command --drop --wait --interval 10 --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --recursive --command="$(MAKE) --ignore-errors lint"' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_calibra' \
-
-changelog: ## Generate partial changelog
-	$(PDS)changelog.py
-
-generate-stubs: ## Generate python interfaces. Useful to identify what the next version should be by comparing to previous runs
-	$(PDS)make_stub_files.py  -c ./.dev_scripts/stub.cfg
-	$(PDS)process_interfaces.py
+	python bump_version major
 
 build-docs: ## build docs
-	$(PDR) -wd 'docs' -ex 'make html'
+	mkdocs build
 
-build-docs-server: build-docs ## builds docs and launch a webserver and watches for changes to documentation
-	$(PDS)serve_docs.py
+build-docs-serve: build-docs ## builds docs and launch a webserver and watches for changes to documentation
+	mkdocs serve
 
 docs: build-docs  ## build docs
 
-docs-server: build-docs-server ## builds docs and launch a webserver and watches for changes to documentation
+docs-serve: build-docs-serve ## builds docs and launch a webserver and watches for changes to documentation
