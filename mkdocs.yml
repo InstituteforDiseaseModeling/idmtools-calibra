@@ -1,8 +1,13 @@
 site_name: idmtools_calibra
+site_description: Idm calibra tools for disease modeling workflows on HPC clusters
 site_url: https://institutefordiseasemodeling.github.io/idmtools_calibra/
+site_author: Institute for Disease Modeling
 repo_url: https://github.com/InstituteforDiseaseModeling/idmtools_calibra
-repo_name: idmtools_calibra
+repo_name: institutefordiseasemodeling/idmtools_calibra
+
+# Configuration
 docs_dir: docs
+site_dir: site
 
 nav:
   - Home: index.md
@@ -16,22 +21,50 @@ nav:
       - Plotters: api/plotters.md
       - Output: api/output.md
 
+# Theme
 theme:
   name: material
-  logo: images/idm-logo-transparent.png
-  favicon: images/favicon.ico
   palette:
-    scheme: default
-    primary: blue
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
   features:
+    - navigation.instant
+    - navigation.tracking
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
+    - navigation.path
     - navigation.top
-    - toc.integrate
+    - navigation.indexes
     - search.suggest
     - search.highlight
+    - search.share
+    - content.tabs.link
     - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/dna
 
 plugins:
   - search:
@@ -89,13 +122,27 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-copyright: "Copyright 1999-2025 Gates Foundation. All rights reserved."
-
+copyright: "Copyright 1999-2026 Gates Foundation. All rights reserved."
+# Extra
 extra:
   social:
-    - icon: fontawesome/solid/house
-      link: https://docs.idmod.org
-      name: IDM docs
     - icon: fontawesome/brands/github
       link: https://github.com/institutefordiseasemodeling/idmtools_calibra
-      name: GitHub
+      name: idmtools_calibra on GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/search/?q=idmtools_calibra
+      name: idmtools_calibra on PyPI
+
+  generator: false
+
+# Extra CSS
+extra_css:
+  - assets/css/extra.css
+
+# Extra JavaScript
+extra_javascript:
+  - assets/js/extra.js
+
+# Watch
+watch:
+  - mkdocs.yml
