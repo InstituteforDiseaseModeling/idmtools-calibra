@@ -1,5 +1,5 @@
 site_name: idmtools_calibra
-site_description: Idm calibra tools for disease modeling workflows on HPC clusters
+site_description: Iterative parameter calibration framework for epidemic and scientific models
 site_url: https://institutefordiseasemodeling.github.io/idmtools_calibra/
 site_author: Institute for Disease Modeling
 repo_url: https://github.com/InstituteforDiseaseModeling/idmtools_calibra
@@ -12,7 +12,9 @@ site_dir: site
 nav:
   - Home: index.md
   - Install: installation.md
+  - Quick Start: quickstart.md
   - Overview: overview.md
+  - Troubleshooting: troubleshooting.md
   - API Reference:
       - Overview: api/index.md
       - Core: api/idmtools_calibra.md
@@ -77,6 +79,7 @@ plugins:
       minify_css: true
       htmlmin_opts:
         remove_comments: true
+
 # Markdown Extensions
 markdown_extensions:
   # Python Markdown
@@ -123,6 +126,7 @@ markdown_extensions:
   - pymdownx.tilde
 
 copyright: "Copyright 1999-2026 Gates Foundation. All rights reserved."
+
 # Extra
 extra:
   social:

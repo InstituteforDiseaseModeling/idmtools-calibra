@@ -1,32 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Core Package](#core-package)
-  - [CalibManager](#calibmanager)
-    - [Constructor](#constructor)
-    - [Key Methods](#key-methods)
-      - [`run_calibration(**kwargs)`](#run_calibrationkwargs)
-      - [`open_for_reading(calibration_directory)` *(classmethod)*](#open_for_readingcalibration_directory-classmethod)
-    - [Example](#example)
-  - [CalibSite](#calibsite)
-    - [Constructor](#constructor-1)
-    - [Abstract Methods to Implement](#abstract-methods-to-implement)
-    - [Example](#example-1)
-  - [RMSESiteSingleChannel](#rmsesitesinglechannel)
-    - [Constructor](#constructor-2)
-    - [Example](#example-2)
-  - [IterationState](#iterationstate)
-    - [Key Attributes](#key-attributes)
-  - [ResampleManager](#resamplemanager)
-    - [Constructor](#constructor-3)
-    - [Key Method](#key-method)
-      - [`resample_and_run()`](#resample_and_run)
-  - [Utility Functions](#utility-functions)
-    - [`set_parameter_sweep_callback`](#set_parameter_sweep_callback)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Core Package
 
 The top-level `idmtools_calibra` package contains the central orchestration classes for running calibrations.
@@ -154,7 +125,7 @@ CalibSite(name)
 
 ```python
 from idmtools_calibra.calib_site import CalibSite
-from my_analyzers import MyAnalyzer
+import pandas as pd
 
 class MySite(CalibSite):
     def __init__(self):
@@ -244,11 +215,11 @@ Orchestrates post-calibration resampling across one or more `BaseResampler` step
 ResampleManager(steps, calibration_manager, restart_at_step=None)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `steps` | `List[BaseResampler]` | — | Ordered list of resampling steps |
-| `calibration_manager` | `CalibManager` | — | The completed calibration to resample from |
-| `restart_at_step` | `int` | `None` | Resume resampling from a specific step index |
+| Parameter | Type | Description                                  |
+|-----------|------|----------------------------------------------|
+| `steps` | `List[BaseResampler]` | Ordered list of resampling steps             |
+| `calibration_manager` | `CalibManager` | The completed calibration to resample from   |
+| `restart_at_step` | `int` | Resume resampling from a specific step index |
 
 ### Key Method
 
@@ -271,3 +242,11 @@ Convenience callback compatible with `CalibManager.map_replicates_callback`. Set
 ```python
 set_parameter_sweep_callback(simulation, param='Run_Number', value=42)
 ```
+
+###  `generate_ll_all`
+```python
+from idmtools_calibra.utilities.ll_all_generator import generate_ll_all
+generate_ll_all(calib_manager, iteration, ll_all_name)
+```
+
+Method rebuild ll_all.csv.

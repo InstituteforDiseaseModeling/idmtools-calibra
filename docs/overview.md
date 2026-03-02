@@ -1,29 +1,6 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Overview](#overview)
-  - [Calibration Workflow](#calibration-workflow)
-  - [How OptimTool Works: EMOD SIR Example](#how-optimtool-works-emod-sir-example)
-    - [The Problem](#the-problem)
-    - [Step 1: Samples Become Simulations](#step-1-samples-become-simulations)
-    - [Step 2: Each Simulation Gets a Score](#step-2-each-simulation-gets-a-score)
-    - [Step 3: OLS Regression Fits Scores to Parameters](#step-3-ols-regression-fits-scores-to-parameters)
-    - [Step 4: Gradient Tells You Which Way to Move](#step-4-gradient-tells-you-which-way-to-move)
-    - [Step 5: Repeat Until Convergence](#step-5-repeat-until-convergence)
-    - [When R² Is Low](#when-r%C2%B2-is-low)
-  - [Key Abstractions](#key-abstractions)
-  - [Resume Support](#resume-support)
-    - [`iter_step` Options](#iter_step-options)
-  - [Example: EMOD SIR (OutputOption1)](#example-emod-sir-outputoption1)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Overview
 
-**idmtools_calibra** is an iterative calibration framework for scientific and epidemic models. It
-runs parameter sweeps, compares model output to reference data, and updates the sampling strategy
-until convergence.
+**idmtools_calibra** is an iterative calibration framework for scientific and epidemic models. It runs parameter sweeps, compares model output to reference data, and updates the sampling strategy until convergence.
 
 ---
 
@@ -31,19 +8,14 @@ until convergence.
 
 The calibration loop is orchestrated by `CalibManager` and follows these steps each iteration:
 
-1. **Sample** — `NextPointAlgorithm.get_samples_for_iteration()` generates a set of parameter
-   combinations to evaluate.
+1. **Sample** — `NextPointAlgorithm.get_samples_for_iteration()` generates a set of parameter combinations to evaluate.
 2. **Configure** — `map_sample_to_model_input_fn` maps each sample row to the simulation task.
-3. **Execute** — Simulations are submitted and run via the idmtools `Platform`
-   (Container / COMPS HPC).
-4. **Analyze** — `BaseCalibrationAnalyzer` compares model output to reference data and returns
-   a likelihood or error score.
-5. **Update** — `NextPointAlgorithm.set_results_for_iteration()` updates the algorithm state with
-   the scores.
+3. **Execute** — Simulations are submitted and run via the idmtools `Platform` (Container / COMPS / Slurm).
+4. **Analyze** — `BaseCalibrationAnalyzer` compares model output to reference data and returns a likelihood or error score.
+5. **Update** — `NextPointAlgorithm.set_results_for_iteration()` updates the algorithm state with the scores.
 6. **Plot** — `BasePlotter.visualize()` generates diagnostic plots for the iteration.
 
-Each iteration's state is written to `Calibration.json`, enabling **resume** from any
-iteration or phase.
+Each iteration's state is written to `Calibration.json`, enabling **resume** from any iteration or phase.
 
 ---
 
@@ -70,6 +42,7 @@ t_max,59.999
 
 The goal is to find values of `a`, `b`, `c` such that the simulated epidemic peaks at t ≈ 60.
 
+![SIR model](images/sir.png)
 ### Step 1: Samples Become Simulations
 
 Each iteration, `OptimTool` generates ~25 parameter combinations. Each row runs one EMOD simulation:
@@ -136,7 +109,7 @@ Iteration N:  Center has converged
                → best parameter values found
 ```
 
-!!! Note "What we are solving for"
+!!! note "What we are solving for"
     The **calibration goal** is to find the disease model parameters (`a`, `b`, `c`) — the values
     passed into EMOD that reproduce the observed epidemic. These are the final output of the calibration.
 
@@ -156,18 +129,70 @@ If the score–parameter relationship is highly nonlinear in the sampled region 
 
 ---
 
+## Algorithm Selection
+
+| Algorithm | Class | Strategy | Best For |
+|-----------|-------|----------|----------|
+| `OptimTool` | `OptimTool` | Adaptive OLS regression | General-purpose; start here |
+| `IMIS` | `IMIS` | Bayesian importance sampling | When you need the full posterior distribution, not just the best point |
+| `GPC` | `GPC` | Gaussian process surrogate | Smooth, low-dimensional parameter spaces |
+| `SPSA` | `SPSA` | Stochastic gradient approximation | Noisy objective functions |
+| `PSPO` | `PSPO` | Particle swarm / perturbation | Population-based optimization |
+| `PBNB` | `OptimToolPBNB` | Progressive branch-and-bound | High-dimensional bounded spaces |
+
+**OptimTool key tuning parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `mu_r` | `0.1` | Mean fractional step size — how far to move each iteration |
+| `sigma_r` | `0.02` | Step size standard deviation |
+| `rsquared_thresh` | `0.5` | R² threshold; below this, fall back to best sample |
+| `samples_per_iteration` | `100` | Simulations per iteration |
+
+See [API Reference: Algorithms](api/algorithms.md) for full details on all algorithms.
+
+---
+
+## Multi-Site Calibration
+
+Pass multiple sites to `CalibManager` to calibrate against several reference datasets simultaneously:
+
+```python
+from idmtools_calibra.rmse_site import RMSESiteSingleChannel
+
+site_incidence = RMSESiteSingleChannel(
+    name='incidence',
+    reference_sources={'data': 'reference/incidence.csv'}
+)
+site_prevalence = RMSESiteSingleChannel(
+    name='prevalence',
+    reference_sources={'data': 'reference/prevalence.csv'}
+)
+
+calib = CalibManager(
+    ...
+    sites=[site_incidence, site_prevalence],
+    ...
+)
+```
+
+Each site contributes an independent score per simulation. The framework combines them (weighted by `analyzer.weight`) into a single total score used by the sampling algorithm.
+
+---
+
 ## Key Abstractions
 
-| Class | Module | Role |
-|---|---|---|
-| `CalibManager` | `calib_manager` | Top-level orchestrator |
-| `NextPointAlgorithm` | `algorithms/next_point_algorithm` | Abstract base for sampling strategies |
-| `OptimTool` | `algorithms/optim_tool` | Adaptive OLS regression-based algorithm (default) |
-| `CalibSite` / `RMSESiteSingleChannel` | `calib_site`, `rmse_site` | Wraps reference data and analyzers |
-| `BaseCalibrationAnalyzer` | `analyzers/base_calibration_analyzer` | Compares output to reference data |
-| `IterationState` | `iteration_state` | Serializable per-iteration state |
-| `BasePlotter` | `plotters/base_plotter` | Generates diagnostic plots |
-| `BaseResampler` | `resamplers/base_resampler` | Post-calibration resampling strategies |
+| Class                                 | Module | Role                                              |
+|---------------------------------------|---|---------------------------------------------------|
+| `CalibManager`                        | `calib_manager` | Top-level orchestrator                            |
+| `NextPointAlgorithm`                  | `algorithms/next_point_algorithm` | Abstract base for sampling strategies             |
+| `OptimTool`                           | `algorithms/optim_tool` | Adaptive OLS regression-based algorithm (default) |
+| `CalibSite` / `RMSESiteSingleChannel` | `calib_site`, `rmse_site` | Wraps reference data and analyzers                |
+| `BaseCalibrationAnalyzer`             | `analyzers/base_calibration_analyzer` | Compares output to reference data                 |
+| `IterationState`                      | `iteration_state` | Serializable per-iteration state                  |
+| `BasePlotter`                         | `plotters/base_plotter` | Generates diagnostic plots                        |
+| `BaseResampler`                       | `resamplers/base_resampler` | Post-calibration resampling strategies            |
+| `ResumeManager`                       | `utilities/resume_manager` | Supports resuming from any iteration and phase    |
 
 ---
 
@@ -189,12 +214,12 @@ calib_manager.run_calibration(
 
 ### `iter_step` Options
 
-| Value | Behaviour                                                   |
-|---|-------------------------------------------------------------|
-| `commission` | Start a new iteration with fresh parameter samples          |
+| Value | Behaviour |
+|-------|-----------|
+| `commission` | Start a new iteration with fresh parameter samples |
 | `analyze` | Analyze existing simulation output from the given iteration |
-| `plot` | Generate plots for the given iteration only                 |
-| `next_point` | The next iteration's samples of OptimTool                   |
+| `plot` | Generate plots for the given iteration only |
+| `next_point` | Advance directly to computing next iteration's samples |
 
 ---
 

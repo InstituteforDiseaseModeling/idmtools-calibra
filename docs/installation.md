@@ -1,74 +1,126 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
+# Installation
 
-- [Install](#install)
-  - [Prerequisites](#prerequisites)
-  - [Installation instructions](#installation-instructions)
+## Quick Install
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+```bash
+pip install idmtools_calibra
+```
 
-# Install
-
-Follow the steps below to install idmtools_calibra.
+---
 
 ## Prerequisites
 
-First, ensure the following prerequisites are met.
+- Windows 10+ Pro/Enterprise, Linux, or macOS
+- Python 3.10, 3.11, 3.12, 3.13, or 3.14 (64-bit)
 
-- Windows 10 Pro or Enterprise, Linux, or Mac
-- Python >= 3.10 (https://www.python.org/downloads/release)
-- A file that indicates the pip index-url:
+---
 
-    === "Windows"
-        In `C:\Users\Username\pip\pip.ini` add the following:
-        ```ini
-        [global]
-        index-url = https://pypi.org/simple
-        ```
+## Detailed Installation
 
-    === "Linux / Mac"
-        In `$HOME/.config/pip/pip.conf` add the following:
-        ```ini
-        [global]
-        index-url = https://pypi.org/simple
-        ```
+### 1. Create a virtual environment
 
-## Installation instructions
+```bash
+python -m venv v-calibra
+```
 
-1. Open a command prompt and create a virtual environment in any directory you choose.
-   The command below names the environment `v-calibra`, but you may use any desired name:
+### 2. Activate it
 
-    ```bash
-    python -m venv v-calibra
+=== "Windows"
+    ```bat
+    v-calibra\Scripts\activate
     ```
 
-2. Activate the virtual environment:
-
-    === "Windows"
-        ```bat
-        v-calibra\Scripts\activate
-        ```
-
-    === "Linux / Mac"
-        ```bash
-        source v-calibra/bin/activate
-        ```
-
-3. Install idmtools_calibra:
-
+=== "Linux / macOS"
     ```bash
-    pip install idmtools_calibra
+    source v-calibra/bin/activate
     ```
 
-    !!! note
-        If you are on Linux, also run:
-        ```bash
-        pip install keyrings.alt
-        ```
+### 3. Install idmtools_calibra
 
-4. When you are finished, deactivate the virtual environment:
+```bash
+pip install idmtools_calibra
+```
 
+!!! note "Linux additional dependency"
+    On Linux, also install the keyring backend:
     ```bash
-    deactivate
+    pip install keyrings.alt
     ```
+
+### 4. Verify the installation
+
+```python
+import idmtools_calibra
+print(idmtools_calibra.__version__)
+```
+
+## Corporate or Offline Environments
+
+If you are behind a corporate proxy or need to point pip at a custom index, create a pip configuration file:
+
+=== "Windows"
+    `C:\Users\<Username>\pip\pip.ini`:
+    ```ini
+    [global]
+    index-url = https://pypi.org/simple
+    ```
+
+=== "Linux / macOS"
+    `$HOME/.config/pip/pip.conf`:
+    ```ini
+    [global]
+    index-url = https://pypi.org/simple
+    ```
+
+---
+
+## Development Install
+
+For contributing to idmtools_calibra or running tests:
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/InstituteforDiseaseModeling/idmtools_calibra.git
+cd idmtools_calibra
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python -m venv v-calibra
+# Windows:
+v-calibra\Scripts\activate
+# Linux/macOS:
+source v-calibra/bin/activate
+```
+
+### 3. Bootstrap the dev environment
+
+```bash
+python .dev_scripts/bootstrap.py
+```
+
+This installs all package dependencies and development tools.
+
+Alternatively, install manually with test extras:
+
+```bash
+pip install -e ".[test]"
+```
+
+### 4. Run the tests
+
+```bash
+cd tests
+make test-all          # run all tests
+make test-unittests    # fast unit tests only
+```
+
+### 5. Build documentation locally
+
+```bash
+make docs        # build
+make docs-serve  # build and serve at http://127.0.0.1:8000
+```
+

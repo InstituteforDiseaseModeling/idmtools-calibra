@@ -1,29 +1,7 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Plotters](#plotters)
-  - [Available Plotters](#available-plotters)
-  - [BasePlotter](#baseplotter)
-    - [Constructor](#constructor)
-    - [Abstract Method](#abstract-method)
-      - [`visualize(iteration_state)`](#visualizeiteration_state)
-    - [Helper Methods](#helper-methods)
-      - [`combine_by_site(site_name, analyzer_names, results)` *(staticmethod)*](#combine_by_sitesite_name-analyzer_names-results-staticmethod)
-    - [Custom Plotter Example](#custom-plotter-example)
-  - [LikelihoodPlotter](#likelihoodplotter)
-  - [SiteDataPlotter](#sitedataplotter)
-  - [OptimToolPlotter](#optimtoolplotter)
-  - [OptimToolPBNBPlotter](#optimtoolpbnbplotter)
-  - [OptimToolSPSAPlotter](#optimtoolspsaplotter)
-  - [SeparatrixBHMPlotter](#separatrixbhmplotter)
-  - [Using Multiple Plotters](#using-multiple-plotters)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Plotters
 
-Plotters generate diagnostic visualizations after each calibration iteration. They are passed to `CalibManager` and called automatically.
+Plotters generate diagnostic visualizations after each calibration iteration. They are passed to `CalibManager` and called automatically at the end of each iteration.
 
 ## Available Plotters
 
@@ -108,7 +86,7 @@ class MyPlotter(BasePlotter):
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 ```
 
-Plots the distribution of likelihood scores across samples for each iteration, showing how the algorithm converges.
+Plots the distribution of likelihood scores across samples for each iteration, showing how the algorithm converges over time.
 
 ```python
 LikelihoodPlotter(combine_sites=True)
@@ -188,7 +166,7 @@ SeparatrixBHMPlotter(combine_sites=True)
 
 ## Using Multiple Plotters
 
-Pass a list of plotters to `CalibManager`:
+Pass a list of plotters to `CalibManager`. Each runs after every iteration:
 
 ```python
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
