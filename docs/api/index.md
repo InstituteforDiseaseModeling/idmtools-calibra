@@ -4,13 +4,13 @@ Complete reference for all public classes and functions in **idmtools_calibra**.
 
 ## Package Map
 
-| Module | Description |
-|--------|-------------|
-| [Core](idmtools_calibra.md) | `CalibManager`, `CalibSite`, `RMSESiteSingleChannel`, `IterationState`, `ResampleManager` |
-| [Algorithms](algorithms.md) | Sampling algorithms: `OptimTool`, `IMIS`, `GPC`, `SPSA`, `PSPO`, `PBNB` |
-| [Analyzers](analyzers.md) | Simulation output analyzers: `BaseCalibrationAnalyzer`, `RMSEAnalyzer` |
-| [Plotters](plotters.md) | Diagnostic visualization: `BasePlotter` and algorithm-specific subclasses |
-| [Output](output.md) | Spatial output utilities |
+| Module | Description                                                                             |
+|--------|-----------------------------------------------------------------------------------------|
+| [Core](idmtools_calibra.md) | `CalibManager`, `CalibSite`, `RMSESiteSingleChannel`, `IterationState`, `ResumeManager` |
+| [Algorithms](algorithms.md) | Sampling algorithms: `OptimTool`, `IMIS`, `GPC`, `SPSA`, `PSPO`, `PBNB`                 |
+| [Analyzers](analyzers.md) | Simulation output analyzers: `BaseCalibrationAnalyzer`, `RMSEAnalyzer`                  |
+| [Plotters](plotters.md) | Diagnostic visualization: `BasePlotter` and algorithm-specific subclasses               |
+| [Output](output.md) | Spatial output utilities                                                                |
 
 ## Typical Import Pattern
 
