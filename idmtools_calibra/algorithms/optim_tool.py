@@ -179,7 +179,8 @@ class OptimTool(NextPointAlgorithm):
             columns=['Iteration', '__sample_index__', 'Results', 'Fitted', *self.get_param_names()])
         self.data['Iteration'] = self.data['Iteration'].astype(int)
         self.data['__sample_index__'] = self.data['__sample_index__'].astype(int)
-
+        for param_name in self.get_param_names():
+            self.data[param_name] = self.data[param_name].astype(float)
         self.n_dimensions = len(self.params)
 
         iteration = 0

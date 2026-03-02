@@ -96,7 +96,7 @@ class OptimToolPSPO(NextPointAlgorithm):
         samples_cpy = samples.copy()
         samples_cpy.index.name = '__sample_index__'
         samples_cpy['Iteration'] = iteration
-        samples_cpy.reset_index(inplace=True)
+        samples_cpy = samples_cpy.reset_index()
 
         self.data = pd.concat([self.data, samples_cpy], ignore_index=True)
         self.data['__sample_index__'] = self.data['__sample_index__'].astype(int)
@@ -114,7 +114,7 @@ class OptimToolPSPO(NextPointAlgorithm):
             # Move X_center, choose samples, save in dataframe
             samples = self.stochastic_newton_raphson(iteration)
 
-        samples.reset_index(drop=True, inplace=True)
+        samples = samples.reset_index(drop=True)
         return self.generate_samples_from_df(samples)
 
     def clamp(self, X):
@@ -184,7 +184,7 @@ class OptimToolPSPO(NextPointAlgorithm):
         state_prev_iter = self.state.set_index('Iteration').loc[iteration - 1]
         dynamic_params = [r['Parameter'] for idx, r in state_prev_iter.iterrows() if r['Dynamic']]
 
-        self.data.set_index('Iteration', inplace=True)
+        self.data = self.data.set_index('Iteration')
         latest_dynamic_samples = self.data.loc[iteration - 1, dynamic_params].values
         latest_results = self.data.loc[iteration - 1, 'Results'].values
 
@@ -265,7 +265,7 @@ class OptimToolPSPO(NextPointAlgorithm):
         x_next = x_next_scaled * (x_max - x_min) + x_min
         hessian_next = np.diag(h_bar)
 
-        self.data.reset_index(inplace=True)
+        self.data = self.data.reset_index()
 
         old_center = self._get_X_center(iteration - 1)
         # old_center_of_dynamic_params = old_center[dynamic_params].values
@@ -300,8 +300,8 @@ class OptimToolPSPO(NextPointAlgorithm):
         new_state = pd.DataFrame({
             'Iteration': [iteration] * self.n_dimensions,
             'Parameter': new_center_df.columns.values,
-            'Center': new_center_df.as_matrix()[0],
-            'Hessian': new_hessian_df.as_matrix()[0],
+            'Center': new_center_df.to_numpy()[0],
+            'Hessian': new_hessian_df.to_numpy()[0],
             'Min': [self.Xmin[pname] for pname in new_center_df.columns.values],
             'Max': [self.Xmax[pname] for pname in new_center_df.columns.values],
             'Dynamic': [self.Dynamic[pname] for pname in new_center_df.columns.values]

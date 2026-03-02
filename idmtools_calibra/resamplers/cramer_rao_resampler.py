@@ -83,7 +83,7 @@ class CramerRaoResampler(BaseResampler):
         names = center_point.get_attribute(key='Name', parameter_type=CalibrationPoint.DYNAMIC)
 
         center_point_as_list = list(
-            pd.DataFrame([center_point.to_value_dict(parameter_type=CalibrationPoint.DYNAMIC)]).as_matrix()[0])
+            pd.DataFrame([center_point.to_value_dict(parameter_type=CalibrationPoint.DYNAMIC)]).to_numpy()[0])
 
         fisher_inf_matrix = compute_fisher_inf_matrix(center_point_as_list, likelihood_df, names)
         covariance = np.linalg.pinv(fisher_inf_matrix)
@@ -109,7 +109,7 @@ class CramerRaoResampler(BaseResampler):
         values = center_point.get_attribute('Value', parameter_type=CalibrationPoint.STATIC)
         for i in range(len(names)):
             resampled_points_df = resampled_points_df.assign(**{str(names[i]): values[i]})
-        resampled_points_df.sort_index(axis=1, inplace=True)
+        resampled_points_df = resampled_points_df.sort_index(axis=1)
 
         # ck4, debugging only
         filename = os.path.join(self.output_location, 'cr-resampled-points.csv')  # J

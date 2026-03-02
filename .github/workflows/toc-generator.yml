@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - '**.md'
+      - '!docs/**'
   pull_request:
     paths:
       - '**.md'
+      - '!docs/**'
 jobs:
   generateTOC:
     name: TOC Generator
@@ -14,4 +16,4 @@ jobs:
     steps:
       - uses: technote-space/toc-generator@v2
         with:
-          TARGET_PATHS: .
+          TARGET_PATHS: '**.md,!docs/**'

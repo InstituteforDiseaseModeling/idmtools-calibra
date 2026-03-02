@@ -1,3 +1,2 @@
--i https://packages.idmod.org/api/pypi/pypi-production/simple
-emod-generic
-emodpy
+emod-generic~=2.22
+emodpy~=3.1

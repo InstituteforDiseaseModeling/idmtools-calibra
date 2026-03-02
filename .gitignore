@@ -185,3 +185,4 @@ examples/*/requirements_updated.txt
 examples/brad_workflow_new/download/reporter_plugins/*
 
 *buildlog
+/site

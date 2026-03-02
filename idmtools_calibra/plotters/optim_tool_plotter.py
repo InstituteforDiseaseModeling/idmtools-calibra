@@ -169,20 +169,12 @@ class OptimToolPlotter(BasePlotter):
             i = int(prev_iter)
 
             x_center = self.state.pivot(index='Iteration', columns='Parameter', values='Center')[dynamic_param_names].values[prev_iter]
+            x_center = pd.Series(x_center)  # ensure iloc works consistently
 
-            h2 = ax.scatter(x_center[0],
-                            x_center[1],
-                            rp[0] + rp[1] * x_center[0] + rp[2] * x_center[1],
+            h2 = ax.scatter(x_center.iloc[0],
+                            x_center.iloc[1],
+                            rp.iloc[0] + rp.iloc[1] * x_center.iloc[0] + rp.iloc[2] * x_center.iloc[1],
                             c='b', marker='.', s=200, figure=fig)
-
-            '''
-            h3 = ax.plot(    [xc[0] for xc in X_center_all[i:i+2]],
-                        [xc[1] for xc in X_center_all[i:i+2]], 
-                        [
-                            rp[0] + rp[1]*X_center_all[i][0] + rp[2]*X_center_all[i][1],
-                            rp[0] + rp[1]*X_center_all[i+1][0] + rp[2]*X_center_all[i+1][1]
-                        ], c='b', figure=fig)
-            '''
 
             h4 = ax.scatter(x0, x1, y_fit, c='r', marker='d', figure=fig)
 
@@ -192,7 +184,7 @@ class OptimToolPlotter(BasePlotter):
             x_surf = np.linspace(xl[0], xl[1], 25)  # generate a mesh
             y_surf = np.linspace(yl[0], yl[1], 25)
             x_surf, y_surf = np.meshgrid(x_surf, y_surf)
-            z_surf = rp[0] + rp[1] * x_surf + rp[2] * y_surf
+            z_surf = rp.iloc[0] + rp.iloc[1] * x_surf + rp.iloc[2] * y_surf
             h5 = ax.plot_surface(x_surf, y_surf, z_surf, cmap=cm.hot, rstride=1, cstride=1,
                                  linewidth=0, antialiased=True, edgecolor=(0, 0, 0, 0), alpha=0.5)
 

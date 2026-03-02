@@ -46,7 +46,7 @@ class SeparatrixBHMPlotter(BasePlotter):
         self.prediction_grid = pd.DataFrame({self.x_var: self.Px.flatten(), self.y_var: self.Py.flatten()})
         self.prediction_grid['Outcome'] = np.NaN
         self.prediction_grid.index.name = 'Sample'
-        self.prediction_grid.reset_index(inplace=True)
+        self.prediction_grid = self.prediction_grid.reset_index()
 
         self.prediction_grid['Implausible'] = False
         self.prediction_grid['Max_Implausibility'] = -1  # For plotting
@@ -241,8 +241,9 @@ class SeparatrixBHMPlotter(BasePlotter):
             [self.prediction_grid['Max_Implausibility'], self.prediction_grid['Implausibility_%d' % iteration]],
             axis=1).max(axis=1)  # Better way?
 
-        self.for_plotting = self.for_plotting.append(
-            self.prediction_grid[[self.x_var, self.y_var, 'Max_Implausibility']], ignore_index=True)
+        self.for_plotting = pd.concat(
+            [self.for_plotting, self.prediction_grid[[self.x_var, self.y_var, 'Max_Implausibility']]],
+            ignore_index=True)
 
         self.for_plotting.loc[self.for_plotting[
                                   'Max_Implausibility'] > self.implausibility_threshold + 2, 'Max_Implausibility'] = self.implausibility_threshold + 2

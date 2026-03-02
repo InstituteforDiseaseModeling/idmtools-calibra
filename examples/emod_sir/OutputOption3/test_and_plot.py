@@ -15,16 +15,13 @@ def get_task():
     dtk.setup( manifest.model_dl_dir )
     from idmtools.core.platform_factory import Platform
     platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
-    task = EMODTask.from_default2(
-        config_path="config.json",
-        eradication_path=settings.MODEL_DRIVER,
-        campaign_builder=model.build_camp,
-        demog_builder=None,
-        schema_path=manifest.schema_file,
-        param_custom_cb=model.set_param_fn,
-        ep4_path=manifest.ep4
-    )
-    task.set_sif( settings.SIF )
+    task = EMODTask.from_defaults(eradication_path=settings.MODEL_DRIVER,
+                                  campaign_builder=model.build_camp,
+                                  schema_path=manifest.schema_file,
+                                  config_builder=model.set_param_fn,
+                                  embedded_python_scripts_path=manifest.ep4,
+                                  demographics_builder=None)
+    task.set_sif( settings.SIF, platform )
     return task, platform
 
 def test_and_plot():
@@ -55,12 +52,12 @@ def test_and_plot():
     # create experiment from builder
     experiment  = Experiment.from_builder(builder, task, name="calibrated emod_sir sweep") 
     experiment.run(wait_until_done=True, platform=platform)
-    task.handle_experiment_completion( experiment )
-    task.get_file_from_comps( experiment.uid, "InsetChart.json" )
-    EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
-    import emod_api.channelreports.plot_icj_means as plotter
-    data = plotter.collect( str( experiment.uid ) )
-    plotter.display( data )
+    # task.handle_experiment_completion( experiment )
+    # task.get_file_from_comps( experiment.uid, "InsetChart.json" )
+    # EMODTask.cache_experiment_metadata_in_sql( experiment.uid )
+    # import emod_api.channelreports.plot_icj_means as plotter
+    # data = plotter.collect( str( experiment.uid ) )
+    # plotter.display( data )
 
 if __name__ == "__main__":
     test_and_plot()

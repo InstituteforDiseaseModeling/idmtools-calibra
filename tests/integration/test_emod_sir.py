@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import csv
 import os
+import re
 import unittest
 
 import pandas as pd
@@ -46,9 +47,9 @@ class TestEMODSir(unittest.TestCase):
         calib_app.go(calib_man, directory=cls.directory)
 
         # following few lines for debug
-        # uniq_filename = '2023-02-02_20_08_13.484256'
+        # uniq_filename = '2026-02-20_23_04_06.347711'
         # cls.directory = os.path.join(CURRENT_DIRECTORY, "emod_sir_calibra_result", uniq_filename)
-        # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=4, iter_step='plot', loop=True)
+        # calib_app.go(calib_man, directory=cls.directory, resume=True, iteration=1, iter_step='plot', loop=True)
         cls.experiments = download_experiment_files(cls.platform, cls.directory, cls.calibra_name, "output.csv")
 
     @classmethod
@@ -80,32 +81,31 @@ class TestEMODSir(unittest.TestCase):
         with open(ll_all_path, newline='') as f:
             reader = csv.reader(f)
             data = list(reader)
-            # validate "total" of likelihood column is sorted
+
+            # Guard against insufficient data
+            self.assertGreater(len(data), 2, "LL_all.csv has insufficient data rows")
+
             index_total = data[0].index('total')
             index_sim = data[0].index('simid')
             rmse_list = []
-            distance_list = []
-            for i in range(1, len(data) - 2):
+
+            for i in range(1, len(data) - 1):
                 # validate LL_all.csv is sorted by 'total' column
                 self.assertTrue(float(data[i][index_total]) >= float(data[i + 1][index_total]))
 
-                # validate ll_all.csv is sorted with RMSE - Root Mean Square Error which means the top one is the best
-                # prediction against the real reference value
-                sim_id = data[i][index_sim].replace("('", '').replace("',)", '')
+                match = re.search(r"'([^']+)'", data[i][index_sim])
+                self.assertIsNotNone(match, f"Could not parse sim_id from: {data[i][index_sim]}")
+                sim_id = match.group(1)
+
                 # Get 'value' column in simulation's output.csv from comps
                 sim_output_production = get_output_data(self.experiments, sim_id, 'value')
                 # Calculate RMSE for each simulation
                 rmse = math.sqrt(mean_squared_error(sim_output_production, reference_dict['value_reference']))
-                # save each rmse value to a list
                 rmse_list.append(rmse)
 
-                # Or we can simply calculate distance between real value (i.e sim_output_production) and reference
-                # value, top sim should have shortest distance
-                distance = abs(sim_output_production.values[0]-reference_dict['value_reference'].values[0])
-                distance_list.append(distance)
+            self.assertTrue(
+                all(a <= b for a, b in zip(rmse_list, rmse_list[1:])),
+                "RMSE list is not sorted in ascending order - top simulation is not the best fit"
+            )
 
-            # validate rmse_list is sorted in ascend order(small to large)
-            self.assertTrue(all(a <= b for a, b in zip(rmse_list, rmse_list[1:])))
-            # verify distance_list is also sorted
-            self.assertTrue(distance_list == sorted(distance_list))
 

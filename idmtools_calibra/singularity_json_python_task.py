@@ -7,6 +7,8 @@ from idmtools.entities.simulation import Simulation
 from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
 
 # TODO - Move into idmtools?
+
+
 @dataclass
 class SingularityJSONConfiguredPythonTask(JSONConfiguredPythonTask):
     provided_command: Optional[CommandLine] = field(default_factory=lambda: CommandLine(), metadata={"md": True})
@@ -36,4 +38,3 @@ class SingularityJSONConfiguredPythonTask(JSONConfiguredPythonTask):
     @classmethod
     def set_param_partial(cls, parameter: str):
         return partial(cls.set_parameter_sweep_callback, param=parameter)
-

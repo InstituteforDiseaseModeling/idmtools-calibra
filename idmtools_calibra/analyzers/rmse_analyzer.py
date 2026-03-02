@@ -11,26 +11,23 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
 
     # Setting up the reference data for use in the analyzer and identifying the model output file to compare against
     def __init__(
-        self,
-        site,
-        dependent_column,
-        independent_column,
-        output_filename="output.csv"
+            self,
+            site,
+            dependent_column,
+            independent_column,
+            output_filename="output.csv"
     ):
         self.model_output_filename = '/'.join(['output', f'{output_filename}'])
-
         self.independent_column = independent_column
         self.dependent_column = dependent_column
-        # I really want to not have to pass reference_type at all here. Should default
-        # to dep col w/o having to even tell it.
-        self.reference = site.get_reference_data()
-
-        # rename reference data column to NOT conflict with model data column; it happens to have the same column
-        # name in this example
         self.reference_column = f"{self.dependent_column}_reference"
-        self.reference.rename(
-            columns={self.dependent_column: self.reference_column}, inplace=True
+
+        # Load and rename reference data
+        self.reference = site.get_reference_data()
+        self.reference = self.reference.rename(
+            columns={self.dependent_column: self.reference_column}
         )
+
         super().__init__(filenames=[str(self.model_output_filename)])
 
     # Here we do what needs to be done once per simulation. Often, as below, the main goal is to line up comparable
@@ -51,16 +48,16 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
         return result
 
     @staticmethod
-    def set_custom_cost_fn( user_cost_fn ):
+    def set_custom_cost_fn(user_cost_fn):
         RMSEAnalyzer._user_cost_fn = user_cost_fn 
 
     @staticmethod
-    def _rmse(series1, series2, series3): # 3 is weights
+    def _rmse(series1, series2, series3):  # 3 is weights
         if RMSEAnalyzer._user_cost_fn:
-            return RMSEAnalyzer._user_cost_fn( series1, series2, series3 )
+            return RMSEAnalyzer._user_cost_fn(series1, series2, series3)
         else:
-            #return math.sqrt( np.average( ( series1-series2 ) ** 2, weights=series3 ) )
-            return sk_mse( series1, series2, sample_weight=series3)
+            # return math.sqrt( np.average( ( series1-series2 ) ** 2, weights=series3 ) )
+            return sk_mse(series1, series2, sample_weight=series3)
             # alternative: 
             # but we would be introducing an sklearn dependency to calibra for the first time.
 
@@ -114,7 +111,7 @@ class RMSEAnalyzer(BaseCalibrationAnalyzer):
             keys=list(data.keys()),
             names=["Sample", "Sim_Id"],
         )
-        data.reset_index(level="Index", drop=True, inplace=True)
+        data = data.reset_index(level="Index", drop=True)
 
         # compare sim data to reference data and determine a match likelihood/score. Higher is better in calibra.
         results = (

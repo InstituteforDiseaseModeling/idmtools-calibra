@@ -12,17 +12,17 @@ def set_param_fn( config ):
 
     return config
 
-def build_camp():
-    """
-    Build a campaign input file for the DTK using emod_api. 
-    """
-    import emod_api.campaign as camp
-    import emod_api.interventions.outbreak as ob 
 
-    camp.set_schema( manifest.schema_file )
-    
-    event = ob.new_intervention( camp, timestep=1, cases=1 )
-    camp.add( event )
+def build_camp(camp):
+    from emodpy.campaign.individual_intervention import OutbreakIndividual as OutbreakIndividual
+    from emodpy.campaign.common import TargetDemographicsConfig
+    from emodpy.campaign.distributor import add_intervention_scheduled
+    outbreak_event = OutbreakIndividual(campaign=camp, antigen=None)
+    target_demographics_config = TargetDemographicsConfig(demographic_coverage=0.4)
+    add_intervention_scheduled(camp,
+                               intervention_list=[outbreak_event],
+                               start_day=1,
+                               target_demographics_config=target_demographics_config)
     return camp
 
 def build_demog():

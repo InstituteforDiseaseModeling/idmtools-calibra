@@ -24,18 +24,15 @@ def get_task( build_camp_fn=None, build_demog_fn=None ):
     print( "Creating COMPS Platform with node_group='idm_48cores', priority='AboveNormal'" )
     platform = Platform(settings.LOCALE, node_group="idm_48cores", priority="AboveNormal")
     import model
-    task = EMODTask.from_default2(
-        config_path="config.json",
-        eradication_path=settings.MODEL_DRIVER,
-        campaign_builder=build_camp_fn,
-        demog_builder=build_demog_fn,
-        schema_path=manifest.schema_file,
-        param_custom_cb=model.set_param_fn,
-        ep4_path=manifest.ep4
-    )
+    task = EMODTask.from_defaults(eradication_path=settings.MODEL_DRIVER,
+                                  campaign_builder=build_camp_fn,
+                                  schema_path=manifest.schema_file,
+                                  config_builder=model.set_param_fn,
+                                  embedded_python_scripts_path=manifest.ep4,
+                                  demographics_builder= None)  # demographics_builder=build_demog_fn)
 
     task.config.parameters.Enable_Property_Output = 1 
-    task.set_sif( settings.SIF )
+    task.set_sif( settings.SIF, platform )
     return task, platform
 
 

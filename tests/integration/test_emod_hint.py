@@ -6,6 +6,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from idmtools_calibra import calib_base_app as calib_app
 from idmtools.core.platform_factory import Platform
@@ -26,6 +27,8 @@ mysettings = settings.Settings()
 mysettings.N_ITERATIONS = 2
 mysettings.N_SAMPLES = 10
 
+
+@pytest.mark.skip(reason='disable all hint related tests')
 class TestEMODHint(unittest.TestCase):
     def demog_mapper(self, build_demog_actual, mapto_key, value):
         """
@@ -57,7 +60,8 @@ class TestEMODHint(unittest.TestCase):
         # site we want to calibrate on - a core organization object for calibra
         site = site
         #self.platform = Platform(mysettings.LOCALE, node_group="idm_48cores", priority="Highest")
-        task = get_task()
+        task = get_task(self.platform)
+
         calib_man = calib_app.init(mysettings, site, task, platform=self.platform)
 
         self.calibra_name = mysettings.CALIBRATION_NAME

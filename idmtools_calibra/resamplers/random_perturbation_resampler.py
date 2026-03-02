@@ -110,6 +110,6 @@ class RandomPerturbationResampler(BaseResampler):
         values = center_point.get_attribute('Value', parameter_type=CalibrationPoint.STATIC)
         for i in range(len(names)):
             df_perturbed_points = df_perturbed_points.assign(**{str(names[i]): values[i]})
-        df_perturbed_points.sort_index(axis=1, inplace=True)
+        df_perturbed_points = df_perturbed_points.sort_index(axis=1)
 
         return df_perturbed_points

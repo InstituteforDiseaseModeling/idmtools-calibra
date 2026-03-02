@@ -13,6 +13,9 @@ class RMSESiteSingleChannel(CalibSite):
         self.reference = pd.read_csv(reference_sources[one_key])
         self.ind_col = self.reference.columns[0]
         self.dep_col = self.reference.columns[1]
+        # rename reference
+        self.reference_column = f"{self.dep_col}_reference"
+        self.reference = self.reference.rename(columns={self.dep_col: self.reference_column})
         super().__init__(name=name)
 
     def get_reference_data(self, reference_type=None):
