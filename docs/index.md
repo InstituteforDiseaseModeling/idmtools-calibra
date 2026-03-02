@@ -58,7 +58,7 @@ State is persisted to `Calibration.json` after every iteration, enabling [resume
 ## Features
 
 - **Multiple sampling algorithms** — `OptimTool` (OLS regression), `IMIS` (Bayesian posterior), `GPC` (Gaussian process), `SPSA`, `PSPO`, `PBNB`
-- **Platform-agnostic** — runs on local machines or COMPS HPC clusters via idmtools
+- **Platform-agnostic** — runs on local container, COMPS HPC, Slurm clusters via idmtools
 - **Resume from any point** — full iteration state serialized to `Calibration.json`; resume from any iteration and phase
 - **Pluggable analyzers** — implement `BaseCalibrationAnalyzer` to score any model output format
 - **Diagnostic plotting** — per-iteration likelihood, data overlay, and algorithm-specific plots
@@ -68,15 +68,15 @@ State is persisted to `Calibration.json` after every iteration, enabling [resume
 
 ## Package Structure
 
-| Package | Description                                                                                     |
-|---------|-------------------------------------------------------------------------------------------------|
-| `idmtools_calibra` | Core: `CalibManager`, `CalibSite`, `RMSESiteSingleChannel`, `IterationState`, `ResampleManager` |
-| `idmtools_calibra.algorithms` | Sampling algorithms: `OptimTool`, `IMIS`, `GPC`, `SPSA`, `PSPO`, `PBNB`                         |
-| `idmtools_calibra.analyzers` | Output analyzers: `BaseCalibrationAnalyzer`, `RMSEAnalyzer`                                     |
-| `idmtools_calibra.plotters` | Diagnostic plots: likelihood, site data, algorithm-specific                                     |
-| `idmtools_calibra.resamplers` | Post-calibration resampling: Cramér-Rao, random perturbation                                    |
-| `idmtools_calibra.utilities` | Helpers: priors, likelihood calculators, resume manager, parsers, encoders                      |
-| `idmtools_calibra.output` | Spatial output utilities                                                                        |
+| Package | Description                                                                                                    |
+|---------|----------------------------------------------------------------------------------------------------------------|
+| `idmtools_calibra` | Core: `CalibManager`, `CalibSite`, `RMSESiteSingleChannel`, `IterationState`, `ResumeManger` |
+| `idmtools_calibra.algorithms` | Sampling algorithms: `OptimTool`, `IMIS`, `GPC`, `SPSA`, `PSPO`, `PBNB`                                        |
+| `idmtools_calibra.analyzers` | Output analyzers: `BaseCalibrationAnalyzer`, `RMSEAnalyzer`                                                    |
+| `idmtools_calibra.plotters` | Diagnostic plots: likelihood, site data, algorithm-specific                                                    |
+| `idmtools_calibra.resamplers` | Post-calibration resampling: Cramér-Rao, random perturbation                                                   |
+| `idmtools_calibra.utilities` | Helpers: priors, likelihood calculators, resume manager, parsers, encoders                                     |
+| `idmtools_calibra.output` | Spatial output utilities                                                                                       |
 
 ---
 

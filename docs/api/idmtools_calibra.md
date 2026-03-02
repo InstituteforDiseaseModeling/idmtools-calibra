@@ -201,31 +201,48 @@ Holds all state for a single calibration iteration: parameter samples, simulatio
 
 ---
 
-## ResampleManager
+## ResumeManager
 
 ```python
-from idmtools_calibra.resample_manager import ResampleManager
+from idmtools_calibra.utilities.resume_manager import ResumeManager
 ```
 
-Orchestrates post-calibration resampling across one or more `BaseResampler` steps.
+Manages resuming a calibration from a specific iteration and phase. Restores `CalibManager` state, validates the requested iteration and step, and re-enters the calibration loop at exactly the right point. Used internally by `CalibManager.run_calibration(resume=True, ...)`.
 
 ### Constructor
 
 ```python
-ResampleManager(steps, calibration_manager, restart_at_step=None)
+ResumeManager(
+    calib_manager,
+    iteration=None,
+    iter_step=None,
+    max_iterations=None,
+    loop=True,
+    backup=False,
+    dry_run=False
+)
 ```
 
-| Parameter | Type | Description                                  |
-|-----------|------|----------------------------------------------|
-| `steps` | `List[BaseResampler]` | Ordered list of resampling steps             |
-| `calibration_manager` | `CalibManager` | The completed calibration to resample from   |
-| `restart_at_step` | `int` | Resume resampling from a specific step index |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `calib_manager` | `CalibManager` | — | The calibration manager to resume |
+| `iteration` | `int` | `None` | Iteration to resume from; auto-detects the latest if `None` |
+| `iter_step` | `str` | `None` | Phase to resume from: `'commission'`, `'analyze'`, `'plot'`, `'next_point'`; auto-detects if `None` |
+| `max_iterations` | `int` | `None` | Override max iterations; uses `calib_manager.max_iterations` if `None` |
+| `loop` | `bool` | `True` | Continue to subsequent iterations after resuming |
+| `backup` | `bool` | `False` | Back up `Calibration.json` before resuming |
+| `dry_run` | `bool` | `False` | Print the resume plan without executing |
 
 ### Key Method
 
-#### `resample_and_run()`
+#### `resume()`
 
-Execute all resampling steps in sequence, persisting restart state between steps.
+Restores all state and re-enters the calibration loop at the resolved iteration and step. Prints a summary of the resume plan before executing.
+
+```python
+rm = ResumeManager(calib_manager=calib, iteration=2, iter_step='analyze')
+rm.resume()
+```
 
 ---
 

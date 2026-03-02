@@ -11,7 +11,7 @@ pip install idmtools_calibra
 ## Prerequisites
 
 - Windows 10+ Pro/Enterprise, Linux, or macOS
-- Python 3.10, 3.11, 3.12, 3.13, or 3.14 (64-bit)
+- Python: Versions 3.10, 3.11, 3.12, 3.13, or 3.14 are supported.
 
 ---
 
