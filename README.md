@@ -1,4 +1,4 @@
-# emodpy
+# idmtools-calibra
 
 [![Build docs and deploy to GH Pages](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml)
 [![Lint](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml)
@@ -33,7 +33,7 @@ pip install idmtools-calibra
 ```
 
 ## Pre-requisites
-- Python 3.10, 3.11, 3.12, 3.13, 31.4 x64
+- Python 3.10, 3.11, 3.12, 3.13, 3.14 x64
 
 
 # Development Environment Setup
