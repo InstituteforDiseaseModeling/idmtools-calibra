@@ -37,7 +37,7 @@ translator = str.maketrans('', '', escapes)
 logger = getLogger("bootstrap")
 
 
-def execute(cmd: List['str'], cwd: str = base_directory, ignore_error: bool = False) -> Generator[str, None, None]:
+def execute(cmd: List[str], cwd: str = base_directory, ignore_error: bool = False) -> Generator[str, None, None]:
     """
     Runs a command and filters output
 
@@ -53,10 +53,12 @@ def execute(cmd: List['str'], cwd: str = base_directory, ignore_error: bool = Fa
         CalledProcessError if the return code was not 0
     """
     logger.debug(f'Running {" ".join(cmd)}')
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, cwd=cwd)
-    for stdout_line in iter(process.stdout.readline, ""):
-        yield stdout_line
-    process.stdout.close()
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, cwd=cwd)
+    try:
+        for stdout_line in iter(process.stdout.readline, ""):
+            yield stdout_line
+    finally:
+        process.stdout.close()
     return_code = process.wait()
     if return_code and not ignore_error:
         raise subprocess.CalledProcessError(return_code, cmd)
@@ -96,9 +98,6 @@ def install_dev_packages():
         logger.critical(f'idmtools-calibra installed failed using {e.cmd} did not succeed')
         result = e.returncode
         logger.debug(f'Return Code: {result}')
-    logger.info('Installing idmtools-calibra docs')
-    for line in execute(["pip", "install", "-r", "requirements.txt"], cwd=join(base_directory)):
-        process_output(line)
 
 
 def install_base_environment():
