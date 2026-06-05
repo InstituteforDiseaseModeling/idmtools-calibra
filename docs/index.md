@@ -2,12 +2,12 @@
 
 **idmtools_calibra** is an iterative parameter calibration framework for epidemic and scientific models. It repeatedly samples the parameter space, runs simulations via [idmtools](https://github.com/InstituteforDiseaseModeling/idmtools) on COMPS, Slurm and Container platforms, compares output to reference data, and updates the sampling strategy until convergence.
 
-For a detailed explanation and step-by-step calibration of an EMOD SIR model, see the  [Overview](overview.md)
+For a detailed explanation and step-by-step calibration of an EMOD SIR model, see the  [Overview](overview.md).
 
 
 ---
 
-## Quick Start
+## Quick start
 
 ```python
 from idmtools_calibra.calib_manager import CalibManager
@@ -40,7 +40,7 @@ See the [Quick Start guide](quickstart.md) for a complete end-to-end walkthrough
 
 ---
 
-## How It Works
+## How it works
 
 Each calibration iteration follows six steps:
 
@@ -66,7 +66,7 @@ State is persisted to `Calibration.json` after every iteration, enabling [resume
 
 ---
 
-## Package Structure
+## Package structure
 
 | Package | Description                                                                                                    |
 |---------|----------------------------------------------------------------------------------------------------------------|
@@ -94,7 +94,7 @@ State is persisted to `Calibration.json` after every iteration, enabling [resume
 ## Documentation
 
 - [Installation](installation.md) — install and verify the package
-- [Quick Start](quickstart.md) — end-to-end tutorial using the solar example
+- [Quick start](quickstart.md) — end-to-end tutorial using the solar example
 - [Overview](overview.md) — how the calibration loop works, algorithm details, resume support
 - [Troubleshooting](troubleshooting.md) — common mistakes and how to fix them
-- [API Reference](api/index.md) — complete reference for all public classes
+- [API reference](api/index.md) — complete reference for all public classes

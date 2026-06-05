@@ -12,7 +12,7 @@ from idmtools_calibra.output.spatial_output import SpatialOutput
 
 Helper class for reading and processing spatially-structured output files produced by simulations (e.g. spatial binary files from EMOD such as `SpatialReport_*.bin`).
 
-### Class Methods
+### Class methods
 
 #### `from_file(filename)` *(classmethod)*
 
@@ -28,7 +28,7 @@ spatial = SpatialOutput.from_file('output/SpatialReport_Prevalence.bin')
 
 Returns a `SpatialOutput` instance.
 
-### Instance Methods
+### Instance methods
 
 #### `to_dataframe()`
 
@@ -39,7 +39,7 @@ df = spatial.to_dataframe()
 # Returns DataFrame with columns: node_id, time, value
 ```
 
-### Usage Example
+### Usage example
 
 ```python
 from idmtools_calibra.output.spatial_output import SpatialOutput

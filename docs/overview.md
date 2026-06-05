@@ -4,7 +4,7 @@
 
 ---
 
-## Calibration Workflow
+## Calibration workflow
 
 The calibration loop is orchestrated by `CalibManager` and follows these steps each iteration:
 
@@ -19,11 +19,11 @@ Each iteration's state is written to `Calibration.json`, enabling **resume** fro
 
 ---
 
-## How OptimTool Works: EMOD SIR Example
+## How OptimTool works: EMOD SIR example
 
 The following walks through a concrete calibration of an EMOD SIR model (`examples/emod_sir/OutputOption1`) to illustrate how `OptimTool` narrows in on the right parameters.
 
-### The Problem
+### The problem
 
 Three dynamic parameters control disease dynamics:
 
@@ -43,7 +43,7 @@ t_max,59.999
 The goal is to find values of `a`, `b`, `c` such that the simulated epidemic peaks at t ≈ 60.
 
 ![SIR model](images/sir.png)
-### Step 1: Samples Become Simulations
+### Step 1: Samples become simulations
 
 Each iteration, `OptimTool` generates ~25 parameter combinations. Each row runs one EMOD simulation:
 
@@ -54,11 +54,11 @@ Each iteration, `OptimTool` generates ~25 parameter combinations. Each row runs 
 | 2      | 0.28            | 5.2               | 3.1               |
 | ...    | ...             | ...               | ...               |
 
-### Step 2: Each Simulation Gets a Score
+### Step 2: Each simulation gets a score
 
 The analyzer compares the simulated infected curve to the reference data, producing a single fitness score per sample. The closer the simulation matches the reference, the higher the score.
 
-### Step 3: OLS Regression Fits Scores to Parameters
+### Step 3: OLS regression fits scores to parameters
 
 `OptimTool` fits an OLS (Ordinary Least Squares) regression to the current iteration's samples and scores:
 
@@ -81,7 +81,7 @@ X = [[1, 0.30, 5.0, 3.0],
 β = [β₀, β₁, β₂, β₃]                        (4×1, solved via (XᵀX)⁻¹XᵀY)
 ```
 
-### Step 4: Gradient Tells You Which Way to Move
+### Step 4: Gradient tells you which way to move
 
 Say the fitted coefficients are:
 
@@ -91,7 +91,7 @@ Say the fitted coefficients are:
 
 The algorithm shifts the center point in that direction and draws new samples around it.
 
-### Step 5: Repeat Until Convergence
+### Step 5: Repeat until convergence
 
 ```
 Iteration 0:  Samples scattered around initial guess
@@ -123,15 +123,15 @@ Iteration N:  Center has converged
     | `a`, `b`, `c` | EMOD model parameters | **Output** — what calibration is trying to find |
     | β₀, β₁, β₂, β₃ | OLS regression coefficients | **Internal** — gradient direction estimate, discarded each iteration |
 
-### When R² Is Low
+### When R² is low
 
 If the score–parameter relationship is highly nonlinear in the sampled region (common in SIR models, where small changes in infectivity can cause dramatic shifts in epidemic dynamics), the linear fit will be poor. In that case the algorithm jumps directly to the best-scoring sample rather than trusting the gradient direction. This makes `OptimTool` robust to nonlinear fitness landscapes.
 
 ---
 
-## Algorithm Selection
+## Algorithm selection
 
-| Algorithm | Class | Strategy | Best For |
+| Algorithm | Class | Strategy | Best for |
 |-----------|-------|----------|----------|
 | `OptimTool` | `OptimTool` | Adaptive OLS regression | General-purpose; start here |
 | `IMIS` | `IMIS` | Bayesian importance sampling | When you need the full posterior distribution, not just the best point |
@@ -153,7 +153,7 @@ See [API Reference: Algorithms](api/algorithms.md) for full details on all algor
 
 ---
 
-## Multi-Site Calibration
+## Multi-site calibration
 
 Pass multiple sites to `CalibManager` to calibrate against several reference datasets simultaneously:
 
@@ -180,7 +180,7 @@ Each site contributes an independent score per simulation. The framework combine
 
 ---
 
-## Key Abstractions
+## Key abstractions
 
 | Class                                 | Module | Role                                              |
 |---------------------------------------|---|---------------------------------------------------|
@@ -196,7 +196,7 @@ Each site contributes an independent score per simulation. The framework combine
 
 ---
 
-## Resume Support
+## Resume support
 
 `CalibManager.run_calibration()` supports resuming from any iteration and phase:
 
@@ -212,7 +212,7 @@ calib_manager.run_calibration(
 )
 ```
 
-### `iter_step` Options
+### `iter_step` options
 
 | Value | Behaviour |
 |-------|-----------|

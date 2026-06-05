@@ -3,7 +3,7 @@
 
 Plotters generate diagnostic visualizations after each calibration iteration. They are passed to `CalibManager` and called automatically at the end of each iteration.
 
-## Available Plotters
+## Available plotters
 
 | Class | Module | Description |
 |-------|--------|-------------|
@@ -35,7 +35,7 @@ BasePlotter(combine_sites=True)
 |-----------|------|---------|-------------|
 | `combine_sites` | `bool` | `True` | Whether to aggregate results across all sites into a single plot |
 
-### Abstract Method
+### Abstract method
 
 #### `visualize(iteration_state)`
 
@@ -45,7 +45,7 @@ Called by `CalibManager` at the end of each iteration.
 |-----------|------|-------------|
 | `iteration_state` | `IterationState` | Full state of the current iteration, including samples, results, and paths |
 
-### Helper Methods
+### Helper methods
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -61,7 +61,7 @@ Sum analyzer scores for a given site into a `<site>_total` column in `results`.
 BasePlotter.combine_by_site('my_site', ['analyzer1', 'analyzer2'], results_df)
 ```
 
-### Custom Plotter Example
+### Custom plotter example
 
 ```python
 from idmtools_calibra.plotters.base_plotter import BasePlotter
@@ -164,7 +164,7 @@ SeparatrixBHMPlotter(combine_sites=True)
 
 ---
 
-## Using Multiple Plotters
+## Using multiple plotters
 
 Pass a list of plotters to `CalibManager`. Each runs after every iteration:
 

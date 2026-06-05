@@ -1,6 +1,6 @@
 # Installation
 
-## Quick Install
+## Quick install
 
 ```bash
 pip install idmtools_calibra
@@ -15,7 +15,7 @@ pip install idmtools_calibra
 
 ---
 
-## Detailed Installation
+## Detailed installation
 
 ### 1. Create a virtual environment
 
@@ -54,7 +54,7 @@ import idmtools_calibra
 print(idmtools_calibra.__version__)
 ```
 
-## Corporate or Offline Environments
+## Corporate or offline environments
 
 If you are behind a corporate proxy or need to point pip at a custom index, create a pip configuration file:
 
@@ -74,7 +74,7 @@ If you are behind a corporate proxy or need to point pip at a custom index, crea
 
 ---
 
-## Development Install
+## Development install
 
 For contributing to idmtools_calibra or running tests:
 

@@ -1,3 +1,5 @@
+**idmtools_calibra** is an iterative parameter calibration framework for epidemic and scientific models. It repeatedly samples the parameter space, runs simulations via [idmtools](https://github.com/InstituteforDiseaseModeling/idmtools) on COMPS, Slurm and Container platforms, compares output to reference data, and updates the sampling strategy until convergence.
+
 [![Build docs and deploy to GH Pages](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/deploy_docs_api.yml)
 [![Lint](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/lint.yml)
 [![Build and publish package to Pypi](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/publish-pypi.yml/badge.svg)](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/actions/workflows/publish-pypi.yml)
@@ -24,10 +26,10 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-# User Installation 
+# User Installation
 
 ```bash
-pip install idmtools-calibra 
+pip install idmtools-calibra
 ```
 
 ## Pre-requisites
@@ -47,7 +49,7 @@ When setting up your environment for the first time, you can use the following i
    `python -m venv idmtools_calibra`
    On Unix(Mac/Linux) you can use venv or virtualenv
 3) Activate the virtualenv
-4) Then run `python ./.dev_scripts/bootstrap.py`. This will install all the tools. 
+4) Then run `python ./.dev_scripts/bootstrap.py`. This will install all the tools.
 
 ## Development Tips
 
@@ -71,7 +73,7 @@ Create and activate a venv.
 Navigate to the root directory of the repo.
 ```bash
 cd docs
-pip install -r requirments.txt
+pip install -r requirements.txt
 mkdocs build  # build docs
 mkdocs serve  # view docs from  http://127.0.0.1:8000/idmtools_calibra/
 mkdocs gh-deploy # deploy to github (need to be on the specific branch)
@@ -81,7 +83,7 @@ Go to Github Actions -> Run GHA job: **Deploy MkDocs via GitHub Pages API**
 
 ## Resume Supports Parameters
 CalibManager's run_calibration method supports the following parameters for resume action, for example:
- 
+
   run_calibration(resume=True, iteration=2, iter_step='analyze')
 
 - resume: bool, default=False, required for resume
@@ -98,7 +100,7 @@ CalibManager's run_calibration method supports the following parameters for resu
   Note: by default, resume will not make a backup of Calibration.json
 - dry_run: bool, default=False, if like to really execute resume action
   Note: by default (dry_run= False), resume will go ahead to execute resume action
-  
+
 iter_step supports the following options:
 - commission: will start to run a new iteration
 - analyze: analyze the output data from given iteration
