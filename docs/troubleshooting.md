@@ -4,9 +4,9 @@ Common mistakes and how to fix them.
 
 ---
 
-## Common Mistakes
+## Common mistakes
 
-| Symptom | Likely Cause | Fix |
+| Symptom | Likely cause | Fix |
 |---------|-------------|-----|
 | `TypeError` on `map_sample_to_model_input_fn` | Wrong function signature | Must be `(simulation, sample_row)` — `sample_row` is a `pandas.Series` |
 | `reduce()` fails or returns wrong scores | `reduce()` returns wrong shape | Must return a `DataFrame` with a score column, **indexed by simulation ID** |
@@ -19,7 +19,7 @@ Common mistakes and how to fix them.
 
 ---
 
-## `map_sample_to_model_input_fn` Signature
+## `map_sample_to_model_input_fn` signature
 
 This is the most common source of errors. The function **must** accept exactly two positional arguments:
 
@@ -41,7 +41,7 @@ The `sample` argument is a `pandas.Series`, so access parameters by name: `sampl
 
 ---
 
-## `reduce()` Return Shape
+## `reduce()` return shape
 
 The `reduce()` method must return a `pandas.DataFrame` indexed by **simulation ID** with at least one score column:
 
@@ -63,7 +63,7 @@ Note: **higher scores = better fit**. If you compute an error metric (RMSE, MAE)
 
 ---
 
-## Resume Fails
+## Resume fails
 
 If `run_calibration(resume=True)` fails:
 
@@ -79,7 +79,7 @@ If `run_calibration(resume=True)` fails:
 
 ---
 
-## Low R² Every Iteration
+## Low R² every iteration
 
 If `OptimTool` logs low R² values every iteration, the fitness landscape is highly nonlinear in the sampled region. This is common in SIR/SIS epidemic models near threshold parameters.
 
@@ -93,7 +93,7 @@ If convergence is slow, try:
 
 ---
 
-## Analyzing Results Without Re-Running
+## Analyzing results without re-running
 
 To load a completed calibration for analysis without executing anything:
 
@@ -105,7 +105,7 @@ cm = CalibManager.open_for_reading('my_calibration')
 
 ---
 
-## Getting Help
+## Getting help
 
 - Check the [examples](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/tree/main/examples) — `examples/solar/` is the simplest end-to-end reference
 - File an issue on [GitHub](https://github.com/InstituteforDiseaseModeling/idmtools-calibra/issues)

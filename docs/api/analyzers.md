@@ -36,7 +36,7 @@ BaseCalibrationAnalyzer(
 | `reference_data` | any | `None` | Reference/observed data to compare against |
 | `weight` | `float` | `1` | Relative weight of this analyzer when combining scores across multiple analyzers |
 
-### Methods to Implement
+### Methods to implement
 
 Subclasses must implement the standard `IAnalyzer` interface:
 
@@ -97,7 +97,7 @@ RMSEAnalyzer(
 | `independent_column` | `str` | — | Name of the column used to align reference and model data (e.g. `'time'`) |
 | `output_filename` | `str` | `'output.csv'` | Model output filename inside the `output/` directory |
 
-### Custom Cost Function
+### Custom cost function
 
 By default RMSE uses scikit-learn's `root_mean_squared_error`. Override the cost function for the entire class:
 

@@ -23,7 +23,7 @@ from idmtools_calibra.algorithms.next_point_algorithm import NextPointAlgorithm
 
 Abstract base class for all sampling algorithms. Subclass this to implement a custom algorithm.
 
-### Methods to Implement
+### Methods to implement
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
@@ -36,7 +36,7 @@ Abstract base class for all sampling algorithms. Subclass this to implement a cu
 | `set_state` | `(state, iteration)` | Restore algorithm state from a persisted dict |
 | `cleanup` | `()` | Release any resources held by the algorithm |
 
-### Inherited Utility Methods
+### Inherited utility methods
 
 | Method | Description |
 |--------|-------------|
@@ -78,7 +78,7 @@ OptimTool(
 | `samples_per_iteration` | `int` | `100` | Total samples drawn per iteration (must be > `center_repeats`) |
 | `rsquared_thresh` | `float` | `0.5` | R² threshold; if regression fit is below this, fall back to best sample |
 
-### Parameter Dictionary Format
+### Parameter dictionary format
 
 Each entry in `params` must be a dict with these keys:
 

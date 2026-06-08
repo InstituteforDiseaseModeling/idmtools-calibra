@@ -1,8 +1,8 @@
-# API Reference
+# API reference
 
 Complete reference for all public classes and functions in **idmtools_calibra**.
 
-## Package Map
+## Package map
 
 | Module | Description                                                                             |
 |--------|-----------------------------------------------------------------------------------------|
@@ -12,7 +12,7 @@ Complete reference for all public classes and functions in **idmtools_calibra**.
 | [Plotters](plotters.md) | Diagnostic visualization: `BasePlotter` and algorithm-specific subclasses               |
 | [Output](output.md) | Spatial output utilities                                                                |
 
-## Typical Import Pattern
+## Typical import pattern
 
 ```python
 from idmtools_calibra.calib_manager import CalibManager
@@ -23,7 +23,7 @@ from idmtools_calibra.analyzers.rmse_analyzer import RMSEAnalyzer
 from idmtools_calibra.plotters.likelihood_plotter import LikelihoodPlotter
 ```
 
-## Calibration Flow
+## Calibration flow
 
 ```
 CalibManager.run_calibration()

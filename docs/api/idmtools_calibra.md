@@ -1,4 +1,4 @@
-# Core Package
+# Core package
 
 The top-level `idmtools_calibra` package contains the central orchestration classes for running calibrations.
 
@@ -44,7 +44,7 @@ CalibManager(
 | `map_replicates_callback` | `callable` | `None` | Callback for sweeping the replicate seed (defaults to `Run_Number`) |
 | `directory` | `str` | `'.'` | Root directory under which the calibration folder is created |
 
-### Key Methods
+### Key methods
 
 #### `run_calibration(**kwargs)`
 
@@ -113,7 +113,7 @@ CalibSite(name)
 |-----------|------|-------------|
 | `name` | `str` | Unique name for this calibration site |
 
-### Abstract Methods to Implement
+### Abstract methods to implement
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -186,7 +186,7 @@ from idmtools_calibra.iteration_state import IterationState
 
 Holds all state for a single calibration iteration: parameter samples, simulation IDs, analyzer results, and timestamps. Serialized to and deserialized from `Calibration.json` to support resuming.
 
-### Key Attributes
+### Key attributes
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
@@ -233,7 +233,7 @@ ResumeManager(
 | `backup` | `bool` | `False` | Back up `Calibration.json` before resuming |
 | `dry_run` | `bool` | `False` | Print the resume plan without executing |
 
-### Key Method
+### Key method
 
 #### `resume()`
 
@@ -246,7 +246,7 @@ rm.resume()
 
 ---
 
-## Utility Functions
+## Utility functions
 
 ### `set_parameter_sweep_callback`
 

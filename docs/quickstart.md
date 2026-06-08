@@ -1,10 +1,10 @@
-# Quick Start
+# Quick start
 
 This guide walks through the **solar example** — the simplest complete calibration in the repository — to get you from zero to a working calibration in minutes. The full code is in `examples/solar/`.
 
 ---
 
-## The Problem
+## The problem
 
 We have 200 days of solar panel production measurements. We want to fit a simple linear model:
 
@@ -16,7 +16,7 @@ The goal: find the gradient `m` and intercept `c` that best explain the observed
 ![Solar](images/solar.png)
 ---
 
-## Step 1: Reference Data
+## Step 1: Reference data
 
 Place your observed data in a CSV:
 
@@ -32,7 +32,7 @@ The first column is the independent variable (day), the second is the dependent 
 
 ---
 
-## Step 2: Create a Site
+## Step 2: Create a site
 
 A **site** pairs reference data with the analyzer that scores model output against it. For RMSE-based calibration, use the built-in `RMSESiteSingleChannel`:
 
@@ -49,7 +49,7 @@ site = RMSESiteSingleChannel(
 
 ---
 
-## Step 3: Define Parameters
+## Step 3: Define parameters
 
 Tell `OptimTool` which parameters to calibrate and their search bounds:
 
@@ -68,7 +68,7 @@ Each `Dynamic: True` parameter will be adapted each iteration. `Dynamic: False` 
 
 ---
 
-## Step 4: Define the Model Mapping
+## Step 4: Define the model mapping
 
 Write a callback that takes one parameter sample and applies it to the simulation task:
 
@@ -82,7 +82,7 @@ def map_sample_to_model_input(simulation, sample):
 
 ---
 
-## Step 5: Create and Run CalibManager
+## Step 5: Create and run CalibManager
 
 ```python
 from idmtools_calibra.calib_manager import CalibManager
@@ -108,7 +108,7 @@ That's it. `CalibManager` handles the rest: running 10 iterations of 25 simulati
 
 ---
 
-## Step 6: Inspect Results
+## Step 6: Inspect results
 
 After calibration completes, the output directory `solar_calibration/` contains:
 
@@ -135,7 +135,7 @@ print(best)
 
 ---
 
-## Resuming a Calibration
+## Resuming a calibration
 
 If a calibration is interrupted, resume from where it left off:
 
@@ -147,9 +147,9 @@ See [Overview → Resume Support](overview.md#resume-support) for all resume opt
 
 ---
 
-## Next Steps
+## Next steps
 
 - [Overview](overview.md) — how OptimTool works, algorithm comparison, multi-site calibration
-- [API Reference: CalibManager](api/idmtools_calibra.md#calibmanager) — all constructor and method options
-- [API Reference: Algorithms](api/algorithms.md) — switch to IMIS, GPC, or other algorithms
+- [API reference: CalibManager](api/idmtools_calibra.md#calibmanager) — all constructor and method options
+- [API reference: Algorithms](api/algorithms.md) — switch to IMIS, GPC, or other algorithms
 - [Troubleshooting](troubleshooting.md) — common mistakes and fixes
